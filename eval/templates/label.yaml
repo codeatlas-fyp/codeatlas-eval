@@ -1,0 +1,24 @@
+# Blind label (build plan C8). Work only from sources/ and the web pages; never from CodeAtlas output or the other label.
+# Push this file only after the other labeller has also finished this case.
+case_id: ""
+labeller: ""                       # initials
+labelled_on: ""                    # YYYY-MM-DD
+labelling_guide_version: ""        # e.g. v1
+minutes_spent: 0
+rules:                             # SATISFIED | VIOLATED | NOT_APPLICABLE | INSUFFICIENT_EVIDENCE
+  C1: {result: "", reason: "", source_record: ""}
+  C2: {result: "", reason: "", source_record: ""}
+  C3: {result: "", reason: "", source_record: ""}
+  C4: {result: "", reason: "", source_record: ""}
+  C5: {result: "", reason: "", source_record: ""}
+  C6: {result: "", reason: "", source_record: ""}
+  C7: {result: "", reason: "", source_record: ""}
+  C8: {result: "", reason: "", source_record: ""}
+  C9: {result: "", reason: "", source_record: ""}
+overall_verdict: {verdict: "", reason: ""}   # PASS | FAIL | REVIEW | UNKNOWN (fixed truth table, case policy)
+semantic:
+  criteria:                        # one entry per acceptance criterion or issue sentence
+    - text: ""
+      relevant_entities: []        # e.g. ["libcloud/compute/drivers/gce.py::GCENodeDriver.ex_create_instancegroup"]
+  no_match: false
+  no_match_rationale: ""           # how the whole candidate set was searched (e.g. git grep) and why nothing qualifies

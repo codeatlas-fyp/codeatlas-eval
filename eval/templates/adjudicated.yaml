@@ -1,0 +1,24 @@
+# Adjudication (build plan C8 rule 5). Initial labels are never edited.
+case_id: ""
+adjudicator: ""
+adjudicated_on: ""
+minutes_spent: 0
+initial_agreement:                 # filled before resolving: true/false per rule and overall
+  rules: {C1: null, C2: null, C3: null, C4: null, C5: null, C6: null, C7: null, C8: null, C9: null}
+  overall: null
+final:
+  rules:                           # same values as the label files
+    C1: {result: "", reason: ""}
+    C2: {result: "", reason: ""}
+    C3: {result: "", reason: ""}
+    C4: {result: "", reason: ""}
+    C5: {result: "", reason: ""}
+    C6: {result: "", reason: ""}
+    C7: {result: "", reason: ""}
+    C8: {result: "", reason: ""}
+    C9: {result: "", reason: ""}
+  overall_verdict: {verdict: "", reason: ""}
+  relevant_entities: []
+  no_match: false
+indeterminate: false               # true when the written guide cannot settle it; stays that way
+indeterminate_reason: ""

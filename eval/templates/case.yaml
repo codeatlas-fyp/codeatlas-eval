@@ -1,0 +1,19 @@
+# Case identity and frozen evidence (build plan C5 step 3). Written by scripts/freeze_case.py.
+case_id: {case_id}
+set: {set}                         # pilot | held-out | challenge
+repo: {repo}
+pr_number: {pr_number}
+pr_url: {pr_url}
+category_provisional: {category}   # from source metadata only, never from CodeAtlas output
+decision_cutoff_utc: {cutoff}      # PR merged_at; nothing after this time may be used
+base_sha: {base_sha}
+head_sha: {head_sha}
+merge_base_sha: {merge_base_sha}
+jira_keys: [{jira_keys}]
+policy_file: {policy_file}
+analysis_root: {analysis_root}
+codeowners_at_base: {codeowners}
+sources_fetched_at: {fetched_at}
+inaccessible: []                   # e.g. ["membership of @apache/team-x at cutoff"]; never write "no approval"
+case_group: ""                     # related PRs (revert + original, follow-up fix) share one group id
+notes: ""

@@ -1,0 +1,11 @@
+# real identities and raw downloads never enter this repo
+pseudonyms*.yaml
+raw/
+*.env
+.env
+bundles/
+# dataset: full clones and raw API caches stay local
+eval/repos/
+eval/pool/raw/
+__pycache__/
+*.tmp

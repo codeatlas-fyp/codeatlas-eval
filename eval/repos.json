@@ -1,0 +1,65 @@
+{
+  "_note": "Windows (since/until) are filled in after each repository's acceptance test. Backup repos are used only if a main repo fails it.",
+  "repos": [
+    {
+      "name": "airflow",
+      "role": "main",
+      "case_prefix": "AF",
+      "github": "apache/airflow",
+      "clone_url": "https://github.com/apache/airflow.git",
+      "jira_base": "https://issues.apache.org/jira",
+      "jira_project": "AIRFLOW",
+      "key_regex": "\\bAIRFLOW-\\d+\\b",
+      "analysis_root": "",
+      "window": {"since": null, "until": null}
+    },
+    {
+      "name": "arrow",
+      "role": "main",
+      "case_prefix": "AR",
+      "github": "apache/arrow",
+      "clone_url": "https://github.com/apache/arrow.git",
+      "jira_base": "https://issues.apache.org/jira",
+      "jira_project": "ARROW",
+      "key_regex": "\\bARROW-\\d+\\b",
+      "analysis_root": "python/",
+      "window": {"since": null, "until": null}
+    },
+    {
+      "name": "libcloud",
+      "role": "main",
+      "case_prefix": "LC",
+      "github": "apache/libcloud",
+      "clone_url": "https://github.com/apache/libcloud.git",
+      "jira_base": "https://issues.apache.org/jira",
+      "jira_project": "LIBCLOUD",
+      "key_regex": "\\bLIBCLOUD-\\d+\\b",
+      "analysis_root": "",
+      "window": {"since": null, "until": null}
+    },
+    {
+      "name": "spark",
+      "role": "backup",
+      "case_prefix": "SP",
+      "github": "apache/spark",
+      "clone_url": "https://github.com/apache/spark.git",
+      "jira_base": "https://issues.apache.org/jira",
+      "jira_project": "SPARK",
+      "key_regex": "\\bSPARK-\\d+\\b",
+      "analysis_root": "python/pyspark/",
+      "window": {"since": null, "until": null}
+    },
+    {
+      "name": "beam",
+      "role": "backup",
+      "case_prefix": "BM",
+      "github": "apache/beam",
+      "clone_url": "https://github.com/apache/beam.git",
+      "jira_base": "https://issues.apache.org/jira",
+      "jira_project": "BEAM",
+      "key_regex": "\\bBEAM-\\d+\\b",
+      "analysis_root": "sdks/python/",
+      "window": {"since": null, "until": null}
+    }
+  ]
+}
