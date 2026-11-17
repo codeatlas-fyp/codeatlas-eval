@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import http.client
 import json
 import os
 import re
@@ -193,8 +194,10 @@ def _get(url: str, headers: dict[str, str]) -> tuple[Any, dict[str, str]]:
                 time.sleep(5 * (attempt + 1))
                 continue
             raise
-        except urllib.error.URLError:
+        except (urllib.error.URLError, http.client.HTTPException, ConnectionError, TimeoutError) as e:
+            # dropped connections ("Remote end closed connection without response") are worth a retry
             if attempt < 3:
+                print(f"  network error ({type(e).__name__}); retrying in {5 * (attempt + 1)}s")
                 time.sleep(5 * (attempt + 1))
                 continue
             raise
