@@ -224,10 +224,52 @@ def gh(path: str, paginate: bool = False) -> Any:
         page += 1
 
 
+_JIRA_LOGIN_REQUIRED: set[str] = set()
+
+
+def archive_get(url: str) -> Any:
+    """GET from lists.apache.org: parsed JSON, or the raw text when the answer is not JSON."""
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT}, method="GET")
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                text = resp.read().decode("utf-8", errors="replace")
+            try:
+                return json.loads(text)
+            except json.JSONDecodeError:
+                return text
+        except urllib.error.HTTPError as e:
+            if (e.code >= 500 or e.code == 429) and attempt < 3:
+                time.sleep(10 * (attempt + 1))
+                continue
+            raise
+        except urllib.error.URLError:
+            if attempt < 3:
+                time.sleep(5 * (attempt + 1))
+                continue
+            raise
+    raise RuntimeError(f"giving up on {url}")
+
+
 def jira_issue(base_url: str, key: str) -> Any:
-    """Apache Jira is Jira Data Center: REST API v2, anonymous read."""
-    url = f"{base_url.rstrip('/')}/rest/api/2/issue/{urllib.parse.quote(key)}?expand=changelog"
-    return _get(url, {"Accept": "application/json"})[0]
+    """One Jira issue with its changelog.
+
+    Apache Jira is Jira Data Center (REST API v2). Since 2025 it answers 401 "Login Required" to anonymous
+    reads, so after the first 401 the issue is rebuilt from the public mailing-list archive instead
+    (scripts/jira_archive.py); the result carries "source" saying so.
+    """
+    from jira_archive import archive_issue  # local import: jira_archive has no dependency on this module
+
+    if base_url not in _JIRA_LOGIN_REQUIRED:
+        url = f"{base_url.rstrip('/')}/rest/api/2/issue/{urllib.parse.quote(key)}?expand=changelog"
+        try:
+            return _get(url, {"Accept": "application/json"})[0]
+        except urllib.error.HTTPError as e:
+            if e.code not in (401, 403):
+                raise
+            _JIRA_LOGIN_REQUIRED.add(base_url)
+            print(f"  jira: {base_url} needs a login (HTTP {e.code}); reading issues from lists.apache.org instead")
+    return archive_issue(key, archive_get)
 
 
 # ---------------------------------------------------------------- CSV
