@@ -1,0 +1,417 @@
+repo,pr_number,key,summary,description_chars,description_lines,title_only,provisional_category,source
+airflow,6096,AIRFLOW-5477,Rewrite Google PubSub Hook to Google Cloud Python,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6222,AIRFLOW-5490,security.py: Fix incorrect None comparison,548,7,no,supported_approval,commits@airflow.apache.org
+airflow,6064,AIRFLOW-5444,action_logging missing important fields such as Dag Id and Task Id for POST actions,1891,24,no,supported_approval,commits@airflow.apache.org
+airflow,6233,AIRFLOW-4939,Ability to specify default retries for all tasks,78,1,no,supported_approval,commits@airflow.apache.org
+airflow,6246,AIRFLOW-5586,Improve error messaging for role creation and updates,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6272,AIRFLOW-5604,Remove duplicated isort check,0,0,yes,needs_manual,commits@airflow.apache.org
+airflow,6197,AIRFLOW-5560,backfill command needs a 'no confirm' option,212,3,no,ownership_gap,commits@airflow.apache.org
+airflow,6248,AIRFLOW-5587,Move airflow.contrib.task_runner.cgroup_task_runner to core,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6262,AIRFLOW-5599,Imporve Python 3 support in MLEngine integration,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6263,AIRFLOW-5598,Improve MLEngine typehint,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6229,AIRFLOW-5580,Add base class for system test,134,1,no,supported_approval,commits@airflow.apache.org
+airflow,6267,AIRFLOW-5601,Use built-in pagination mechanism in MLEngine hook,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6264,AIRFLOW-5600,Add MLEngine system tests,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6268,AIRFLOW-5602,Use unittest.mock in MLEngine hook tests,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6271,AIRFLOW-5603,Add MLEngine version operators,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6100,AIRFLOW-4524,"""Ignore All Deps"" and ""Ignore Task Deps"" doesn't ignore task dependencies",1407,29,no,ownership_gap,commits@airflow.apache.org
+airflow,6100,AIRFLOW-5387,Pagination is broken when the config variable hide_paused_dags_by_default is set to True because showPaused variable is removed,686,12,no,ownership_gap,commits@airflow.apache.org
+airflow,6284,AIRFLOW-5102,Workers fail to shutdown jobs after failed heartbeats,591,4,no,supported_approval,commits@airflow.apache.org
+airflow,6258,AIRFLOW-5595,gcs_to_bq operator - Throws error when BQ dataset isn't located in US or EU region.,533,2,no,supported_approval,commits@airflow.apache.org
+airflow,6217,AIRFLOW-5572,Clearing Task Instances with reschedule mode does not clear reschedules during up_for_reschedule,0,0,yes,requirement_changed,commits@airflow.apache.org
+airflow,6279,AIRFLOW-5609,Add MLEngine model operators,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6282,AIRFLOW-5614,Enable Fernet by default,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6294,AIRFLOW-4660,Make airflow/bin Pylint compatible,308,1,no,supported_approval,commits@airflow.apache.org
+airflow,6247,AIRFLOW-5588,Add celery's architecture diagram,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6287,AIRFLOW-5622,Improve creating directories in SFTPHook,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6286,AIRFLOW-5617,Add fallback for connection's project id in MLEngine hook,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6274,AIRFLOW-5608,Scheduler not shutting down executor(s) gracefully,104,1,no,needs_manual,commits@airflow.apache.org
+airflow,6236,AIRFLOW-5584,Initialise hook in execute not in ctor in Cloud SQL operators,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6237,AIRFLOW-5581,KubernetesJobWatcher dies prematurely with num_runs or run_duration,2476,39,no,supported_approval,commits@airflow.apache.org
+airflow,6292,AIRFLOW-5624,Use mock decorator in MLEngine operators test,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6293,AIRFLOW-5625,Update MLEngine integration doc and typehint,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6298,AIRFLOW-5630,Improve BigQueryGetDataOperator to handle no rows,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6296,AIRFLOW-5626,Add labels to MLEngine resources,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6325,AIRFLOW-5651,Remove GCP deprecated imports,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6309,AIRFLOW-3783,Fix header rendering in the redshift-to-s3 plugin,250,3,no,supported_approval,commits@airflow.apache.org
+airflow,6309,AIRFLOW-5395,Fix RedshiftToS3Operator when unloading with column names containing a dot,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6300,AIRFLOW-4661,Make airflow/config_templates Pylint compatible,321,1,no,supported_approval,commits@airflow.apache.org
+airflow,6308,AIRFLOW-5634,Disabled DagModelView fields can be edited (classic UI),170,2,no,supported_approval,commits@airflow.apache.org
+airflow,6330,AIRFLOW-5653,Logging airflow operator raised exceptions,433,2,no,needs_manual,commits@airflow.apache.org
+airflow,6314,AIRFLOW-5497,dag_processing::list_py_file_paths method pydoc needs param added,1008,16,no,ownership_gap,commits@airflow.apache.org
+airflow,6312,AIRFLOW-5641,Not able to run git sync init container as root,274,1,no,supported_approval,commits@airflow.apache.org
+airflow,6302,AIRFLOW-5636,Allow adding or overriding existing Extra Operator Links for existing Operators,211,2,no,supported_approval,commits@airflow.apache.org
+airflow,6334,AIRFLOW-5657,Upgrade dill dependency,306,3,no,supported_approval,commits@airflow.apache.org
+airflow,6297,AIRFLOW-5224,gcs_to_bq.GoogleCloudStorageToBigQueryOperator - Specify Encoding for BQ ingestion,862,6,no,ownership_gap,commits@airflow.apache.org
+airflow,6303,AIRFLOW-5126,Read aws_session_token in extra_config of the aws hook,3209,47,no,ownership_gap,commits@airflow.apache.org
+airflow,6313,AIRFLOW-5643,S3Hook logic is duplicated and could be clearer,410,3,no,supported_approval,commits@airflow.apache.org
+airflow,6357,AIRFLOW-5608,Scheduler not shutting down executor(s) gracefully,104,1,no,supported_approval,commits@airflow.apache.org
+airflow,6163,AIRFLOW-4574,SSHHook should support pkey parameter,878,4,no,supported_approval,commits@airflow.apache.org
+airflow,5967,AIRFLOW-5415,Druid Broker Hook does not respect authentication parameters,111,1,no,needs_manual,commits@airflow.apache.org
+airflow,6315,AIRFLOW-5640,BaseOperator email parameter is wrongly typed and not documented,431,2,no,supported_approval,commits@airflow.apache.org
+airflow,6362,AIRFLOW-5688,Merge alembic migrations,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6347,AIRFLOW-5680,Kubernetes builds are often timing out even with kind,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6365,AIRFLOW-5694,Check for blinker when detecting Sentry packages,1798,28,no,supported_approval,commits@airflow.apache.org
+airflow,6364,AIRFLOW-5693,Support slack blocks componentss,206,2,no,supported_approval,commits@airflow.apache.org
+airflow,6368,AIRFLOW-5697,Retrofit Dataflow integration,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6368,AIRFLOW-5698,Organize Dataflow tests,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6369,AIRFLOW-5697,Retrofit Dataflow integration,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6369,AIRFLOW-5698,Organize Dataflow tests,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6369,AIRFLOW-5699,Add more tests for Dataflow integration,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6378,AIRFLOW-5707,Add type annotations to SFTPHook,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6344,AIRFLOW-5665,Add path_exists method to SFTPHook,0,0,yes,needs_manual,commits@airflow.apache.org
+airflow,6339,AIRFLOW-5661,Fix create_cluster method of GKEClusterHook,0,0,yes,needs_manual,commits@airflow.apache.org
+airflow,6367,AIRFLOW-5695,Cannot run a task from UI if its state is None,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6381,AIRFLOW-5697,Retrofit Dataflow integration,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6381,AIRFLOW-5712,Rename Dataflow internal classes,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6305,AIRFLOW-4965,Handling throttling in AI Airflow operators,5145,73,no,supported_approval,commits@airflow.apache.org
+airflow,6382,AIRFLOW-5697,Retrofit Dataflow integration,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6382,AIRFLOW-5712,Rename Dataflow internal classes,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6382,AIRFLOW-5713,Remove dead code in Dataflow integration,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6228,AIRFLOW-5379,Add Google Search Ads 360 operators,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6170,AIRFLOW-4971,Add Google Display & Video 360 integration,367,5,no,needs_manual,commits@airflow.apache.org
+airflow,6366,AIRFLOW-5696,Add GoogleCloudStorageToSFTPOperator,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6306,AIRFLOW-5632,Rename operators tests,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6384,AIRFLOW-5714,Collect SLA miss emails only from tasks missed SLA,389,2,no,ownership_gap,commits@airflow.apache.org
+airflow,6385,AIRFLOW-5715,"Make email, owner context available",0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6332,AIRFLOW-5710,Optionally error on unused operator arguments,389,1,no,supported_approval,commits@airflow.apache.org
+airflow,6370,AIRFLOW-5701,Dont clear xcom explicitly before execution,0,0,yes,requirement_changed,commits@airflow.apache.org
+airflow,6317,AIRFLOW-5644,Simplify TriggerDagRunOperator usage,95,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6401,AIRFLOW-5732,Add unit test for the version command,155,1,no,supported_approval,commits@airflow.apache.org
+airflow,6095,AIRFLOW-5474,Add Basic Auth to Druid hook,155,1,no,supported_approval,commits@airflow.apache.org
+airflow,6336,AIRFLOW-5073,Change SQLSensor behavior returning 'success' for NULL result,126,2,no,needs_manual,commits@airflow.apache.org
+airflow,6407,AIRFLOW-5740,Fix Transient failure in Slack test,2047,13,no,supported_approval,commits@airflow.apache.org
+airflow,6416,AIRFLOW-5746,FakeDatetime cannot be imported,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6420,AIRFLOW-5746,FakeDatetime cannot be imported,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6422,AIRFLOW-5690,Task heartbeat is being reported as a warning,509,5,no,supported_approval,commits@airflow.apache.org
+airflow,6394,AIRFLOW-5723,Simplify illegal arguments test,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6430,AIRFLOW-5757,Improve test_on_kill test,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6397,AIRFLOW-5727,Incorrect --connect param with jdbc connection,228,1,no,supported_approval,commits@airflow.apache.org
+airflow,6387,AIRFLOW-5717,Add get_tree_map method to SFTPHook,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6389,AIRFLOW-5663,PythonVirtualenvOperator doesn't print logs until the operator is finished,975,15,no,needs_manual,commits@airflow.apache.org
+airflow,6435,AIRFLOW-5759,Don't allow additional arguments in BaseOperator,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6418,AIRFLOW-4162,Support layout blocks in SlackAPIPostOperator & SlackWebhookOperator,226,3,no,ownership_gap,commits@airflow.apache.org
+airflow,6418,AIRFLOW-5749,"Support the ""blocks"" component for slack operators",151,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6436,AIRFLOW-5746,FakeDatetime cannot be imported,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6436,AIRFLOW-5764,Avoid loading corrupted DAGs in a breeze environment,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6442,AIRFLOW-5771,Merge alembic heads,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6441,AIRFLOW-5770,Add PythonVirtualenvOperator example,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6449,AIRFLOW-5793,add test for multiple alembic revision heads,173,2,no,supported_approval,commits@airflow.apache.org
+airflow,6438,AIRFLOW-5766,example_http_operator failing due to 404 errors,262,2,no,requirement_changed,commits@airflow.apache.org
+airflow,6431,AIRFLOW-5798,Set default to None for external_task_id in ExternalTaskSensor,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6404,AIRFLOW-5671,rename DataProcHook to DataprocHook,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6409,AIRFLOW-5676,rename CloudSpannerHook to SpannerHook,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6411,AIRFLOW-5678,rename GCPTextToSpeechHook to CloudTextToSpeechHook,0,0,yes,needs_manual,commits@airflow.apache.org
+airflow,6414,AIRFLOW-5673,rename GcfHook to CloudFunctionsHook,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6444,AIRFLOW-5772,Use mock.patch.dict for manipulation of env vars,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,5940,AIRFLOW-5336,Add ability to make updating perms on webserver init optional,606,2,no,requirement_changed,commits@airflow.apache.org
+airflow,5559,AIRFLOW-4930,"Druid hook sends json ingestion spec string using json= parameter of requests, not body=",455,3,no,supported_approval,commits@airflow.apache.org
+airflow,6398,AIRFLOW-5729,Make InputDataConfig in SageMakerTrainingOperator optional,272,2,no,supported_approval,commits@airflow.apache.org
+airflow,6400,AIRFLOW-5731,Make output format from list commands configurable,248,1,no,supported_approval,commits@airflow.apache.org
+airflow,6443,AIRFLOW-5769,Rename the S3_hook to s3_hook,211,2,no,supported_approval,commits@airflow.apache.org
+airflow,6057,AIRFLOW-5442,Druid broker hook get pandas DataFrame implementation,69,1,no,supported_approval,commits@airflow.apache.org
+airflow,5694,AIRFLOW-5082,add subject in aws sns hook,292,2,no,supported_approval,commits@airflow.apache.org
+airflow,6199,AIRFLOW-5562,Skip grant single DAG permissions for Admin role,456,3,no,supported_approval,commits@airflow.apache.org
+airflow,6468,AIRFLOW-5815,Wrong isort on security.p,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6421,AIRFLOW-5741,Move Cloud Natural Language to providers,242,4,no,needs_manual,commits@airflow.apache.org
+airflow,6474,AIRFLOW-5787,Migrate AWS SQS to /providers/aws [AIP-21],0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6486,AIRFLOW-5836,Pin azure-storage-blob version to <12,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6432,AIRFLOW-5758,Support the custom cursor classes for the PostgreSQL,156,2,no,requirement_changed,commits@airflow.apache.org
+airflow,6491,AIRFLOW-5814,Implementing Presto hook tests,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6410,AIRFLOW-5677,rename GCPSpeechToTextHook to CloudSpeechToTextHook,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6476,AIRFLOW-5743,Move Gogle PubSub to providers package,202,4,no,ownership_gap,commits@airflow.apache.org
+airflow,6503,AIRFLOW-5838,Make all __init__ pylint compatible,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6374,AIRFLOW-5658,Links issue through reverse proxy access,859,19,no,supported_approval,commits@airflow.apache.org
+airflow,6504,AIRFLOW-5852,Make tests.www pylint compatible,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6331,AIRFLOW-5709,Fix and test regression in custom task resources,197,1,no,needs_manual,commits@airflow.apache.org
+airflow,6352,AIRFLOW-5683,Add SubDagOperator that propagates skipped state,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6509,AIRFLOW-5846,Implementing Sqlite hook tests,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6466,AIRFLOW-5811,Add metric for externally killed task count,114,1,no,supported_approval,commits@airflow.apache.org
+airflow,6505,AIRFLOW-5853,BigQuery - standardize task_ids in example_dag,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6473,AIRFLOW-5819,AWSBatchOperator has invalid default value for array_properties,2457,27,no,supported_approval,commits@airflow.apache.org
+airflow,6470,AIRFLOW-5817,Improve BigQuery operators idempotency,0,0,yes,needs_manual,commits@airflow.apache.org
+airflow,6463,AIRFLOW-5806,Drop id from xcom table,0,0,yes,requirement_changed,commits@airflow.apache.org
+airflow,6269,AIRFLOW-5874,Use poke_interval of 0 to make EMR tests run green,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6383,AIRFLOW-5697,Retrofit Dataflow integration,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6383,AIRFLOW-5711,Add fallback for connection's project ID in Dataflow hook,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6517,AIRFLOW-5867,[--debug] unit_test_mode configuration interpreted as str instead of bool,986,18,no,requirement_changed,commits@airflow.apache.org
+airflow,6525,AIRFLOW-5875,The example qubole operator has a typo that causes import error,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6482,AIRFLOW-5823,Add a new hook for ingesting data into Apache Pinot,233,1,no,supported_approval,commits@airflow.apache.org
+airflow,6532,AIRFLOW-5883,Fix inefficient sqlalchemy .count() queries,54,1,no,supported_approval,commits@airflow.apache.org
+airflow,6502,AIRFLOW-5786,Migrate AWS SNS to /providers/aws [AIP-21],0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6520,AIRFLOW-5870,Allow infinite pool for tasks,91,1,no,supported_approval,commits@airflow.apache.org
+airflow,6386,AIRFLOW-5697,Retrofit Dataflow integration,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6386,AIRFLOW-5716,Simplify DataflowJobsController logic,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6533,AIRFLOW-5888,Use psycopg2-binary package,2131,6,no,needs_manual,commits@airflow.apache.org
+airflow,6530,AIRFLOW-5878,Use JobID to monitor statuses when running a Dataflow template,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6530,AIRFLOW-5879,Use JobID to monitor statuses when running a Dataflow template,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6519,AIRFLOW-5869,Deserialized Operators have no start_date,829,13,no,supported_approval,commits@airflow.apache.org
+airflow,6542,AIRFLOW-5854,Docker logs of Python processes are not visible,319,3,no,supported_approval,commits@airflow.apache.org
+airflow,6484,AIRFLOW-5832,pagerduty hook,91,1,no,supported_approval,commits@airflow.apache.org
+airflow,6512,AIRFLOW-5824,Add a new hook and operator for AWS DataSync,129,2,no,supported_approval,commits@airflow.apache.org
+airflow,5731,AIRFLOW-5117,Airflow K8S not working with EKS when not deployed in cluster,267,2,no,supported_approval,commits@airflow.apache.org
+airflow,6543,AIRFLOW-5893,Refactor CLI tests,1248,24,no,supported_approval,commits@airflow.apache.org
+airflow,6543,AIRFLOW-5894,Group tests for the Dags command,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6545,AIRFLOW-5896,Move email stuff from tests/core.py,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6550,AIRFLOW-5897,Allow setting -1 as pool slots value in webserver,112,1,no,supported_approval,commits@airflow.apache.org
+airflow,6548,AIRFLOW-5899,dmypy still reports error,65,1,no,needs_manual,commits@airflow.apache.org
+airflow,6527,AIRFLOW-5697,Retrofit Dataflow integration,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6527,AIRFLOW-5876,Fetch all Dataflow jobs during searching,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6529,AIRFLOW-5716,Simplify DataflowJobsController logic,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6529,AIRFLOW-5876,Fetch all Dataflow jobs during searching,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6529,AIRFLOW-5877,Improve job_id detection,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6551,AIRFLOW-5900,heartbeat_callback for local_task_job can be more efficient,175,1,no,supported_approval,commits@airflow.apache.org
+airflow,6531,AIRFLOW-5882,State dependency should not be ignorable,232,1,no,supported_approval,commits@airflow.apache.org
+airflow,6541,AIRFLOW-5892,BashOperator does not create temporary shell script,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6536,AIRFLOW-5885,List of tests should not be generated during Docker build,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6554,AIRFLOW-5901,Group tests for the tasks command,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6524,AIRFLOW-5873,KubernetesPodOperator fixes and test,1022,6,no,supported_approval,commits@airflow.apache.org
+airflow,6544,AIRFLOW-5895,Move TestHDFSHook from tests/core.py,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6566,AIRFLOW-5893,Refactor CLI tests,1248,24,no,supported_approval,commits@airflow.apache.org
+airflow,6566,AIRFLOW-5917,Group tests for the Webserver command,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6547,AIRFLOW-5898,alembic command crashes due to typing import path collision,498,7,no,supported_approval,commits@airflow.apache.org
+airflow,6558,AIRFLOW-5905,Unify GCP file names,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6371,AIRFLOW-5691,Rewrite Dataproc operators to use python library,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6580,AIRFLOW-5925,Upgrade some dependencies,98,1,no,requirement_changed,commits@airflow.apache.org
+airflow,6549,AIRFLOW-5880,Enforce unique task ids,344,2,no,supported_approval,commits@airflow.apache.org
+airflow,6567,AIRFLOW-5893,Refactor CLI tests,1248,24,no,supported_approval,commits@airflow.apache.org
+airflow,6567,AIRFLOW-5918,Group tests for the Pools command,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6440,AIRFLOW-5768,Google Cloud SQL - Don't store ephemeral connection object to database,385,3,no,supported_approval,commits@airflow.apache.org
+airflow,6579,AIRFLOW-5926,Fix race-condition  in TestCliWebServer,0,0,yes,requirement_changed,commits@airflow.apache.org
+airflow,6582,AIRFLOW-5928,hive hooks load_file short circuit,222,2,no,supported_approval,commits@airflow.apache.org
+airflow,6568,AIRFLOW-5893,Refactor CLI tests,1248,24,no,supported_approval,commits@airflow.apache.org
+airflow,6568,AIRFLOW-5919,Group tests for the Users/Roles/permission commands,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6393,AIRFLOW-5717,Add get_tree_map method to SFTPHook,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6393,AIRFLOW-5718,Add SFTPToGoogleCloudStorageOperator,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6587,AIRFLOW-5893,Refactor CLI tests,1248,24,no,ownership_gap,commits@airflow.apache.org
+airflow,6587,AIRFLOW-5937,Group tests for the Version/Connection/Db command,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6399,AIRFLOW-5730,Enable get_pandas_df on Druid and Pinot DbApiHooks,6277,82,no,needs_manual,commits@airflow.apache.org
+airflow,6592,AIRFLOW-5942,Pin PyMSSQL to <3.0,412,2,no,supported_approval,commits@airflow.apache.org
+airflow,6586,AIRFLOW-5936,Allow explicit get_pty in SSHOperator,272,1,no,supported_approval,commits@airflow.apache.org
+airflow,6232,AIRFLOW-5582,AutoCommit in jdbc is missing get_autocommit.,275,3,no,requirement_changed,commits@airflow.apache.org
+airflow,6591,AIRFLOW-5940,Remove redundant Code in models.dagrun,297,9,no,supported_approval,commits@airflow.apache.org
+airflow,6571,AIRFLOW-5923,Use absolute paths in GCP system tests,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6595,AIRFLOW-6002,Drop python 3.5 from support matrix,135,1,no,supported_approval,commits@airflow.apache.org
+airflow,6572,AIRFLOW-3489,PostgresToGoogleCloudStorageOperator doesn't handle PostgreSQL json properly,292,2,no,supported_approval,commits@airflow.apache.org
+airflow,6539,AIRFLOW-5783,Migrate AWS Redshift to /providers/aws [AIP-21],0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,5913,AIRFLOW-5073,Change SQLSensor behavior returning 'success' for NULL result,126,2,no,supported_approval,commits@airflow.apache.org
+airflow,6593,AIRFLOW-6000,Fix random failing  in TestCliConnections.test_cli_connections_add_delete,437,1,no,requirement_changed,commits@airflow.apache.org
+airflow,6588,AIRFLOW-5781,Migrate AWS Kinesis to /providers/aws [AIP-21],0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6461,AIRFLOW-5804,Batch the xcom pull operation,131,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6380,AIRFLOW-3632,dag_runs endpoint does not allow quick subsequent requests to same DAG,504,2,no,ownership_gap,commits@airflow.apache.org
+airflow,6575,AIRFLOW-5921,Add bulk_load_custom to MySqlHook,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,5297,AIRFLOW-2143,Try number displays incorrect values in the web UI,587,5,no,ownership_gap,commits@airflow.apache.org
+airflow,6617,AIRFLOW-6021,Replace list literal with list constructor,197,3,no,supported_approval,commits@airflow.apache.org
+airflow,6620,AIRFLOW-6023,Remove deprecated Celery configs,130,1,no,supported_approval,commits@airflow.apache.org
+airflow,6624,AIRFLOW-6026,Use ccntextlib to redirect stderr and stdout,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6631,AIRFLOW-6039,Not correctly displayed Cyrillic in the DAGs logs,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6630,AIRFLOW-5947,Make the json backend pluggable for DAG Serialization,88,1,no,supported_approval,commits@airflow.apache.org
+airflow,6621,AIRFLOW-6025,Add label to uniquely identify creator of Pod,174,4,no,supported_approval,commits@airflow.apache.org
+airflow,6629,AIRFLOW-6035,Remove comand method in Task,146,1,no,supported_approval,commits@airflow.apache.org
+airflow,6628,AIRFLOW-6034,Fix Deprecation Elasticsearch configs on Master,41,1,no,supported_approval,commits@airflow.apache.org
+airflow,5900,AIRFLOW-5313,Add params support for awsbatch_operator,224,1,no,supported_approval,commits@airflow.apache.org
+airflow,6639,AIRFLOW-6044,Standardize the Code Structure in kube_pod_operator.py,163,1,no,supported_approval,commits@airflow.apache.org
+airflow,6640,AIRFLOW-6045,Error on failed execution of compile_assets,277,1,no,supported_approval,commits@airflow.apache.org
+airflow,6642,AIRFLOW-6046,Fix Alembic migrations & sync it to 1.10.*,537,15,no,supported_approval,commits@airflow.apache.org
+airflow,6645,AIRFLOW-6048,Make K8s Pod Operator's methods static,0,0,yes,requirement_changed,commits@airflow.apache.org
+airflow,6648,AIRFLOW-6052,Add TypeHints to kubernetes_pod_operator,40,1,no,supported_approval,commits@airflow.apache.org
+airflow,6622,AIRFLOW-6024,Do not use the logger in CLI,195,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6614,AIRFLOW-6020,KubernetesExecutor iteritems() exception when using Python 3.*,323,5,no,needs_manual,commits@airflow.apache.org
+airflow,6653,AIRFLOW-6054,Add a command that starts the database consoles,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6658,AIRFLOW-6060,Improve conf_vars context manager,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6637,AIRFLOW-6042,Fix SFTPToGcsExampleDagsSystemTest,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,4465,AIRFLOW-3682,Default aws_conn_id is wrong for emr_base_sensor and emr_create_job_flow_operator,420,3,no,requirement_changed,commits@airflow.apache.org
+airflow,6635,AIRFLOW-6033,"UI crashes at ""Landing Time"" after switching task_id caps/small letters",6090,94,no,needs_manual,commits@airflow.apache.org
+airflow,6647,AIRFLOW-6049,airflow test double prints when the task log handler is already StreamHandler,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6563,AIRFLOW-5915,Add support for the new documentation theme,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6396,AIRFLOW-5726,Delete table as s3 key in RedshiftToS3Transfer,247,2,no,ownership_gap,commits@airflow.apache.org
+airflow,6659,AIRFLOW-6063,Unpin pylint version,0,0,yes,requirement_changed,commits@airflow.apache.org
+airflow,6650,AIRFLOW-6051,Allow loading logs for removed DAGs.,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6668,AIRFLOW-6073,Move Qubole Operator Link class to qubole_operator.py,80,1,no,supported_approval,commits@airflow.apache.org
+airflow,6636,AIRFLOW-6041,Add user agent to the Discovery API client,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6672,AIRFLOW-6079,Make consistent use of timezone.parse,130,4,no,supported_approval,commits@airflow.apache.org
+airflow,6654,AIRFLOW-6055,Exponential Backoff in Sensors,87,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6564,AIRFLOW-5910,Improve lineage support,84,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6564,AIRFLOW-5911,Simplify lineage support and improve robustness,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6644,AIRFLOW-6047,Simplify the logging configuration template,337,3,no,supported_approval,commits@airflow.apache.org
+airflow,6682,AIRFLOW-6088,"Timing metrics dag_processing.last_* erroneously emitted as milliseconds, not seconds",426,4,no,supported_approval,commits@airflow.apache.org
+airflow,6690,AIRFLOW-3656,Airflow Web UI link to the docs should be dynamic to Airflow version,701,3,no,supported_approval,commits@airflow.apache.org
+airflow,6688,AIRFLOW-6099,Add host name to task runner log,767,4,no,supported_approval,commits@airflow.apache.org
+airflow,6681,AIRFLOW-6089,Reorder setup package and add unittest for CI,60,1,no,supported_approval,commits@airflow.apache.org
+airflow,6691,AIRFLOW-6129,Pylint fails on master with no-member issues,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6693,AIRFLOW-6131,Make Cassandra hooks/sensors pylint compatible,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6674,AIRFLOW-6080,New version of mypy catches more type errors,115,1,no,supported_approval,commits@airflow.apache.org
+airflow,6698,AIRFLOW-6136,Remove hardcoded project ID in example_dag,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6699,AIRFLOW-6137,Remove refuse after CLI refactor,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6695,AIRFLOW-6133,Make Hive transfer operators pylint compatible,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6706,AIRFLOW-6143,Inconsistent pylint hive changed merged to master,0,0,yes,needs_manual,commits@airflow.apache.org
+airflow,6704,AIRFLOW-6141,The sensor cannot be executed by invalid deps,10725,35,no,supported_approval,commits@airflow.apache.org
+airflow,6710,AIRFLOW-6144,Improve the log message of airflow scheduler,1335,18,no,supported_approval,commits@airflow.apache.org
+airflow,6638,AIRFLOW-6043,`Dag.sub_dag` method keeps references to origin dag,331,9,no,supported_approval,commits@airflow.apache.org
+airflow,5883,AIRFLOW-5194,Remove action_logging from cli commands that could happen before db is initialized,6947,87,no,supported_approval,commits@airflow.apache.org
+airflow,6716,AIRFLOW-6159,Change logging level of the heartbeat message to DEBUG,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6709,AIRFLOW-5834,serve_logs should be optional,243,1,no,needs_manual,commits@airflow.apache.org
+airflow,6718,AIRFLOW-6162,Serialization is not a module by mistake,61,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6694,AIRFLOW-6132,AzureContainerInstancesOperator should allow to pass in tags,162,2,no,supported_approval,commits@airflow.apache.org
+airflow,6684,AIRFLOW-6095,Task stats endpoint is slow and returns a large payload,424,3,no,supported_approval,commits@airflow.apache.org
+airflow,6553,AIRFLOW-5902,local_task_job is sleeping more often than it needs and spamming task log,115,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6724,AIRFLOW-6169,Avoid unnecessary int-to-float conversion in utils.dates.scale_time_units,99,1,no,supported_approval,commits@airflow.apache.org
+airflow,6702,AIRFLOW-6140,Add missing types and pylint compliance for core classes,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6720,AIRFLOW-6165,"Housekeeping for utils.dates.date_range(), and add tests for it",166,1,no,supported_approval,commits@airflow.apache.org
+airflow,6733,AIRFLOW-6058,Run tests with pytest,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6735,AIRFLOW-6180,Improve kerberos init in pytest conftest,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6731,AIRFLOW-6177,"Log DAG processors timeout event at error level, not info",140,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6729,AIRFLOW-6172,BigQuery - Move BigQuery Pandas data frame system tests to separate file,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6741,AIRFLOW-6167,Escape col name in MysqlToHive operator,0,0,yes,needs_manual,commits@airflow.apache.org
+airflow,6748,AIRFLOW-6192,Stop creating Hook from SFTPSensor.__init__,2500,17,no,requirement_changed,commits@airflow.apache.org
+airflow,6715,AIRFLOW-5945,Fix limitation with OperatorLinks when using DAG Serialization,109,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6715,AIRFLOW-6153,Allow adding Custom Fields to Serialized Operators,240,1,no,ownership_gap,commits@airflow.apache.org
+airflow,5566,AIRFLOW-4935,Add method in the bigquery hook to list tables in a dataset,74,1,no,supported_approval,commits@airflow.apache.org
+airflow,6697,AIRFLOW-6135,Extracct Dag processing from SchedulerJob into separate class,346,5,no,supported_approval,commits@airflow.apache.org
+airflow,6755,AIRFLOW-6199,Add GKE example with XCOM,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6751,AIRFLOW-6196,Use new syntax for NamedTuple,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6754,AIRFLOW-6185,SQLAlchemy Connection model schema not aligned with Alembic schema,490,4,no,ownership_gap,commits@airflow.apache.org
+airflow,6753,AIRFLOW-6197,Use tabulate to display DAG Runs,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6676,AIRFLOW-6081,Refactor test_connection_command.py,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6719,AIRFLOW-6158,Upgrade sendgrid dependency,49,1,no,needs_manual,commits@airflow.apache.org
+airflow,6686,AIRFLOW-6072,aws_hook: Ability to set outbound proxy,766,6,no,requirement_changed,commits@airflow.apache.org
+airflow,6686,AIRFLOW-6075,AWS Hook: Improve documentation,153,1,no,requirement_changed,commits@airflow.apache.org
+airflow,6612,AIRFLOW-6018,Display task instance in table during backfilling,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6759,AIRFLOW-6203,BigQuery - parametrize hook tests,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6627,AIRFLOW-5931,Spawning new python interpreter is slow,387,2,no,ownership_gap,commits@airflow.apache.org
+airflow,6732,AIRFLOW-6175,Executor changes queued tasks to scheduled without removing from task queue,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6739,AIRFLOW-6183,Fix flaky GCS hook gzip test,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6241,AIRFLOW-3014,Password column on connection table should be longer,328,1,no,needs_manual,commits@airflow.apache.org
+airflow,6770,AIRFLOW-6216,"Allow pytests to be run without ""tests""",97,1,no,requirement_changed,commits@airflow.apache.org
+airflow,6655,AIRFLOW-6056,Allow EmrAddStepsOperator to accept job_flow_name as alternative to job_flow_id,231,2,no,supported_approval,commits@airflow.apache.org
+airflow,6723,AIRFLOW-6168,Make ProxyFix arguments configurable for non-standard reverse proxies,234,2,no,supported_approval,commits@airflow.apache.org
+airflow,6783,AIRFLOW-3014,Password column on connection table should be longer,328,1,no,supported_approval,commits@airflow.apache.org
+airflow,6768,AIRFLOW-6209,Drop support for gcp_service_account_keys option,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6355,AIRFLOW-5685,Loading AVRO file from GCS to BQ throwing ValueError,775,10,no,supported_approval,commits@airflow.apache.org
+airflow,6426,AIRFLOW-5751,add get_uri method to connections object,311,3,no,ownership_gap,commits@airflow.apache.org
+airflow,6758,AIRFLOW-6195,"queued_dttm is ""None"" on UI, and not updated when tasks requeued",573,8,no,supported_approval,commits@airflow.apache.org
+airflow,6789,AIRFLOW-623,"Ldap Attributes not always a ""list""",244,5,no,supported_approval,commits@airflow.apache.org
+airflow,6789,AIRFLOW-6230,Improve mocking in GCP tests,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6651,AIRFLOW-6084,Add info endpoint to experimental api,113,2,no,requirement_changed,commits@airflow.apache.org
+airflow,6771,AIRFLOW-6121,Rename cloud_build service,20,1,no,needs_manual,commits@airflow.apache.org
+airflow,6765,AIRFLOW-5889,AWS Batch Operator - API request limits should not fail a task,2154,31,no,needs_manual,commits@airflow.apache.org
+airflow,6340,AIRFLOW-5660,Scheduler becomes responsive when processing large DAGs on kubernetes.,786,5,no,supported_approval,commits@airflow.apache.org
+airflow,6796,AIRFLOW-5744,Environment variables not correctly set in Spark submit operator,987,4,no,supported_approval,commits@airflow.apache.org
+airflow,6784,AIRFLOW-6171,airflow ignore file with .* located in a subdirectory ignores dags in other dirs,701,4,no,ownership_gap,commits@airflow.apache.org
+airflow,6740,AIRFLOW-6181,Add InProcess executor,403,6,no,supported_approval,commits@airflow.apache.org
+airflow,6806,AIRFLOW-6241,Fix typo in airflow/gcp/operator/dataflow.py,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6803,AIRFLOW-6095,Task stats endpoint is slow and returns a large payload,424,3,no,ownership_gap,commits@airflow.apache.org
+airflow,6803,AIRFLOW-6238,Dags stats endpoint is slow and returns a large payload,423,3,no,ownership_gap,commits@airflow.apache.org
+airflow,6804,AIRFLOW-6095,Task stats endpoint is slow and returns a large payload,424,3,no,supported_approval,commits@airflow.apache.org
+airflow,6804,AIRFLOW-6239,Last_dagruns endpoint incredibly slow,388,3,no,supported_approval,commits@airflow.apache.org
+airflow,6798,AIRFLOW-6122,Rename kms service,20,1,no,supported_approval,commits@airflow.apache.org
+airflow,6776,AIRFLOW-6220,BigQuery - remove reduntant hook tests after renaming,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6661,AIRFLOW-5959,"Change import paths in ""jira"" modules",0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6793,AIRFLOW-1076,Support getting variable by string in templates,320,2,no,supported_approval,commits@airflow.apache.org
+airflow,6807,AIRFLOW-5463,Variable set is not atomic,249,3,no,needs_manual,commits@airflow.apache.org
+airflow,6726,AIRFLOW-6170,BranchPythonOperator does not do XCom push of returned value,895,7,no,requirement_changed,commits@airflow.apache.org
+airflow,6810,AIRFLOW-6243,Optimize NamedHivePartitionSensor to reduce Hive metastore poke load,91,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6809,AIRFLOW-6247,Fix sort order in Alembic Migration template,92,1,no,supported_approval,commits@airflow.apache.org
+airflow,6683,AIRFLOW-6091,"BigQueryCursor doesn't properly clean buffer, page_token and all_pages_loaded before starting .execute() method",464,3,no,supported_approval,commits@airflow.apache.org
+airflow,6816,AIRFLOW-4824,MySqlHook needs to override DbApiHook.get_uri to pull in extra for charset=utf-8 during create_engine,575,5,no,supported_approval,commits@airflow.apache.org
+airflow,6817,AIRFLOW-6254,obscure conn extra in logs,464,5,no,supported_approval,commits@airflow.apache.org
+airflow,6785,AIRFLOW-6226,warning.catch_warning should not be use in our code,334,3,no,ownership_gap,commits@airflow.apache.org
+airflow,6812,AIRFLOW-6250,on_failure_callback does not know the task_id when handle_failure() is called without passing context,665,10,no,supported_approval,commits@airflow.apache.org
+airflow,6808,AIRFLOW-6246,MySqlToGoogleCloudStorageOperator: Null value of Bytes type conversion fails,148,3,no,needs_manual,commits@airflow.apache.org
+airflow,6805,AIRFLOW-6240,BigQuery - remove unnecessary mocks in hook system tests [depends on [AIRFLOW-6220]],0,0,yes,requirement_changed,commits@airflow.apache.org
+airflow,6832,AIRFLOW-6263,Fix broken pywinrm integratino,616,7,no,supported_approval,commits@airflow.apache.org
+airflow,6196,AIRFLOW-3152,Kubernetes Pod Operator should support init containers,120,1,no,needs_manual,commits@airflow.apache.org
+airflow,6831,AIRFLOW-6262,Add execute callback for operators,184,1,no,supported_approval,commits@airflow.apache.org
+airflow,6833,AIRFLOW-3189,DbAPI get_uri returns invalid uri if schema is None,299,3,no,supported_approval,commits@airflow.apache.org
+airflow,6678,AIRFLOW-6083,AwsLambdaHook is not accepting non-default configuration,1292,5,no,supported_approval,commits@airflow.apache.org
+airflow,6764,AIRFLOW-4733,[AIP-XXX] Changes in import path,186,2,no,needs_manual,commits@airflow.apache.org
+airflow,6764,AIRFLOW-6206,Use a consistent `aws_` prefix for AWS contrib modules,82,1,no,needs_manual,commits@airflow.apache.org
+airflow,6801,AIRFLOW-6260,Drive _cmd config options by env var,935,5,no,supported_approval,commits@airflow.apache.org
+airflow,6779,AIRFLOW-6222,http hook should log response text,75,1,no,ownership_gap,commits@airflow.apache.org
+airflow,6836,AIRFLOW-4940,DynamoDB to S3 backup operator,58,1,no,supported_approval,commits@airflow.apache.org
+airflow,6088,AIRFLOW-5349,Add scheduler_name option for KubernetesPodOperator,262,1,no,supported_approval,commits@airflow.apache.org
+airflow,6166,AIRFLOW-5532,Missed imagePullSecrets from pod created from k8s executor,675,2,no,supported_approval,commits@airflow.apache.org
+airflow,6777,AIRFLOW-6220,BigQuery - remove reduntant hook tests after renaming,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6777,AIRFLOW-6223,BigQeury - improve hook test,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6350,AIRFLOW-5681,Allow specification of a tag or hash for the git_sync init container,187,2,no,ownership_gap,commits@airflow.apache.org
+airflow,6607,AIRFLOW-5458,Flask-AppBuilder shows critical security vulnerability,302,3,no,ownership_gap,commits@airflow.apache.org
+airflow,6607,AIRFLOW-5462,Google Authentication redirection page crashes with KeyError: 'login',3163,60,no,ownership_gap,commits@airflow.apache.org
+airflow,6818,AIRFLOW-6256,BaseJob table is not removed when clearing the DB,0,0,yes,needs_manual,commits@airflow.apache.org
+airflow,6692,AIRFLOW-6130,Make Cassandra to GCS operator pylint compatible,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6773,AIRFLOW-6038,AWS DataSync example dags,43,1,no,supported_approval,commits@airflow.apache.org
+airflow,6840,AIRFLOW-6269,Add show config command in CLI,101,4,no,supported_approval,commits@airflow.apache.org
+airflow,6849,AIRFLOW-6297,Add Airflow website link to UI docs,35,1,no,supported_approval,commits@airflow.apache.org
+airflow,6845,AIRFLOW-6270,"Remove ""good"" errors/""warnings"" from docs_build",481,6,no,supported_approval,commits@airflow.apache.org
+airflow,6827,AIRFLOW-6126,Rename speech_to_text service,20,1,no,supported_approval,commits@airflow.apache.org
+airflow,6822,AIRFLOW-5616,PrestoHook to use prestodb,221,1,no,supported_approval,commits@airflow.apache.org
+airflow,6843,AIRFLOW-5903,Remove serve_logs command,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6842,AIRFLOW-6271,Airflow does not inform where it reads configuration from,198,1,no,supported_approval,commits@airflow.apache.org
+airflow,6826,AIRFLOW-6147,Rename gcs_to_s3 service,20,1,no,supported_approval,commits@airflow.apache.org
+airflow,6852,AIRFLOW-6101,Rename dataflow service,842,14,no,requirement_changed,commits@airflow.apache.org
+airflow,6854,AIRFLOW-6100,CLONE - Add deprecation warning to gcp_sql_hook service,153,3,no,supported_approval,commits@airflow.apache.org
+airflow,6853,AIRFLOW-6104,Rename datastore service,888,14,no,ownership_gap,commits@airflow.apache.org
+airflow,6857,AIRFLOW-5903,Remove serve_logs command,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6844,AIRFLOW-6272,Manage front-end JS deps with yarnpkg instead of npm,114,1,no,supported_approval,commits@airflow.apache.org
+airflow,6838,AIRFLOW-6267,Add View Creation to BigQueryOperator,37,1,no,supported_approval,commits@airflow.apache.org
+airflow,6680,AIRFLOW-5517,SparkSubmitHook: spark-binary parameter no longer taken from extra,408,7,no,needs_manual,commits@airflow.apache.org
+airflow,6680,AIRFLOW-6086,SparkSubmitOperator - Unable to override spark_binary,829,14,no,needs_manual,commits@airflow.apache.org
+airflow,6866,AIRFLOW-6312,Unpin marshmallow-sqlalchemy for Py>3.5,1180,13,no,supported_approval,commits@airflow.apache.org
+airflow,6869,AIRFLOW-6317,BigQuery - move repeated variables to constants in hook tests,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6872,AIRFLOW-6106,Rename compute service,435,8,no,supported_approval,commits@airflow.apache.org
+airflow,6865,AIRFLOW-6314,BigQuery - improve BigQueryHook test,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6862,AIRFLOW-6105,Rename bigtable service,203,4,no,supported_approval,commits@airflow.apache.org
+airflow,6860,AIRFLOW-6311,Remove python2 from codebase,430,5,no,requirement_changed,commits@airflow.apache.org
+airflow,6873,AIRFLOW-6320,Add quarterly to crontab presets,32,1,no,supported_approval,commits@airflow.apache.org
+airflow,6868,AIRFLOW-6316,Use sphinx render in tutorial.rst,175,4,no,needs_manual,commits@airflow.apache.org
+airflow,6867,AIRFLOW-6315,Create .airflow_db_initialised always in root tests directory,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6880,AIRFLOW-6325,Clear cli hint,189,5,no,supported_approval,commits@airflow.apache.org
+airflow,6878,AIRFLOW-6323,Non-ASCII comment in default airflow.cfg file causes initdb to fail when using Python 2.7,716,9,no,supported_approval,commits@airflow.apache.org
+airflow,6888,AIRFLOW-6333,Bump Pylint to 2.4.4,20,1,no,supported_approval,commits@airflow.apache.org
+airflow,6877,AIRFLOW-6324,Hide celery commands when executor is not CeleryExecutor,362,5,no,supported_approval,commits@airflow.apache.org
+airflow,6884,AIRFLOW-4113,Unpin moto library,186,1,no,supported_approval,commits@airflow.apache.org
+airflow,6892,AIRFLOW-6336,Make tests/utils pylint compatible,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6893,AIRFLOW-6338,Make tests/sensors pylint compatible,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6895,AIRFLOW-6339,Make tests/hooks pylint compatible,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6897,AIRFLOW-6341,Make tests/models pylint compatible,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6883,AIRFLOW-6330,Show cli help when param blank or typo,2728,50,no,supported_approval,commits@airflow.apache.org
+airflow,6894,AIRFLOW-6337,Make tests/operators pylint compatible,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6899,AIRFLOW-6343,Make tests/* pylint compatible,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6906,AIRFLOW-6362,Fix typehint for CommandType,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6914,AIRFLOW-6364,Move conn tests from test_core to test_connection,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6916,AIRFLOW-6335,dag_processor_manager timeout logs should be ERROR not INFO/WARN,1322,13,no,supported_approval,commits@airflow.apache.org
+airflow,6917,AIRFLOW-6350,security - spark submit operator logging+exceptions should mask passwords,1004,25,no,supported_approval,commits@airflow.apache.org
+airflow,6913,AIRFLOW-6351,security - ui - Add Cross Site Scripting defence,1293,38,no,supported_approval,commits@airflow.apache.org
+airflow,6920,AIRFLOW-6366,Fix migrations for MS SQL Server,504,4,no,requirement_changed,commits@airflow.apache.org
+airflow,6910,AIRFLOW-6363,Split complex tests in TestDag into smaller units,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6921,AIRFLOW-5406,Allow spark_submit_hook to run without pip install kubernetes/airflow[kubernetes],81,1,no,supported_approval,commits@airflow.apache.org
+airflow,6918,AIRFLOW-6229,SparkSubmitOperator polls forever if status json can't find driver id,198,1,no,supported_approval,commits@airflow.apache.org
+airflow,6901,AIRFLOW-6345,ProxyFix fails on 1.10.7 due to TypeError,1368,19,no,supported_approval,commits@airflow.apache.org
+airflow,6915,AIRFLOW-6348,security - cli.py is currently printing logs with password if you use cli to add connection with conn_password,915,19,no,supported_approval,commits@airflow.apache.org
+airflow,6925,AIRFLOW-6367,Move variable tests from test_core to models/test_variable,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6925,AIRFLOW-6368,Move conf tests from test_core to test_configuration,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6908,AIRFLOW-6358,print details of failed task,936,17,no,supported_approval,commits@airflow.apache.org
+airflow,6927,AIRFLOW-6371,Move dag tests from test_core to test_dag,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6926,AIRFLOW-6370,Skip Cassandra tests if cluster is not up,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6932,AIRFLOW-6374,Automate sending emails for Airflow Release manager,209,2,no,ownership_gap,commits@airflow.apache.org
+airflow,6937,AIRFLOW-6380,Create sepaarate variable for each subcommands,197,1,no,supported_approval,commits@airflow.apache.org
+airflow,6936,AIRFLOW-6370,Skip Cassandra tests if cluster is not up,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6936,AIRFLOW-6377,Decouple cli utils from argparse.Namespace,212,2,no,supported_approval,commits@airflow.apache.org
+airflow,6936,AIRFLOW-6379,Simplify `airflow task run` logic,183,4,no,supported_approval,commits@airflow.apache.org
+airflow,6912,AIRFLOW-6352,security - ui - add timeout,352,10,no,supported_approval,commits@airflow.apache.org
+airflow,6871,AIRFLOW-6319,Add support for workgroups in AWS Athena,674,3,no,requirement_changed,commits@airflow.apache.org
+airflow,6933,AIRFLOW-6376,Remove code duplicate -order_queued_tasks_by_priority,82,1,no,supported_approval,commits@airflow.apache.org
+airflow,6923,AIRFLOW-5149,Config flag to skip SLA checks,934,19,no,supported_approval,commits@airflow.apache.org
+airflow,6945,AIRFLOW-6318,Change python3 as Dataflow Hooks/Operators default interpreter,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6656,AIRFLOW-6057,Add op_args and op_kwargs in PythonSensor templated fields,435,4,no,supported_approval,commits@airflow.apache.org
+airflow,6952,AIRFLOW-4445,[security] mushroom cloud errors too verbose,172,1,no,supported_approval,commits@airflow.apache.org
+airflow,6949,AIRFLOW-6391,Move content of utils.tests to tests.test_utils,0,0,yes,ownership_gap,commits@airflow.apache.org
+airflow,6951,AIRFLOW-6356,make cli only print output relevant to dag argument passed in rather than from any random dag in bag,749,7,no,supported_approval,commits@airflow.apache.org
+airflow,6958,AIRFLOW-6397,Check for `sub_process` before trying to get pid in bash operator on kill,2201,28,no,supported_approval,commits@airflow.apache.org
+airflow,6964,AIRFLOW-6400,pytest not working on Windows,255,4,no,supported_approval,commits@airflow.apache.org
+airflow,6967,AIRFLOW-6403,BigQuery - add tests for BigQueryCursor,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6959,AIRFLOW-6397,Check for `sub_process` before trying to get pid in bash operator on kill,2201,28,no,supported_approval,commits@airflow.apache.org
+airflow,6959,AIRFLOW-6398,improve flakey test test_mark_success_no_kill,415,5,no,supported_approval,commits@airflow.apache.org
+airflow,6971,AIRFLOW-6409,BigQuery hook - add tests for run_query method,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6909,AIRFLOW-6359,spark_submit_hook.py polling too frequent,489,11,no,supported_approval,commits@airflow.apache.org
+airflow,6957,AIRFLOW-6396,Use tempfile.TemporaryDirectory instead of custom one,0,0,yes,supported_approval,commits@airflow.apache.org
+airflow,6968,AIRFLOW-6110,Rename natural_language service,20,1,no,supported_approval,commits@airflow.apache.org

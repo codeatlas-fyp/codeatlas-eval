@@ -1,0 +1,78 @@
+repo,pr_number,key,summary,description_chars,description_lines,title_only,provisional_category,source
+arrow,13191,ARROW-16592,[FlightRPC][Python] Regression in DoPut error handling,1133,9,no,supported_approval,jira
+arrow,13274,ARROW-16606,[FlightRPC][Python] Flight RPC crashes when a middleware sends an authorization header written with an upper-case A as in 'Authorization' ,18152,215,no,supported_approval,jira
+arrow,13280,ARROW-12203,[C++][Python] Switch default Parquet version to 2.4,235,1,no,supported_approval,jira
+arrow,12753,ARROW-15783,[Python] Converting arrow MonthDayNanoInterval to pandas fails DCHECK,296,3,no,supported_approval,jira
+arrow,12786,ARROW-16109,[Python] python/pyarrow/tests/parquet/test_dataset.py::test_read_table_schema requires dataset mark,404,5,no,supported_approval,jira
+arrow,12791,ARROW-16113,[Python] Partitioning.dictionaries in case of a subset of fields are dictionary encoded,414,3,no,supported_approval,jira
+arrow,12787,ARROW-15364,[Python][Doc] Update filesystem entry in read docstrings,428,7,no,supported_approval,jira
+arrow,12627,ARROW-15860,[Python][Docs] Document RecordBatchReader,97,1,no,supported_approval,jira
+arrow,12797,ARROW-13922,[Python] ParquetDataset throws error when len(path_or_paths) = 1,3086,45,no,ownership_gap,jira
+arrow,12675,ARROW-15982,[Python] parquet.read_table fails to parse home directory path,1240,18,no,supported_approval,jira
+arrow,12796,ARROW-16079,[Python] Address docstrings in Parquet schema and metadata,450,4,no,ownership_gap,jira
+arrow,12765,ARROW-15523,[Python] Make joins able to receive Datasets as inputs,0,0,yes,supported_approval,jira
+arrow,12765,ARROW-15526,[Python] Make joins able to output a Dataset as a result,0,0,yes,supported_approval,jira
+arrow,12704,ARROW-15428,[Python] Address docstrings in Parquet classes and functions,549,10,no,supported_approval,jira
+arrow,12825,ARROW-7174,[Python] Expose parquet dictionary size write parameter in python.,90,1,no,needs_manual,jira
+arrow,12816,ARROW-15723,[Python] Segfault  orcWriter write table,327,8,no,needs_manual,jira
+arrow,12816,ARROW-16025,[Python] Calling nonexistent method of pyarrow.orc.ORCWriter causes segfault,84,1,no,needs_manual,jira
+arrow,12837,ARROW-15824,[Python] Make pyarrow.parquet a package,245,1,no,needs_manual,jira
+arrow,12841,ARROW-15526,[Python] Make joins able to output a Dataset as a result,0,0,yes,supported_approval,jira
+arrow,12749,ARROW-16069,[C++][FlightRPC] Refactor error statuses/codes into the transport-agnostic layer,289,2,no,supported_approval,jira
+arrow,12863,ARROW-11259,[Python] Allow to create field reference to nested field,381,3,no,supported_approval,jira
+arrow,12863,ARROW-13798,[Python] Selective projection of struct fields errors with use_legacy_dataset = False,3122,50,no,supported_approval,jira
+arrow,12863,ARROW-14596,[Python] parquet.read_table nested fields in columns does not work for use_legacy_dataset=False,504,18,no,supported_approval,jira
+arrow,12660,ARROW-15965,[C++][Python] Add Scalar constructor of RoundToMultipleOptions to Python,375,1,no,supported_approval,jira
+arrow,12902,ARROW-7350,[Python] Parquet file metadata min and max statistics not decoded from bytes for Decimal data types,1009,17,no,supported_approval,jira
+arrow,12911,ARROW-16216,[Python][FlightRPC] Fix test_flight.py when flight is not available,155,2,no,supported_approval,jira
+arrow,12800,ARROW-15776,[Python] Expose IpcReadOptions,134,1,no,supported_approval,jira
+arrow,12939,ARROW-15777,[Python][Flight] Allow passing IpcReadOptions to FlightCallOptions,137,1,no,supported_approval,jira
+arrow,12811,ARROW-16122,[Python] Change use_legacy_dataset default and deprecate no-longer supported keywords in parquet.write_to_dataset,386,3,no,requirement_changed,jira
+arrow,12752,ARROW-16048,[Python] Null buffers with Pickle protocol,363,1,no,ownership_gap,jira
+arrow,12930,ARROW-16233,[Python] [Packaging] test_zoneinfo_tzinfo_to_string fails with zoneinfo._common.ZoneInfoNotFoundError on packaging wheels on Windows,6029,77,no,ownership_gap,jira
+arrow,12798,ARROW-16120,[Python] ParquetDataset deprecation: change Deprecation to FutureWarnings,169,1,no,needs_manual,jira
+arrow,12901,ARROW-16114,[Python] Document parquet.FileMetadata and statistics,171,1,no,ownership_gap,jira
+arrow,12821,ARROW-7914,[Python] Allow pandas datetime as index for feather,775,10,no,supported_approval,jira
+arrow,12952,ARROW-16121,[Python] Deprecate the (common_)metadata(_path) attributes of ParquetDataset,454,3,no,ownership_gap,jira
+arrow,12838,ARROW-15757,[Python] Missing bindings for existing_data_behavior makes it impossible to maintain old behavior ,481,3,no,ownership_gap,jira
+arrow,12955,ARROW-16240,[Python] Support row_group_size/chunk_size keyword in pq.write_to_dataset with use_legacy_dataset=False,887,5,no,ownership_gap,jira
+arrow,12701,ARROW-15892,[C++] Dataset APIs require s3:ListBucket Permissions,1157,8,no,supported_approval,jira
+arrow,12998,ARROW-16336,[Python] Hide internal (common_)metadata related warnings from the user (ParquetDataset),127,1,no,needs_manual,jira
+arrow,12967,ARROW-16294,[C++] Improve performance of parquet readahead,543,3,no,ownership_gap,jira
+arrow,12909,ARROW-15796,[Python] Pickling ParquetFileFragment shouldn't fetch metadata,233,2,no,ownership_gap,jira
+arrow,13052,ARROW-16442,[Python] The fragments for ORC dataset return base Fragment instead of FileFragment,890,21,no,supported_approval,jira
+arrow,13033,ARROW-16413,[Python] FileFormat::GetReaderAsync hangs with an fsspec filesystem,236,2,no,supported_approval,jira
+arrow,13064,ARROW-16436,[C++] Datasets ignores CSV autogenerate_column_names during discovery,1666,34,no,supported_approval,jira
+arrow,12778,ARROW-14114,[C++][Parquet] Reading an encrypted parquet with FileReader.ReadTable() multithreaded sometimes fails,185,1,no,supported_approval,jira
+arrow,12954,ARROW-16241,[Python] Suppress warnings in tests when using use_legacy_dataset=True,155,1,no,supported_approval,jira
+arrow,13075,ARROW-16467,[Python] Allow execplan to handle Filter nodes,163,1,no,supported_approval,jira
+arrow,13099,ARROW-16468,[Python] Test the _exec_plan.filter_table helper with complex expressions,246,2,no,needs_manual,jira
+arrow,13116,ARROW-16526,[Python] test_partitioned_dataset fails when building with PARQUET but without DATASET,2820,57,no,requirement_changed,jira
+arrow,13147,ARROW-16548,[Python] Fix test_parquet_invalid_version test when no parquet or dataset are defined,1006,12,no,supported_approval,jira
+arrow,13062,ARROW-16420,[Python] pq.write_to_dataset always ignores partitioning,230,2,no,supported_approval,jira
+arrow,13155,ARROW-16469,[Python] Extend Table.filter to accept Expressions,146,2,no,supported_approval,jira
+arrow,12672,ARROW-15779,[Python] Create python bindings for Substrait consumer,293,1,no,ownership_gap,jira
+arrow,13199,ARROW-16018,[Doc][Python] Run doctests on Python docstring examples,756,6,no,ownership_gap,jira
+arrow,13216,ARROW-16018,[Doc][Python] Run doctests on Python docstring examples,756,6,no,needs_manual,jira
+arrow,13204,ARROW-16018,[Doc][Python] Run doctests on Python docstring examples,756,6,no,needs_manual,jira
+arrow,12977,ARROW-16302,[C++] Null values in partitioning field for FilenamePartitioning,1453,27,no,supported_approval,jira
+arrow,13243,ARROW-16372,[Python] Tests failing on s390x because they use Parquet,4582,82,no,ownership_gap,jira
+arrow,12460,ARROW-13530,[C++] Implement cumulative sum compute function,0,0,yes,supported_approval,jira
+arrow,13264,ARROW-16272,[C++][Python] Poor read performance of S3FileSystem.open_input_file when used with `pd.read_csv`,3658,123,no,supported_approval,jira
+arrow,13176,ARROW-16597,[Python][FlightRPC] Active server may segfault if Python interpreter shuts down,1436,23,no,supported_approval,jira
+arrow,13289,ARROW-14632,[Python] Make write_dataset arguments keyword-only,244,1,no,supported_approval,jira
+arrow,13281,ARROW-16685,[Python] Using Python's set in inner Table.join has undeterministic behaviour,343,4,no,supported_approval,jira
+arrow,12657,ARROW-14821,"[R] Implement bindings for lubridate's floor_date, ceiling_date, and round_date",0,0,yes,ownership_gap,jira
+arrow,13275,ARROW-16546,[Python] Pyarrow fails to loads parquet file with long column names,1390,15,no,supported_approval,jira
+arrow,13309,ARROW-16726,[Python] Setuptools warnings about installing packages as data,1098,19,no,supported_approval,jira
+arrow,13331,ARROW-16546,[Python] Pyarrow fails to loads parquet file with long column names,1390,15,no,ownership_gap,jira
+arrow,13317,ARROW-16610,[Python] Raise an error for conflicting options in pq.write_to_dataset,335,3,no,supported_approval,jira
+arrow,13338,ARROW-16761,[C++][Python] Track bytes_written on FileWriter / WrittenFile,755,2,no,supported_approval,jira
+arrow,13206,ARROW-15906,[C++] S3Filesystem shouldn't create new buckets by default,257,2,no,supported_approval,jira
+arrow,13327,ARROW-16706,[Python] Expose RankOptions,23,1,no,supported_approval,jira
+arrow,13342,ARROW-16382,[Python] Disable memory mapping by default in pyarrow,94,1,no,supported_approval,jira
+arrow,13402,ARROW-16898,[Python] TypeError from `Table.from_pandas(df)` when df using non-str index name,1734,28,no,requirement_changed,jira
+arrow,13402,ARROW-8,Set up Travis CI,277,1,no,requirement_changed,jira
+arrow,13109,ARROW-15365,[Python] Expose full cast options in the pyarrow.compute.cast function,411,2,no,supported_approval,jira
+arrow,13455,ARROW-16864,[Python] external_id for S3 incorrectly set,1595,20,no,supported_approval,jira
+arrow,13461,ARROW-16873,[Python] test_debug_memory_pool_disabled segfaulting on MacOS CI,1300,23,no,supported_approval,jira

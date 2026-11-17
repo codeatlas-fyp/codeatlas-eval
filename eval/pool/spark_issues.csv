@@ -1,0 +1,135 @@
+repo,pr_number,key,summary,description_chars,description_lines,title_only,provisional_category,source
+spark,36006,SPARK-38686,Implement `keep` parameter of `(Index/MultiIndex).drop_duplicates`,66,1,no,supported_approval,jira
+spark,35782,SPARK-38479,Add `Series.duplicated` to indicate duplicate Series values.,60,1,no,ownership_gap,jira
+spark,36042,SPARK-38763,Pandas API on spark Can`t apply lamda to columns.  ,2069,34,no,supported_approval,jira
+spark,36038,SPARK-38759,Add StreamingQueryListener support in PySpark,225,1,no,ownership_gap,jira
+spark,36038,SPARK-38760,Implement DataFrame.observe in PySpark,167,2,no,ownership_gap,jira
+spark,35067,SPARK-37423,Inline type hints for python/pyspark/mllib/fpm.py,81,1,no,supported_approval,jira
+spark,36086,SPARK-38759,Add StreamingQueryListener support in PySpark,225,1,no,supported_approval,jira
+spark,36086,SPARK-38804,Add StreamingQueryManager.removeListener in PySpark,90,1,no,supported_approval,jira
+spark,36082,SPARK-38760,Implement DataFrame.observe in PySpark,167,2,no,supported_approval,jira
+spark,36028,SPARK-38726,Support `how` parameter of `MultiIndex.dropna`,46,1,no,supported_approval,jira
+spark,36041,SPARK-38765,Implement `inplace` parameter of `Series.clip`,46,1,no,supported_approval,jira
+spark,36034,SPARK-38755,Add file to address missing pandas general functions,204,2,no,supported_approval,jira
+spark,36112,SPARK-38827,Improve the test coverage for pyspark/find_spark_home.py,144,1,no,supported_approval,jira
+spark,36071,SPARK-37398,Inline type hints for python/pyspark/ml/classification.py,99,1,no,supported_approval,jira
+spark,34513,SPARK-37234,Inline type hints for python/pyspark/mllib/stat/_statistics.py,0,0,yes,needs_manual,jira
+spark,36093,SPARK-38837,Implement `dropna` parameter of `SeriesGroupBy.value_counts`,60,1,no,supported_approval,jira
+spark,36130,SPARK-3723,"DecisionTree, RandomForest: Add more instrumentation",511,6,no,supported_approval,jira
+spark,36130,SPARK-37234,Inline type hints for python/pyspark/mllib/stat/_statistics.py,0,0,yes,supported_approval,jira
+spark,35578,SPARK-37402,Inline type hints for python/pyspark/mllib/clustering.py,96,1,no,supported_approval,jira
+spark,35576,SPARK-37424,Inline type hints for python/pyspark/mllib/random.py,87,1,no,supported_approval,jira
+spark,36065,SPARK-38677,pyspark hangs in local mode running rdd map operation,968,11,no,supported_approval,jira
+spark,36142,SPARK-38859,"iloc setitem failed due to ""Cannot convert * into bool""",530,6,no,supported_approval,jira
+spark,36145,SPARK-38854,Improve the test coverage for pyspark/statcounter.py,43,1,no,ownership_gap,jira
+spark,36167,SPARK-38882,The usage logger attachment logic should handle static methods properly.,719,22,no,supported_approval,jira
+spark,36115,SPARK-38822,Raise indexError when insert loc is out of bounds,599,5,no,requirement_changed,jira
+spark,36168,SPARK-38822,Raise indexError when insert loc is out of bounds,599,5,no,supported_approval,jira
+spark,36076,SPARK-38793,Support `return_indexer` parameter of `Index/MultiIndex.sort_values`,68,1,no,supported_approval,jira
+spark,36104,SPARK-38863,Implement `skipna` parameter of `DataFrame.all`,48,1,no,supported_approval,jira
+spark,36063,SPARK-38785,impl Series.ewm and DataFrame.ewm,0,0,yes,ownership_gap,jira
+spark,36120,SPARK-38833,PySpark applyInPandas should allow to return empty DataFrame without columns,962,19,no,supported_approval,jira
+spark,36048,SPARK-38774,impl Series.autocorr,0,0,yes,ownership_gap,jira
+spark,36127,SPARK-38844,impl Series.interpolate and DataFrame.interpolate,1898,26,no,ownership_gap,jira
+spark,34293,SPARK-37014,Inline type hints for python/pyspark/streaming/context.py,0,0,yes,supported_approval,jira
+spark,36113,SPARK-38107,Use error classes in the compilation errors of python/pandas UDFs,393,6,no,ownership_gap,jira
+spark,36184,SPARK-38890,Implement `ignore_index` of `DataFrame.sort_index`.,51,1,no,supported_approval,jira
+spark,36159,SPARK-38857,series name should be preserved in series.mode(),272,4,no,ownership_gap,jira
+spark,36190,SPARK-38893,Test SourceProgress in PySpark,182,1,no,needs_manual,jira
+spark,35530,SPARK-37405,Inline type hints for python/pyspark/ml/feature.py,84,1,no,needs_manual,jira
+spark,36203,SPARK-37405,Inline type hints for python/pyspark/ml/feature.py,84,1,no,supported_approval,jira
+spark,35977,SPARK-38660,PySpark DeprecationWarning: distutils Version classes are deprecated,1079,18,no,supported_approval,jira
+spark,36201,SPARK-27420,KinesisInputDStream should expose a way to configure CloudWatch metrics,702,3,no,supported_approval,jira
+spark,36201,SPARK-38881,PySpark Kinesis Streaming should expose metricsLevel CloudWatch config that is already supported in the Scala/Java APIs,813,4,no,supported_approval,jira
+spark,36210,SPARK-38913,Output identifiers in error messages in SQL style,192,1,no,requirement_changed,jira
+spark,36235,SPARK-38927,Skip NumPy/Pandas tests in `test_rdd.py` if not available,0,0,yes,supported_approval,jira
+spark,34324,SPARK-37015,Inline type hints for python/pyspark/streaming/dstream.py,0,0,yes,supported_approval,jira
+spark,36148,SPARK-38880,Implement `numeric_only` parameter of `GroupBy.max/min`,55,1,no,supported_approval,jira
+spark,36186,SPARK-38903,Implement `ignore_index` of `Series.sort_values` and `Series.sort_index`,72,1,no,supported_approval,jira
+spark,36250,SPARK-38940,Test Series' anchor frame for in-place updates on Series,56,1,no,supported_approval,jira
+spark,36257,SPARK-38943,EWM support ignore_na,0,0,yes,supported_approval,jira
+spark,36255,SPARK-38813,Remove TimestampNTZ type support in Spark 3.3,115,2,no,supported_approval,jira
+spark,36255,SPARK-38828,Remove TimestampNTZ type Python support in Spark 3.3,0,0,yes,supported_approval,jira
+spark,36259,SPARK-38949,Wrap SQL statements by double quotes in error messages,252,8,no,ownership_gap,jira
+spark,36269,SPARK-38971,Test anchor frame for in-place `Series.rename_axis`,51,1,no,supported_approval,jira
+spark,36083,SPARK-38581,List of supported pandas APIs for pandas API on Spark docs.,278,2,no,supported_approval,jira
+spark,36266,SPARK-38952,Implement `numeric_only` of `GroupBy.first` and `GroupBy.last`,62,1,no,supported_approval,jira
+spark,36215,SPARK-38938,Implement `inplace` and `columns` parameters of `Series.drop`,61,1,no,supported_approval,jira
+spark,36246,SPARK-38937,interpolate support param `limit_direction`,0,0,yes,supported_approval,jira
+spark,36306,SPARK-38989,Implement `ignore_index` of `DataFrame/Series.sample`,53,1,no,supported_approval,jira
+spark,36356,SPARK-38821,test_nsmallest test failed tue to pandas 1.4.0-1.4.2 bug,327,4,no,supported_approval,jira
+spark,36364,SPARK-39030,Rename sum to avoid shading the builtin Python function,71,2,no,supported_approval,jira
+spark,36342,SPARK-38879,Improve the test coverage for pyspark/rddsampler.py,42,1,no,supported_approval,jira
+spark,36309,SPARK-39000,Convert bools to ints in basic statistical functions of GroupBy objects,71,1,no,ownership_gap,jira
+spark,36205,SPARK-38907,Impl DataFrame.corrwith,0,0,yes,supported_approval,jira
+spark,36307,SPARK-38985,Support sub-error-class for UNSUPPORTED_FEATURE et al,442,5,no,supported_approval,jira
+spark,36369,SPARK-39032,Incorrectly formatted examples in pyspark.sql.functions.when,29,1,no,supported_approval,jira
+spark,36359,SPARK-39027,Output SQL statements in upper case in error messages,247,8,no,requirement_changed,jira
+spark,36384,SPARK-39051,Minor refactoring of `python/pyspark/sql/pandas/conversion.py`,62,1,no,supported_approval,jira
+spark,36383,SPARK-39049,Remove unneeded pass,20,1,no,supported_approval,jira
+spark,36367,SPARK-38988,"Pandas API - ""PerformanceWarning: DataFrame is highly fragmented."" get printed many times. ",136,4,no,ownership_gap,jira
+spark,36161,SPARK-38870,"SparkSession.builder returns a new builder in Scala, but not in Python",3328,60,no,ownership_gap,jira
+spark,36317,SPARK-38993,Impl DataFrame.boxplot and DataFrame.plot.box,0,0,yes,supported_approval,jira
+spark,36382,SPARK-39048,Refactor `GroupBy._reduce_for_stat_function` on accepted data types ,526,4,no,requirement_changed,jira
+spark,36357,SPARK-38820,"Refresh dtype when astype(""category"")",1893,28,no,supported_approval,jira
+spark,36425,SPARK-33277,Python/Pandas UDF right after off-heap vectorized reader could cause executor crash.,646,11,no,supported_approval,jira
+spark,36425,SPARK-39084,df.rdd.isEmpty() results in unexpected executor failure and JVM crash,1244,28,no,supported_approval,jira
+spark,36432,SPARK-39029,Improve the test coverage for pyspark/broadcast.py,42,1,no,needs_manual,jira
+spark,36437,SPARK-30661,KMeans blockify input vectors,0,0,yes,supported_approval,jira
+spark,36444,SPARK-39095,Adjust `GroupBy.std` to match pandas 1.4,40,1,no,requirement_changed,jira
+spark,36465,SPARK-39113,rename self to cls in python/pyspark/mllib/clustering.py,107,2,no,supported_approval,jira
+spark,36414,SPARK-39077,Implement `skipna` of basic statistical functions of DataFrame and Series,73,1,no,ownership_gap,jira
+spark,36408,SPARK-39071,Add unwrap_udt function for unwrapping UserDefinedType columns,145,2,no,ownership_gap,jira
+spark,36452,SPARK-39109,Adjust `GroupBy.mean/median` to match pandas 1.4,48,1,no,ownership_gap,jira
+spark,36420,SPARK-39081,Impl DataFrame.resample and Series.resample,0,0,yes,supported_approval,jira
+spark,36504,SPARK-39155,Access to JVM through passed-in GatewayClient during type conversion,367,3,no,requirement_changed,jira
+spark,36549,SPARK-39186,make skew consistent with pandas,0,0,yes,supported_approval,jira
+spark,36554,SPARK-39186,make skew consistent with pandas,0,0,yes,supported_approval,jira
+spark,36560,SPARK-39192,make pandas-on-spark's kurt consistent with pandas,0,0,yes,supported_approval,jira
+spark,36581,SPARK-39054,GroupByTest failed due to axis Length mismatch,3599,49,no,supported_approval,jira
+spark,36509,SPARK-38961,Enhance to automatically generate the pandas API support list,159,1,no,ownership_gap,jira
+spark,36587,SPARK-39215,Reduce Py4J calls in pyspark.sql.utils.is_timestamp_ntz_preferred,181,2,no,ownership_gap,jira
+spark,36545,SPARK-39168,Consider all values in a python list when inferring schema,1674,23,no,ownership_gap,jira
+spark,36594,SPARK-39223,implement skew and kurt in Rolling/RollingGroupby/Expanding/ExpandingGroupby,0,0,yes,ownership_gap,jira
+spark,36464,SPARK-38947,Support Groupby positional indexing,207,5,no,supported_approval,jira
+spark,36569,SPARK-39201,Implement `ignore_index` of `DataFrame.explode` and `DataFrame.drop_duplicates`,79,1,no,supported_approval,jira
+spark,36589,SPARK-39218,Python foreachBatch streaming query cannot be stopped gracefully after pin thread mode is enabled,2165,39,no,supported_approval,jira
+spark,36486,SPARK-39129,impl Groupby.ewm,0,0,yes,supported_approval,jira
+spark,36624,SPARK-39246,Implement Groupby.skew,0,0,yes,supported_approval,jira
+spark,36555,SPARK-39189,interpolate supports limit_area,0,0,yes,supported_approval,jira
+spark,36391,SPARK-39053,test_multi_index_dtypes failed due to index mismatch,446,17,no,supported_approval,jira
+spark,36652,SPARK-39273,Make PandasOnSparkTestCase inherit ReusedSQLTestCase,206,1,no,supported_approval,jira
+spark,36656,SPARK-39252,Flaky Test: pyspark.sql.tests.test_dataframe.DataFrameTests test_df_is_empty,2361,44,no,ownership_gap,jira
+spark,36355,SPARK-38982,test_categories_setter failed due to pandas bug,49,1,no,supported_approval,jira
+spark,36648,SPARK-39268,AttachDistributedSequenceExec do not checkpoint childRDD with single partition,0,0,yes,ownership_gap,jira
+spark,36681,SPARK-39299,Series.autocorr use SQL.corr to avoid conversion to vector,0,0,yes,supported_approval,jira
+spark,36682,SPARK-39300,Move pandasSkewness and pandasKurtosis into pandas.spark.functions,0,0,yes,supported_approval,jira
+spark,36599,SPARK-39228,Implement `skipna` of `Series.argmax`,37,1,no,supported_approval,jira
+spark,36547,SPARK-39197,Implement `skipna` parameter of `GroupBy.all`,45,1,no,supported_approval,jira
+spark,36699,SPARK-39317,groupby.apply doc test failed when SPARK_CONF_ARROW_ENABLED disable,2229,35,no,supported_approval,jira
+spark,36718,SPARK-39331,Flay test: StreamingListenerTests.test_listener_events,47,1,no,supported_approval,jira
+spark,36640,SPARK-39262,Correct the behavior of creating DataFrame from an RDD,925,28,no,requirement_changed,jira
+spark,36712,SPARK-39326,"replace ""NaN"" with real ""None"" value in indexes in doctest",0,0,yes,supported_approval,jira
+spark,36711,SPARK-39314,Respect ps.concat sort parameter to follow pandas behavior,132,2,no,requirement_changed,jira
+spark,36729,SPARK-39295,Improve documentation of pandas API support list.,239,1,no,supported_approval,jira
+spark,36660,SPARK-39284,Implement Groupby.mad,0,0,yes,ownership_gap,jira
+spark,36701,SPARK-39179,Improve the test coverage for pyspark/shuffle.py,39,1,no,supported_approval,jira
+spark,36840,SPARK-39443,Improve docstring of pyspark.sql.functions.col/first,107,3,no,supported_approval,jira
+spark,36793,SPARK-39405,NumPy Input Support in PySpark,746,4,no,ownership_gap,jira
+spark,36793,SPARK-39406,Accept NumPy array in createDataFrame,68,1,no,ownership_gap,jira
+spark,36683,SPARK-39301,Levearge LocalRelation in createDataFrame with Arrow optimization,234,1,no,needs_manual,jira
+spark,36895,SPARK-39456,Fix broken function links in the auto-generated pandas API support list documentation.,597,2,no,supported_approval,jira
+spark,36906,SPARK-39508,Support IPv6 between JVM and Python Daemon in PySpark,0,0,yes,supported_approval,jira
+spark,36927,SPARK-39534,Series.argmax only needs single pass,0,0,yes,requirement_changed,jira
+spark,36957,SPARK-39236,Make CreateTable API and ListTables API compatible ,311,2,no,requirement_changed,jira
+spark,36957,SPARK-39555,Make createTable and listTables in the python side support 3-layer-namespace,109,1,no,requirement_changed,jira
+spark,36971,SPARK-39572,Fix `test_daemon.py` to support IPv6,0,0,yes,supported_approval,jira
+spark,36870,SPARK-39405,NumPy Input Support in PySpark,746,4,no,supported_approval,jira
+spark,36870,SPARK-39483, Construct the schema from `np.dtype` when `createDataFrame` from a NumPy array,79,1,no,supported_approval,jira
+spark,36981,SPARK-39574,Better error message when `ps.Index` is used for DataFrame/Series creation,75,1,no,requirement_changed,jira
+spark,36981,SPARK-39581,Better error messages for Pandas API on Spark,356,6,no,requirement_changed,jira
+spark,37019,SPARK-39446,Add relevance score for nDCG evaluation in MLLIB,527,2,no,supported_approval,jira
+spark,36985,SPARK-39263,"GetTable, TableExists and DatabaseExists",0,0,yes,supported_approval,jira
+spark,36985,SPARK-39597,"Make GetTable, TableExists and DatabaseExists in the python side support 3-layer-namespace",0,0,yes,supported_approval,jira
+spark,36986,SPARK-39506,"CacheTable, isCached, UncacheTable, setCurrentCatalog, currentCatalog, listCatalogs",0,0,yes,ownership_gap,jira
+spark,36986,SPARK-39598,"Make *cache*, *catalog* in the python side support 3-layer-namespace",0,0,yes,ownership_gap,jira
