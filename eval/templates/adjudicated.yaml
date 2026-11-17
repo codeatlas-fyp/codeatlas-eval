@@ -18,7 +18,12 @@ final:
     C8: {result: "", reason: ""}
     C9: {result: "", reason: ""}
   overall_verdict: {verdict: "", reason: ""}
-  relevant_entities: []
-  no_match: false
+  semantic:
+    criteria:                      # one entry per criterion_id, same fields as the label files
+      - criterion_id: ""
+        relevant: []               # final label_ref list
+        no_match: false
+        reason: ""                 # why, when the two labels differed
+        indeterminate: false       # true when guide Section 4 cannot settle it (excluded, counted)
 indeterminate: false               # true when the written guide cannot settle it; stays that way
 indeterminate_reason: ""
