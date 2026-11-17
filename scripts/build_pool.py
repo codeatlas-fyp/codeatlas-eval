@@ -4,9 +4,11 @@ Usage:
     python scripts/build_pool.py --repo libcloud            # uses the window in eval/repos.json
     python scripts/build_pool.py --repo airflow --jira      # also reads Jira to flag edited requirements
     python scripts/build_pool.py --repo airflow --limit 50  # stop after 50 new PRs (resumable)
+    python scripts/build_pool.py --repo arrow --recheck-unmerged   # redo rows an older run excluded as unmerged
 
 Writes eval/pool/<repo>_pool.csv. Every candidate PR gets a row; excluded rows keep their reason
-(rows are never deleted). Raw API responses are cached in eval/pool/raw/ (git-ignored).
+(rows are never deleted). Raw API responses are cached in eval/pool/raw/ (git-ignored); a PR whose four cached
+files already exist is read from the cache instead of the API.
 The provisional category comes from source metadata only, never from CodeAtlas output. Rows marked
 needs_manual are set by hand to meaningful_link or semantic_no_match after reading the issue and diff.
 """
@@ -14,8 +16,9 @@ needs_manual are set by hand to meaningful_link or semantic_no_match after readi
 from __future__ import annotations
 
 import argparse
+import json
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -24,13 +27,45 @@ from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, fir
 
 FIELDS = ["repo", "pr_number", "pr_url", "merged_at", "base_sha", "head_sha", "merge_commit_sha", "title", "keys_found",
           "key_locations", "py_files_changed", "files_changed", "review_count", "approvals_on_head", "codeowners_present",
-          "provisional_category", "included", "exclusion_reason"]
+          "provisional_category", "included", "exclusion_reason", "merged_via"]
 MAX_FILES = 20
 BOT_TITLE = re.compile(r"^\s*(bump |build\(deps|chore\(deps|\[?release\b|prepare release|update changelog)", re.IGNORECASE)
 
 
 def ts(s: str) -> datetime:
     return datetime.fromisoformat(s.replace("Z", "+00:00"))
+
+
+def utc_z(iso: str) -> str:
+    """Any ISO time with an offset -> GitHub's UTC form, e.g. 2022-04-05T08:11:12Z."""
+    return ts(iso).astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def cached_pr(raw: Path) -> tuple[Any, Any, Any, Any] | None:
+    """(pr, files, reviews, commits) from eval/pool/raw/<repo>/<n>/ when all four were saved, else None."""
+    paths = [raw / f"{name}.json" for name in ("pr", "files", "reviews", "commits")]
+    if not all(p.exists() for p in paths):
+        return None
+    try:
+        pr, files, reviews, commits = (json.loads(p.read_text(encoding="utf-8")) for p in paths)
+    except json.JSONDecodeError:  # a file cut short by a crash: fetch again
+        return None
+    return pr, files, reviews, commits
+
+
+def merge_time(pr: dict[str, Any], commit: dict[str, str]) -> tuple[str, str]:
+    """(merged_at, how) for a PR whose commit sits on the main branch's first-parent line.
+
+    GitHub's merge button sets merged_at. Arrow and Spark merge with a script (merge_arrow_pr.py, merge_spark_pr.py)
+    that pushes the squashed commit to the main branch with "Closes #N" and closes the PR, so GitHub leaves
+    merged_at empty. Such a PR is merged all the same: its commit is on the main branch (that is how this script
+    found it). Its merge time is that commit's committer time. A PR that is still open is not merged.
+    """
+    if pr.get("merged_at"):
+        return pr["merged_at"], "github"
+    if pr.get("state") == "closed":
+        return utc_z(commit["time"]), f"script (commit {commit['sha'][:10]} on main)"
+    return "", ""
 
 
 def requirement_edited(cfg: dict[str, Any], keys: list[str], work_began: str, merged_at: str, raw_dir: Path) -> bool | None:
@@ -57,6 +92,8 @@ def main() -> None:
     ap.add_argument("--until")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--jira", action="store_true")
+    ap.add_argument("--recheck-unmerged", action="store_true",
+                    help="drop rows an older run excluded as 'not merged on GitHub' and classify them again")
     a = ap.parse_args()
 
     cfg = repo_cfg(a.repo)
@@ -67,6 +104,10 @@ def main() -> None:
     repo = ensure_clone(cfg)
     out = EVAL / "pool" / f"{cfg['name']}_pool.csv"
     rows = read_csv(out)
+    if a.recheck_unmerged:
+        before = len(rows)
+        rows = [r for r in rows if not r.get("exclusion_reason", "").startswith("not merged on GitHub")]
+        print(f"rechecking {before - len(rows)} rows excluded as unmerged by an older run")
     done = {r["pr_number"] for r in rows}
     root = cfg["analysis_root"]
     new = 0
@@ -79,12 +120,16 @@ def main() -> None:
             break
         new += 1
         raw = EVAL / "pool" / "raw" / cfg["name"] / str(n)
-        pr = gh(f"repos/{cfg['github']}/pulls/{n}")
-        files = gh(f"repos/{cfg['github']}/pulls/{n}/files", paginate=True)
-        reviews = gh(f"repos/{cfg['github']}/pulls/{n}/reviews", paginate=True)
-        commits = gh(f"repos/{cfg['github']}/pulls/{n}/commits", paginate=True)
-        for name, data in (("pr", pr), ("files", files), ("reviews", reviews), ("commits", commits)):
-            dump_json(raw / f"{name}.json", data)
+        cached = cached_pr(raw)
+        if cached:
+            pr, files, reviews, commits = cached
+        else:
+            pr = gh(f"repos/{cfg['github']}/pulls/{n}")
+            files = gh(f"repos/{cfg['github']}/pulls/{n}/files", paginate=True)
+            reviews = gh(f"repos/{cfg['github']}/pulls/{n}/reviews", paginate=True)
+            commits = gh(f"repos/{cfg['github']}/pulls/{n}/commits", paginate=True)
+            for name, data in (("pr", pr), ("files", files), ("reviews", reviews), ("commits", commits)):
+                dump_json(raw / f"{name}.json", data)
 
         # keys and where they were found
         where: dict[str, set[str]] = {}
@@ -112,8 +157,9 @@ def main() -> None:
         # inclusion rules (C4)
         login = (pr.get("user") or {}).get("login", "")
         reason = ""
-        if not pr.get("merged_at"):
-            reason = "not merged on GitHub (check script-merge)"
+        merged_at, merged_via = merge_time(pr, c)
+        if not merged_at:
+            reason = "not merged (PR still open)"
         elif not py:
             reason = f"no .py file under '{root or '/'}'"
         elif len(paths) > MAX_FILES:
@@ -125,7 +171,7 @@ def main() -> None:
         if not keys:
             cat = "no_key"
         elif a.jira and requirement_edited(cfg, keys, commits[0]["commit"]["committer"]["date"] if commits else pr["created_at"],
-                                           pr["merged_at"] or pr["closed_at"], raw):
+                                           merged_at or pr["closed_at"], raw):
             cat = "requirement_changed"
         elif approvals and not approvers_on_head:
             cat = "ownership_gap"            # approval only on an older commit
@@ -137,12 +183,13 @@ def main() -> None:
             cat = "needs_manual"             # set to meaningful_link or semantic_no_match by hand
 
         rows.append({
-            "repo": cfg["name"], "pr_number": n, "pr_url": pr["html_url"], "merged_at": pr.get("merged_at") or "",
+            "repo": cfg["name"], "pr_number": n, "pr_url": pr["html_url"], "merged_at": merged_at,
             "base_sha": base, "head_sha": head, "merge_commit_sha": c["sha"], "title": pr.get("title", ""),
             "keys_found": ";".join(keys), "key_locations": ";".join(f"{k}:{'+'.join(sorted(v))}" for k, v in sorted(where.items())),
             "py_files_changed": len(py), "files_changed": len(paths), "review_count": len(reviews),
             "approvals_on_head": len(approvers_on_head), "codeowners_present": co_path or "no",
             "provisional_category": cat, "included": "no" if reason else "yes", "exclusion_reason": reason,
+            "merged_via": merged_via,
         })
         write_csv(out, rows, FIELDS)   # write after every PR so a crash loses nothing
         print(f"#{n:<6} {cat:<20} {'excluded: ' + reason if reason else 'included'}")
