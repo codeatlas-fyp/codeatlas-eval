@@ -90,5 +90,23 @@ class MainRunTests(unittest.TestCase):
             self.assertEqual(row["keys_found"], "ARROW-1")
 
 
+
+class RetryTests(unittest.TestCase):
+    def test_dropped_connection_is_retried(self):
+        import http.client
+        from unittest import mock
+
+        import common
+
+        ok = mock.MagicMock()
+        ok.__enter__.return_value = ok
+        ok.read.return_value = b'{"number": 1}'
+        ok.headers = {}
+        calls = [http.client.RemoteDisconnected("Remote end closed connection without response"), ok]
+        with mock.patch.object(common.urllib.request, "urlopen", side_effect=calls), \
+                mock.patch.object(common.time, "sleep"), mock.patch("builtins.print"):
+            self.assertEqual(common._get("https://api.github.com/x", {})[0], {"number": 1})
+
+
 if __name__ == "__main__":
     unittest.main()
