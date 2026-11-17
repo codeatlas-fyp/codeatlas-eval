@@ -1,5 +1,5 @@
 {
-  "_note": "Windows (since/until) are filled in after each repository's acceptance test. Backup repos are used only if a main repo fails it.",
+  "_note": "Windows set from the repository acceptance runs (eval/results/acceptance_*.md, run by Yusra 17 Nov 2026). Libcloud failed acceptance (18 keyed PRs 2016-2019), so Spark is promoted to main and Beam stays the backup.",
   "repos": [
     {
       "name": "airflow",
@@ -11,7 +11,10 @@
       "jira_project": "AIRFLOW",
       "key_regex": "\\bAIRFLOW-\\d+\\b",
       "analysis_root": "",
-      "window": {"since": null, "until": null}
+      "window": {
+        "since": "2019-10-01",
+        "until": "2019-12-31"
+      }
     },
     {
       "name": "arrow",
@@ -23,11 +26,14 @@
       "jira_project": "ARROW",
       "key_regex": "\\bARROW-\\d+\\b",
       "analysis_root": "python/",
-      "window": {"since": null, "until": null}
+      "window": {
+        "since": "2022-04-01",
+        "until": "2022-06-30"
+      }
     },
     {
       "name": "libcloud",
-      "role": "main",
+      "role": "rejected",
       "case_prefix": "LC",
       "github": "apache/libcloud",
       "clone_url": "https://github.com/apache/libcloud.git",
@@ -35,11 +41,14 @@
       "jira_project": "LIBCLOUD",
       "key_regex": "\\bLIBCLOUD-\\d+\\b",
       "analysis_root": "",
-      "window": {"since": null, "until": null}
+      "window": {
+        "since": null,
+        "until": null
+      }
     },
     {
       "name": "spark",
-      "role": "backup",
+      "role": "main",
       "case_prefix": "SP",
       "github": "apache/spark",
       "clone_url": "https://github.com/apache/spark.git",
@@ -47,7 +56,10 @@
       "jira_project": "SPARK",
       "key_regex": "\\bSPARK-\\d+\\b",
       "analysis_root": "python/pyspark/",
-      "window": {"since": null, "until": null}
+      "window": {
+        "since": "2022-04-01",
+        "until": "2022-06-30"
+      }
     },
     {
       "name": "beam",
@@ -59,7 +71,10 @@
       "jira_project": "BEAM",
       "key_regex": "\\bBEAM-\\d+\\b",
       "analysis_root": "sdks/python/",
-      "window": {"since": null, "until": null}
+      "window": {
+        "since": "2021-04-01",
+        "until": "2021-06-30"
+      }
     }
   ]
 }
