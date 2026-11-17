@@ -5,7 +5,8 @@ Usage:
     python scripts/freeze_case.py --all
 
 For each case creates eval/cases/<id>/ with case.yaml, sources/ (PR, commits, reviews, files, Jira issues with
-changelog, CODEOWNERS_at_base.txt, fetched_at.txt), an empty checklist.csv and blank label files.
+changelog, jira_<KEY>_at_cutoff.txt with the issue text at the cutoff, CODEOWNERS_at_base.txt, fetched_at.txt),
+an empty checklist.csv and blank label files.
 Existing sources are never overwritten unless --refresh. Nothing is written to GitHub or Jira.
 """
 
@@ -16,6 +17,7 @@ import shutil
 from datetime import datetime, timezone
 
 from common import (EVAL, codeowners_at, dump_json, ensure_clone, gh, git, jira_issue, read_csv, repo_cfg, write_csv)
+from jira_archive import issue_text
 
 TEMPLATES = EVAL / "templates"
 
@@ -40,9 +42,14 @@ def freeze(row: dict[str, str], refresh: bool) -> None:
     keys = [k for k in row["jira_keys"].split(";") if k]
     for k in keys:
         try:
-            dump_json(src / f"jira_{k}.json", jira_issue(cfg["jira_base"], k))
+            issue = jira_issue(cfg["jira_base"], k)
         except Exception as e:  # noqa: BLE001
             (src / f"jira_{k}.INACCESSIBLE.txt").write_text(f"{e}\n", encoding="utf-8")
+            continue
+        dump_json(src / f"jira_{k}.json", issue)
+        # the issue as it stood at the decision cutoff, ready for prepare_case.py --issue-text
+        cutoff_at = pr.get("merged_at") or row["decision_cutoff_utc"] or None  # script-merged PRs: the pool's merge time
+        (src / f"jira_{k}_at_cutoff.txt").write_text(issue_text(issue, cutoff_at), encoding="utf-8")
 
     base, head = pr["base"]["sha"], pr["head"]["sha"]
     git(repo, "fetch", "--quiet", "origin", f"pull/{n}/head:refs/pr/{n}", check=False)
