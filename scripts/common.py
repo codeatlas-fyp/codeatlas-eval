@@ -107,14 +107,19 @@ def codeowners_at(repo_dir: Path, sha: str) -> tuple[str | None, str | None]:
 # ---------------------------------------------------------------- keys and PR numbers
 
 PR_PATTERNS = (re.compile(r"\(#(\d+)\)\s*$"), re.compile(r"^Merge pull request #(\d+)"))
+# Apache merge scripts (Airflow before mid-2018, Arrow before 2022, Libcloud) keep the subject as the
+# Jira title and write the PR number in the body: "Closes #9618 from user/branch" or "Closes #894".
+BODY_PR_PATTERN = re.compile(r"^\s*Closes:?\s+#(\d+)\b", re.IGNORECASE | re.MULTILINE)
 
 
-def pr_number(subject: str) -> int | None:
+def pr_number(subject: str, body: str = "") -> int | None:
+    """PR number from the merge subject, else from a "Closes #N" line in the commit body."""
     for pat in PR_PATTERNS:
         m = pat.search(subject.strip())
         if m:
             return int(m.group(1))
-    return None
+    m = BODY_PR_PATTERN.search(body or "")
+    return int(m.group(1)) if m else None
 
 
 def find_keys(text: str, key_regex: str) -> list[str]:

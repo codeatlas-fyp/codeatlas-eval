@@ -36,7 +36,7 @@ def main() -> None:
     commits = first_parent_commits(repo, a.since, a.until)
     prs, keyed = [], []
     for c in commits:
-        n = pr_number(c["subject"])
+        n = pr_number(c["subject"], c["body"])
         if n is None:
             continue
         text = f"{c['subject']}\n{c['body']}\n{merged_branch_messages(repo, c)}"
@@ -61,7 +61,7 @@ def main() -> None:
         "| Measure | Value |",
         "|---|---|",
         f"| First-parent commits in window | {len(commits)} |",
-        f"| Merged PRs (PR number in subject) | {len(prs)} |",
+        f"| Merged PRs (PR number in subject or a 'Closes #N' body line) | {len(prs)} |",
         f"| Keyed merged PRs ({cfg['jira_project']}-n anywhere in the merge or its commits) | {len(keyed)} |",
         f"| CODEOWNERS at window start | {co_start or 'none'} |",
         f"| CODEOWNERS at window end | {co_end or 'none'} |",

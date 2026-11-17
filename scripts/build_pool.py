@@ -72,7 +72,7 @@ def main() -> None:
     new = 0
 
     for c in first_parent_commits(repo, since, until):
-        n = pr_number(c["subject"])
+        n = pr_number(c["subject"], c["body"])
         if n is None or str(n) in done:
             continue
         if a.limit and new >= a.limit:
