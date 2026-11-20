@@ -9,3 +9,8 @@ eval/repos/
 eval/pool/raw/
 __pycache__/
 *.tmp
+# frozen evidence holds real identities; staging and invalid freezes are never committed (A6)
+eval/cases/*/sources/
+eval/challenge/*/sources/
+eval/cases/*.staging/
+eval/cases/*.invalid-*/
