@@ -3,7 +3,7 @@
 Usage:
     python scripts/update_pool.py --repo airflow --history    # A1: pin refs from the merge commit (clone + PR files)
     python scripts/update_pool.py --repo airflow --reviews    # A4: approvals at or before the merge (reviews endpoint)
-    python scripts/update_pool.py --repo airflow --links      # A5: link_status from key_locations (no network)
+    python scripts/update_pool.py --repo airflow --links      # A5: link_status from key_locations and the clone (no network)
 
 Only included rows are touched; excluded rows keep what they have. GitHub is read with GET only and every answer
 is cached in eval/pool/raw/<repo>/<pr>/ (git-ignored), so a rerun reads the cache. The pool is written after
@@ -18,9 +18,9 @@ from pathlib import Path
 from typing import Any
 
 from build_pool import FIELDS, approval_category, approvals_by_merge, approvers_on, migrate_row, owner_info
-from common import EVAL, codeowners_at, dump_json, ensure_clone, gh, read_csv, repo_cfg, write_csv
+from common import EVAL, REPOS_DIR, codeowners_at, dump_json, ensure_clone, find_keys, gh, git, read_csv, repo_cfg, write_csv
 from history import fetch_pr_heads, pin
-from links import pool_link_status
+from links import parse_locations, pool_link_status
 
 
 def cached_or_fetch(raw: Path, name: str, api_path: str, paginate: bool = True) -> Any:
@@ -96,9 +96,29 @@ def update_reviews(cfg: dict[str, Any], rows: list[dict[str, str]], save) -> lis
     return changed
 
 
-def update_links(rows: list[dict[str, str]]) -> None:
-    """A5 for every row (no network): link_status from key_locations."""
+def merge_commit_locations(repo_dir: Path, row: dict[str, str], key_regex: str) -> str:
+    """key_locations with "merge_commit" added for each known key in the main-branch commit's whole message.
+
+    Older pools read only the body of that commit, but script merges (Arrow, Spark, Airflow 2019) put the key in
+    its subject. Only keys already in keys_found get the location; no key is added or dropped.
+    """
+    locs = parse_locations(row.get("key_locations", ""))
+    if row.get("merge_commit_sha"):
+        msg = git(repo_dir, "log", "-1", "--format=%B", row["merge_commit_sha"], check=False)
+        for k in find_keys(msg, key_regex):
+            if k in locs:
+                locs[k].add("merge_commit")
+    return ";".join(f"{k}:{'+'.join(sorted(v))}" for k, v in sorted(locs.items()))
+
+
+def update_links(cfg: dict[str, Any], rows: list[dict[str, str]]) -> None:
+    """A5 for every row (no network: the local clone only): merge-commit locations, then link_status."""
+    repo_dir = REPOS_DIR / cfg["name"]
+    if not (repo_dir / ".git").exists():
+        raise SystemExit(f"no clone in {repo_dir}; run --history first")
     for r in rows:
+        if r.get("key_locations"):
+            r["key_locations"] = merge_commit_locations(repo_dir, r, cfg["key_regex"])
         r["link_status"] = pool_link_status(r.get("key_locations", ""))
 
 
@@ -127,7 +147,7 @@ def main(argv: list[str] | None = None) -> int:
     if a.reviews:
         update_reviews(cfg, rows, save)
     if a.links:
-        update_links(rows)
+        update_links(cfg, rows)
     save()
     return 0
 

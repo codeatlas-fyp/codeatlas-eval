@@ -185,7 +185,9 @@ def main() -> None:
         # keys and where they were found
         where: dict[str, set[str]] = {}
         sources = {"title": pr.get("title", ""), "branch": pr.get("head", {}).get("ref", ""), "body": pr.get("body") or "",
-                   "commit": "\n".join(x["commit"]["message"] for x in commits) + "\n" + c["body"] + "\n" + merged_branch_messages(repo, c)}
+                   "commit": "\n".join(x["commit"]["message"] for x in commits) + "\n" + merged_branch_messages(repo, c),
+                   # the main-branch commit itself, subject included (script merges put the key there; A5)
+                   "merge_commit": c["subject"] + "\n" + c["body"]}
         for loc, text in sources.items():
             for k in find_keys(text, cfg["key_regex"]):
                 where.setdefault(k, set()).add(loc)

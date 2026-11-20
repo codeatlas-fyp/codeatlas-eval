@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 import freeze_case as fc
 import links
+import update_pool as up
 
 KEY_RE = r"\bAIRFLOW-\d+\b"
 MERGED = "2019-10-01T12:00:00Z"
@@ -96,6 +97,22 @@ class KeySourcesTests(unittest.TestCase):
         self.assertEqual(where, {"AIRFLOW-7": {"merge_commit"}, "AIRFLOW-8": {"branch"}, "AIRFLOW-9": {"body"}})
         got = links.freeze_link_statuses(where, "fix", KEY_RE)
         self.assertEqual([x["status"] for x in got], ["verified", "verified", "uncertain"])
+
+
+class PoolMergeCommitTests(unittest.TestCase):
+    def test_key_in_the_merge_commit_subject_makes_the_pool_row_verified(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            git = ["git", "-c", "user.name=T", "-c", "user.email=t@example.test", "-c", "commit.gpgsign=false"]
+            subprocess.run([*git, "init", "-q"], cwd=repo, check=True)
+            (repo / "a.py").write_text("a = 1\n", encoding="utf-8")
+            subprocess.run([*git, "add", "a.py"], cwd=repo, check=True)
+            subprocess.run([*git, "commit", "-q", "-m", "[AIRFLOW-1] fix (#9)\n\nmentions AIRFLOW-2"], cwd=repo, check=True)
+            sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo, capture_output=True, text=True).stdout.strip()
+            row = {"merge_commit_sha": sha, "key_locations": "AIRFLOW-1:title"}
+            got = up.merge_commit_locations(repo, row, KEY_RE)
+        self.assertEqual(got, "AIRFLOW-1:merge_commit+title")    # AIRFLOW-2 was not a key of the row: not added
+        self.assertEqual(links.pool_link_status(got), "verified")
 
 
 if __name__ == "__main__":
