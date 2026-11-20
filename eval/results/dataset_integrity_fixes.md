@@ -73,11 +73,13 @@ files: `test_freeze_atomic.py` (A3), `test_reviews_cutoff.py` (A4), `test_links.
 - **Sign-off:** the baseline policy (Areej, Yusra, Saleha; `eval/policies/README.md`) and the quotas. Official
   labelling and the real draw wait for both.
 - **Evaluation runner:** not built; `scripts/scoring.py` only defines which keys are scored.
-- **Mail-archive completeness:** the archive is the only anonymous Jira source. The Arrow list holds only
-  `[Created]` emails, so Arrow summary and description edits are invisible there. The text at the cutoff is then
-  the created text and is still reported as `reconstructed`, so C1, C6 and `requirement_changed` can be missed for
-  Arrow. The Arrow and Spark issues cached in `eval/pool/raw/` come from the REST API and have full histories, but
-  they cannot be fetched again anonymously.
+- **Mail-archive completeness (partly addressed):** a cached REST copy in `eval/pool/raw/` is now preferred
+  (`jira_rest_cache`, later edits undone with `fromString`). An archive issue with only its Created email is
+  `created_text_only`: C1 and C6 are never SATISFIED for it, and it is reported separately
+  (`eval/scoring_rules.md`). Included pool keys: Airflow 415 reconstructed, 1 created_text_only; Arrow 77 and Spark
+  134 jira_rest_cache (`jira_history` column). Still open: the cache exists only on the machine that built the
+  pools and cannot be fetched again anonymously. A freeze elsewhere falls back to the archive, where Arrow keys
+  would be created_text_only.
 - **PR descriptions edited after the merge:** GitHub keeps no description history that the API returns, so a key
   found only in a description stays uncertain and is never scored.
 - **Challenge set:** CH-01..CH-12 are planned, with expected outcomes still to be written. No scenario covers C4
