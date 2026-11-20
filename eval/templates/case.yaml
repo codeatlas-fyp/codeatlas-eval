@@ -15,7 +15,12 @@ historical_diff_status: {historical_diff_status}   # verified | unverifiable (di
 historical_diff_reason: "{historical_diff_reason}"
 api_base_sha: {api_base_sha}             # GitHub API base, for comparison only
 api_head_sha: {api_head_sha}             # GitHub API head, for comparison only
-jira_keys: [{jira_keys}]
+jira_keys: [{jira_keys}]                 # every historically supported key, none dropped (B4)
+jira_links:{jira_links}
+# jira_links: one entry per key, verified first, then by key. status verified | uncertain (A5);
+# requirement_quality explicit_criteria | descriptive_issue | title_only | unavailable (B3);
+# reconstruction_status of jira_<KEY>_at_cutoff.txt. Scored keys: verified AND adjudicated relevant
+# (eval/scoring_rules.md).
 policy_file: {policy_file}
 analysis_root: {analysis_root}
 codeowners_at_base: {codeowners}               # read at base_at_merge

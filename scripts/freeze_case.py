@@ -39,8 +39,9 @@ from typing import Any
 from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, gh, git, jira_issue, merged_branch_messages,
                     read_csv, repo_cfg, write_csv)
 from history import pin
-from jira_archive import cutoff_file_text
-from links import freeze_link_statuses, title_at
+from jira_archive import cutoff_file_text, reconstruct_at
+from links import VERIFIED, freeze_link_statuses, title_at
+from requirement_quality import UNAVAILABLE, classify_issue
 
 TEMPLATES = EVAL / "templates"
 FREEZE_TOOL_VERSION = "freeze_case.py 2"
@@ -146,6 +147,26 @@ def split_reviews(reviews: list[dict[str, Any]], cutoff: str) -> tuple[list[dict
     return before, after
 
 
+LINK_FIELDS = ("key", "found_in", "status", "requirement_quality", "reconstruction_status", "source")
+
+
+def sort_links(links: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Verified keys first, then by key."""
+    return sorted(links, key=lambda x: (x["status"] != VERIFIED, x["key"]))
+
+
+def jira_links_yaml(links: list[dict[str, Any]]) -> str:
+    """The jira_links value for case.yaml: one flow mapping per key, or [] when the case has no key."""
+    if not links:
+        return " []"
+    lines = []
+    for x in links:
+        parts = [f"key: {x['key']}", f"found_in: [{', '.join(x['found_in'])}]"]
+        parts += [f"{f}: {x[f]}" for f in LINK_FIELDS[2:]]
+        lines.append("  - {" + ", ".join(parts) + "}")
+    return "\n" + "\n".join(lines)
+
+
 def key_sources(repo: Path, cfg: dict[str, Any], pr: dict[str, Any], commits: list[dict[str, Any]],
                 merge_sha: str) -> dict[str, set[str]]:
     """{key: locations}: title, branch, body, commit (PR commits) and merge_commit (the commit on main and,
@@ -209,19 +230,34 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
     links = freeze_link_statuses(key_sources(repo, cfg, pr, data["commits"], merge_sha), merged_title, cfg["key_regex"])
     dump_json(src / "jira_links.json", {"title_at_merge": merged_title, "links": links})
     mandatory.append("sources/jira_links.json")
+    # B4: every historically supported key is frozen (verified and uncertain alike); none is dropped
     keys = sorted({k for k in row["jira_keys"].split(";") if k} | {x["key"] for x in links})
+    by_key = {x["key"]: x for x in links}
+    jira_links = []
     for k in keys:
+        link = by_key.get(k) or {"key": k, "found_in": ["case_row"], "status": "uncertain",
+                                 "reason": "listed in the case row but not found in the PR, its commits or the merge"}
+        entry = {"key": k, "found_in": link["found_in"], "status": link["status"]}
         try:
             issue = jira_issue(cfg["jira_base"], k)
         except Exception as e:  # noqa: BLE001
             (src / f"jira_{k}.INACCESSIBLE.txt").write_text(f"{e}\n", encoding="utf-8")
-            mandatory.append(f"sources/jira_{k}.INACCESSIBLE.txt")
+            (src / f"jira_{k}_at_cutoff.txt").write_text(
+                f"key: {k}\nsource: none\ncutoff: {cutoff}\nreconstruction_status: inaccessible\n"
+                f"reconstruction_note: {type(e).__name__}\n---\n", encoding="utf-8")
+            mandatory += [f"sources/jira_{k}.INACCESSIBLE.txt", f"sources/jira_{k}_at_cutoff.txt"]
+            jira_links.append(entry | {"requirement_quality": UNAVAILABLE, "source": "none",
+                                       "reconstruction_status": "inaccessible"})
             continue
         dump_json(src / f"jira_{k}.json", issue)
         # the issue as it stood at the decision cutoff, rebuilt the way its source allows: a header (source,
         # cutoff, reconstruction status), '---', then the text (none if unverifiable)
         (src / f"jira_{k}_at_cutoff.txt").write_text(cutoff_file_text(issue, cutoff), encoding="utf-8")
         mandatory += [f"sources/jira_{k}.json", f"sources/jira_{k}_at_cutoff.txt"]
+        rebuilt = reconstruct_at(issue, cutoff)
+        jira_links.append(entry | {"requirement_quality": classify_issue(issue, cutoff), "source": rebuilt["source"],
+                                   "reconstruction_status": rebuilt["status"]})
+    jira_links = sort_links(jira_links)
 
     hist = pin(repo, merge_sha, n, data["files"], api_base=pr["base"]["sha"], api_head=pr["head"]["sha"])
     dump_json(src / "history.json", hist)
@@ -240,7 +276,7 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
             historical_diff_status=hist["historical_diff_status"],
             historical_diff_reason=hist["historical_diff_reason"].replace('"', "'"),
             api_base_sha=hist["api_base_sha"], api_head_sha=hist["api_head_sha"],
-            jira_keys=", ".join(keys) or "none", policy_file=f"eval/policies/{cfg['name']}.yaml",
+            jira_keys=", ".join(keys) or "none", jira_links=jira_links_yaml(jira_links), policy_file=f"eval/policies/{cfg['name']}.yaml",
             analysis_root=cfg["analysis_root"] or "/", codeowners=co_path or "none", fetched_at=fetched,
             category=row["category_provisional"]),
         encoding="utf-8")

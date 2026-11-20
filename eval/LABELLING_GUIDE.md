@@ -114,6 +114,31 @@ Mechanical edits made necessary by the change (renaming a call site, adjusting a
 updating a type hint) count as explained if the entity they serve is relevant; write
 "follows from <entity>" in the reason.
 
+## PRs with several Jira keys
+
+Every key the history supports is frozen and listed in `case.yaml` under `jira_links` (verified keys first). No
+key is dropped, and you decide relevance, not the scripts (`eval/scoring_rules.md`).
+
+1. **Before labelling any rule or criterion**, fill `jira_links` in your label file with one entry for **every**
+   key in `case.yaml`: `relevance` is `relevant`, `not_relevant` or `unclear`, and `reason` is one line citing the
+   source (commit, title, issue text).
+2. **Relevant:** the PR does the work the issue asks for, or a necessary part of it.
+   Example (illustrative): commit "[AIRFLOW-5477] Rewrite PubSub hook" and AIRFLOW-5477 is "Rewrite Google PubSub Hook to Google
+   Cloud Python": relevant, reason "commit implements the issue's hook rewrite".
+3. **Not relevant:** the key is mentioned but the PR does not do its work: "see also AIRFLOW-1234", a follow-up
+   ("AIRFLOW-1300 will handle the docs"), the issue that introduced the bug being fixed, or a duplicate.
+   Example: description says "follow-up to AIRFLOW-5400": not_relevant, reason "PR body: named as the earlier
+   change, not implemented here".
+4. **Unclear:** you cannot decide from the sources. Write `unclear` with what is missing (for example "issue text
+   is title only; PR changes a different module"). Do not force a choice; the adjudicator resolves it, and a key
+   that stays unclear is recorded but never scored.
+5. **Scored keys** are those with `status: verified` **and** adjudicated relevance `relevant`. Uncertain keys
+   (for example only in the PR description) are shown to you but never scored, whatever you label.
+6. Rules that need a requirement use only scored keys. If a case has no scored key, those rules (C1, C3, C4, C6,
+   C8, C9) stay INSUFFICIENT_EVIDENCE and the case still counts for coverage.
+7. **Criteria** are taken from every scored key and each is tagged with its key (`criterion_id` starts with the
+   key, e.g. `AIRFLOW-5477:v1:ac1`).
+
 ## 3. Overall verdict
 
 The fixed truth table, and how required rules with insufficient evidence give UNKNOWN.

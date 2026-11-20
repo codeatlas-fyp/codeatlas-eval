@@ -4,9 +4,15 @@ adjudicator: ""
 adjudicated_on: ""
 minutes_spent: 0
 initial_agreement:                 # filled before resolving: true/false per rule and overall
+  jira_links: {}                   # key: true/false, did the two labels give the same relevance
   rules: {C1: null, C2: null, C3: null, C4: null, C5: null, C6: null, C7: null, C8: null, C9: null}
   overall: null
 final:
+  jira_links:                      # one entry per key, resolved before rules and criteria; scored keys are
+                                   # status verified AND relevance relevant (eval/scoring_rules.md)
+    - key: ""
+      relevance: ""        # relevant | not_relevant | unclear
+      reason: ""           # one line citing the source
   rules:                           # same values as the label files
     C1: {result: "", reason: ""}
     C2: {result: "", reason: ""}
