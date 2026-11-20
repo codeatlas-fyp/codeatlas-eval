@@ -35,6 +35,21 @@ The case is kept and stays in the coverage counts. The rules that need a require
 keep INSUFFICIENT_EVIDENCE; the other rules (C2, C5, C7) are scored as labelled. The case contributes no semantic
 criteria.
 
+## Keys whose edit history is unknown (created_text_only)
+
+The issue text at the cutoff comes from a cached REST copy when one exists in `eval/pool/raw/` (source
+`jira_rest_cache`, later edits undone with their old values), otherwise from the mail archive. When the archive
+holds only the issue's Created email (Arrow's list), the created text is known but not whether it was edited:
+`reconstruction_status` is `created_text_only` ("edit history not available in the archive").
+
+- **C1 and C6** for a scored key with `created_text_only` are **INSUFFICIENT_EVIDENCE (history unknown), never
+  SATISFIED**. A VIOLATED label stands only if another scored key, whose history is known, carries it.
+- These keys and their cases are **reported separately** (`history_unknown_keys` in `scripts/scoring.py`), never
+  pooled with the keys whose history is known.
+- **Sampling:** a pool row with such a key cannot be proven unchanged. `build_pool.requirement_edited` gives
+  "unknown", not "unchanged", and the sampling report lists such sampled rows in their own table. They are
+  never counted as evidence that a requirement stayed the same.
+
 ## Rules not estimable on the pilot
 
 Rules marked `estimable_on_real_data: false` in `eval/rules_scope.yaml` are excluded from the pilot metrics and

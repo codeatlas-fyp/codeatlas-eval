@@ -240,6 +240,17 @@ def report(seed: int, repos: list[str], pool_files: dict[str, Path], avail, allo
         nkeys = [len([k for k in x["keys_found"].split(";") if k]) for x in taken[r]]
         out.append(f"| {r} | {sum(n == 1 for n in nkeys)} | {sum(n > 1 for n in nkeys)} | "
                    f"{sum(verified_keys(x) > 0 for x in taken[r])} |")
+    # a key whose archive has only its Created email (created_text_only) has an unknown edit history: the row
+    # cannot be proven unchanged, so its category (anything but requirement_changed) is reported separately
+    from scoring import history_unknown
+    out += ["", "## Requirement not proven unchanged (edit history unknown)", "",
+            "Rows with a created_text_only key: C1 and C6 stay INSUFFICIENT_EVIDENCE for them "
+            "(eval/scoring_rules.md), and their category cannot be proven to be 'unchanged'.", "",
+            "| Repo | Sampled cases | Cases |", "|---|---|---|"]
+    for r in repos:
+        unknown = [x for x in taken[r] if history_unknown(x.get("jira_history", ""))]
+        out.append(f"| {r} | {len(unknown)} | "
+                   f"{', '.join('#' + x['pr_number'] + ' ' + x['provisional_category'] for x in unknown) or '-'} |")
     return out
 
 

@@ -44,7 +44,7 @@ before the merge count (fix A4).
 | supported_approval | 7 | Keyed; approval on the head commit at or before the merge by a listed CODEOWNER, or no CODEOWNERS rule applies; issue unchanged during the PR |
 | ownership_gap | 6 | Approval only on an older commit, or owners are teams whose membership at the cutoff is not visible |
 | no_approval | 7 | Keyed PR with no approval on the head commit at or before the merge |
-| requirement_changed | 2 | Summary or description edited after the first commit and before the merge |
+| requirement_changed | 2 | Summary or description edited after the first commit and before the merge. A row whose key has only a Created email in the archive (`created_text_only`) cannot be proven unchanged; the sampling report lists such rows separately |
 | no_key | 2 | Merged Python PR with no Jira key anywhere |
 | **Total** | **24** | exactly 8 per repository |
 

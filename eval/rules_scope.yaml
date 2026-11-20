@@ -17,14 +17,19 @@
 #   Every email has a time (epoch). Actors appear as display names, never as Jira account ids.
 # The Arrow and Spark issues cached in eval/pool/raw/ (fetched from the REST API on another machine before the
 # login requirement) do carry status, assignee and priority histories, but they cannot be fetched again
-# anonymously, so they are not counted as the pilot's source here.
+# anonymously and exist only on one machine, so C3, C4 and C8 stay not estimable. For the requirement text and
+# its edits (C1, C6) the cached REST copy is preferred when it exists (source jira_rest_cache).
 rules:
   C1:
     name: Requirement changed after work began
     estimable_on_real_data: true
     reason: >-
-      Needs summary/description edits with their times. The archive's Updated emails give them for Airflow and
-      Spark. Caveat: the Arrow list has only Created emails, so Arrow edits are invisible in the archive.
+      Needs summary/description edits with their times. A cached REST copy (jira_rest_cache, with its changelog)
+      gives them and is preferred; otherwise the archive's Updated emails do (Airflow, Spark). Where the archive
+      has only the Created email (Arrow's list), the edit history is unknown (created_text_only).
+    when_history_unknown: >-
+      Keys with reconstruction_status created_text_only give INSUFFICIENT_EVIDENCE (history unknown), never
+      SATISFIED, and are reported separately (eval/scoring_rules.md).
     tested_instead: CH-06, CH-07 (in addition)
   C2:
     name: PR modifies its own governance
@@ -59,7 +64,10 @@ rules:
     name: Implementation built on a superseded version
     estimable_on_real_data: true
     reason: >-
-      Same evidence as C1 (summary/description edits with times after the last commit). Same Arrow caveat.
+      Same evidence as C1 (summary/description edits with times after the last commit), from the same sources.
+    when_history_unknown: >-
+      Keys with reconstruction_status created_text_only give INSUFFICIENT_EVIDENCE (history unknown), never
+      SATISFIED, and are reported separately (eval/scoring_rules.md).
     tested_instead: CH-06 (in addition)
   C7:
     name: Test evidence
