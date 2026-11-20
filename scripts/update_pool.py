@@ -5,6 +5,7 @@ Usage:
     python scripts/update_pool.py --repo airflow --reviews    # A4: approvals at or before the merge (reviews endpoint)
     python scripts/update_pool.py --repo airflow --links      # A5: link_status from key_locations and the clone (no network)
     python scripts/update_pool.py --repo airflow --quality    # B3: requirement_quality from the saved issue text
+    python scripts/update_pool.py --repo airflow --jira-history   # Jira source and history status per key
 
 Only included rows are touched; excluded rows keep what they have. GitHub is read with GET only and every answer
 is cached in eval/pool/raw/<repo>/<pr>/ (git-ignored), so a rerun reads the cache. The pool is written after
@@ -19,10 +20,12 @@ from pathlib import Path
 from typing import Any
 
 from build_pool import FIELDS, approval_category, approvals_by_merge, approvers_on, migrate_row, owner_info
-from common import EVAL, REPOS_DIR, codeowners_at, dump_json, ensure_clone, find_keys, gh, git, read_csv, repo_cfg, write_csv
+from common import (EVAL, REPOS_DIR, archive_get, cached_rest_issue, codeowners_at, dump_json, ensure_clone, find_keys, gh,
+                    git, read_csv, repo_cfg, write_csv)
 from history import fetch_pr_heads, pin
 from links import parse_locations, pool_link_status
 from requirement_quality import UNAVAILABLE, classify_issue, row_quality
+from jira_archive import REST_LIKE, archive_email_kinds, issue_source, reconstruct_at
 
 
 def cached_or_fetch(raw: Path, name: str, api_path: str, paginate: bool = True) -> Any:
@@ -141,6 +144,41 @@ def update_quality(cfg: dict[str, Any], rows: list[dict[str, str]]) -> None:
     print(f"{cfg['name']}: requirement_quality set; {missing} key(s) with no saved issue (unavailable)")
 
 
+def key_history(cfg: dict[str, Any], row: dict[str, str], key: str, kinds_cache: dict[str, Any],
+                get=archive_get) -> str:
+    """How the issue's text at the cutoff is known: jira_rest_cache, reconstructed, created_text_only,
+    unverifiable or unavailable. Archive copies saved without email_kinds get them first (one GET search)."""
+    cached = cached_rest_issue(cfg["name"], key, row["pr_number"])
+    if cached:
+        status = reconstruct_at(cached, row["merged_at"])["status"]
+        return "jira_rest_cache" if status == "reconstructed" else status
+    path = EVAL / "pool" / "raw" / cfg["name"] / row["pr_number"] / f"jira_{key}.json"
+    if not path.exists():
+        return UNAVAILABLE
+    issue = json.loads(path.read_text(encoding="utf-8"))
+    archive = issue.get("archive")
+    if archive is not None and "email_kinds" not in archive and issue_source(issue) not in REST_LIKE:
+        if key not in kinds_cache:
+            first = archive.get("list", "").split("@")[0]
+            lists = tuple(dict.fromkeys([first, "issues", "commits", "jira", "dev"]) if first else ())
+            kinds_cache[key] = archive_email_kinds(key, get, lists or ("issues", "commits", "jira", "dev"))
+        if kinds_cache[key]:
+            archive["email_kinds"] = kinds_cache[key][1]
+            dump_json(path, issue)
+    return reconstruct_at(issue, row["merged_at"])["status"]
+
+
+def update_jira_history(cfg: dict[str, Any], rows: list[dict[str, str]], save) -> None:
+    """jira_history for included rows: KEY:status per key (see key_history)."""
+    kinds_cache: dict[str, Any] = {}
+    for r in rows:
+        keys = [k for k in r["keys_found"].split(";") if k]
+        if r["included"] != "yes" or not keys:
+            continue
+        r["jira_history"] = ";".join(f"{k}:{key_history(cfg, r, k, kinds_cache)}" for k in keys)
+        save()
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", required=True)
@@ -148,8 +186,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--reviews", action="store_true", help="A4: count only approvals submitted at or before the merge")
     ap.add_argument("--links", action="store_true", help="A5: link_status from key_locations (no network)")
     ap.add_argument("--quality", action="store_true", help="B3: requirement_quality from the saved issue text")
+    ap.add_argument("--jira-history", action="store_true", help="Jira source and history status per key")
     a = ap.parse_args(argv)
-    if not (a.history or a.reviews or a.links or a.quality):
+    if not (a.history or a.reviews or a.links or a.quality or a.jira_history):
         ap.error("choose at least one update")
 
     cfg = repo_cfg(a.repo)
@@ -170,6 +209,8 @@ def main(argv: list[str] | None = None) -> int:
         update_links(cfg, rows)
     if a.quality:
         update_quality(cfg, rows)
+    if a.jira_history:
+        update_jira_history(cfg, rows, save)
     save()
     return 0
 
