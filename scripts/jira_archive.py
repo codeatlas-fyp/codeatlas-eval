@@ -12,6 +12,13 @@ freeze_case.py use it unchanged. The result says where it came from (`source`, `
 
 Limits: an edit is recorded with the new text only (the emails do not always carry the old text);
 issues whose emails never reached the list are reported as not found, never guessed.
+
+Every issue records where it came from in `source`: "apache_mail_archive" (this module), "jira_rest"
+(Jira's REST API) or "jira_rest_cache" (a REST copy with its changelog saved earlier in eval/pool/raw/, which
+common.jira_issue_for prefers over the archive). The text at a cutoff is rebuilt differently (`reconstruct_at`):
+- archive: the created text plus every edit up to the cutoff (edits after it are ignored);
+- REST: the current text with every summary/description edit after the cutoff undone, newest first, using
+  each edit's old value (`fromString`). An edit without an old value makes the result "unverifiable".
 """
 
 from __future__ import annotations
@@ -27,7 +34,13 @@ from typing import Any
 
 ARCHIVE_API = "https://lists.apache.org/api"
 DEFAULT_LISTS = ("issues", "commits", "jira", "dev")
-SOURCE = "lists.apache.org archive of Jira notification emails"
+SOURCE = "apache_mail_archive"   # the issue was rebuilt from lists.apache.org (Jira notification emails)
+REST_SOURCE = "jira_rest"         # the issue came from Jira's REST API (current text plus changelog)
+CACHE_SOURCE = "jira_rest_cache"  # a REST copy saved earlier in eval/pool/raw/ (preferred over the archive)
+REST_LIKE = (REST_SOURCE, CACHE_SOURCE)
+CREATED_TEXT_ONLY = "created_text_only"   # archive has the Created email only: text known, edit history not
+TEXT_STATUSES = ("reconstructed", CREATED_TEXT_ONLY)   # statuses whose cutoff file carries the issue text
+TRACKED_FIELDS = ("summary", "description")
 TRAILER = re.compile(r"\n--\s*\nThis message was sent by Atlassian.*", re.DOTALL)
 SUBJECT = re.compile(r"^\[jira\]\s+\[(?P<kind>[^\]]+)\]\s+\((?P<key>[A-Z][A-Z0-9_]*-\d+)\)\s*(?P<title>.*)$", re.DOTALL)
 HEADER_LINE = re.compile(r"^\s*(?P<name>[A-Z][A-Za-z /]*?):\s?(?P<value>.*)$")
@@ -150,12 +163,14 @@ def archive_issue(key: str, get: Getter, lists: tuple[str, ...] = DEFAULT_LISTS,
         seen: set[str] = set()
         created: dict[str, Any] | None = None
         updates: list[dict[str, Any]] = []
+        kinds: dict[str, int] = {}   # every notification kind on the list (Created, Updated, Commented, ...)
         for e in _search(get, key, lst, domain):
             parsed = parse_subject(e.get("subject", ""))
             msg_id = e.get("message-id") or e.get("mid") or e.get("id")
             if not parsed or parsed[1] != key or msg_id in seen:
                 continue
             seen.add(msg_id)
+            kinds[parsed[0]] = kinds.get(parsed[0], 0) + 1
             if parsed[0] == "Created" and (created is None or e["epoch"] < created["epoch"]):
                 created = e
             elif parsed[0] == "Updated":
@@ -177,6 +192,7 @@ def archive_issue(key: str, get: Getter, lists: tuple[str, ...] = DEFAULT_LISTS,
             "source": SOURCE,
             "archive": {"list": f"{lst}@{domain}", "created_mid": created["mid"],
                         "updated_mids": [h["archive_mid"] for h in histories],
+                        "email_kinds": dict(sorted(kinds.items())),
                         "permalink": f"https://lists.apache.org/thread/{created['mid']}"},
             "fields": {
                 "summary": summary,
@@ -191,13 +207,47 @@ def archive_issue(key: str, get: Getter, lists: tuple[str, ...] = DEFAULT_LISTS,
     raise NotInArchive(f"{key}: no '[jira] [Created]' email in {', '.join(lists)} @ {domain}")
 
 
+def archive_email_kinds(key: str, get: Getter, lists: tuple[str, ...] = DEFAULT_LISTS,
+                        domain: str | None = None) -> tuple[str, dict[str, int]] | None:
+    """(list, {kind: count}) for the first list that has the issue's Created email; one search per list, no bodies.
+
+    Used to add `email_kinds` to archive copies saved before it was recorded.
+    """
+    domain = domain or project_domain(key)
+    for lst in lists:
+        seen: set[str] = set()
+        kinds: dict[str, int] = {}
+        for e in _search(get, key, lst, domain):
+            parsed = parse_subject(e.get("subject", ""))
+            msg_id = e.get("message-id") or e.get("mid") or e.get("id")
+            if not parsed or parsed[1] != key or msg_id in seen:
+                continue
+            seen.add(msg_id)
+            kinds[parsed[0]] = kinds.get(parsed[0], 0) + 1
+        if kinds.get("Created"):
+            return f"{lst}@{domain}", dict(sorted(kinds.items()))
+    return None
+
+
+def created_text_only(issue: dict[str, Any]) -> bool:
+    """True when the archive holds only the issue's Created email, so later edits cannot be seen (Arrow's list).
+
+    An archive copy saved before email_kinds was recorded counts as created-text-only if it has no archived edit:
+    its history is then unknown, and unknown is never treated as unchanged.
+    """
+    kinds = (issue.get("archive") or {}).get("email_kinds")
+    if kinds is not None:
+        return {k for k, n in kinds.items() if n} == {"Created"}
+    return not issue.get("changelog", {}).get("histories")
+
+
 def description_at(issue: dict[str, Any], cutoff_iso: str) -> tuple[str, str]:
     """(summary, description) as they stood at the cutoff: created text plus edits up to the cutoff."""
     cutoff = datetime.fromisoformat(cutoff_iso.replace("Z", "+00:00"))
     summary = issue["fields"].get("summary", "")
     description = issue["fields"].get("description", "") or ""
-    for h in issue.get("changelog", {}).get("histories", []):
-        at = datetime.fromisoformat(h["created"].replace("+0000", "+00:00"))
+    for h in sorted(issue.get("changelog", {}).get("histories", []), key=lambda h: _at(h["created"])):
+        at = _at(h["created"])
         if at > cutoff:
             break
         for item in h.get("items", []):
@@ -206,6 +256,78 @@ def description_at(issue: dict[str, Any], cutoff_iso: str) -> tuple[str, str]:
             elif item.get("field") == "description":
                 description = item.get("toString", description)
     return summary, description
+
+
+def issue_source(issue: dict[str, Any]) -> str:
+    """apache_mail_archive or jira_rest. Older saved issues: an `archive` block means the mail archive."""
+    src = issue.get("source") or ""
+    if src == CACHE_SOURCE:
+        return CACHE_SOURCE
+    if src == SOURCE or src.startswith("lists.apache.org") or "archive" in issue:
+        return SOURCE
+    if src == REST_SOURCE or (not src and "fields" in issue):
+        return REST_SOURCE
+    return src or "unknown"
+
+
+def _at(created: str) -> datetime:
+    return datetime.fromisoformat(created.replace("Z", "+00:00").replace("+0000", "+00:00"))
+
+
+def reconstruct_at(issue: dict[str, Any], cutoff_iso: str) -> dict[str, str]:
+    """Summary and description as they stood at the cutoff, with how they were obtained.
+
+    Returns source, cutoff, status ("reconstructed", "created_text_only" or "unverifiable"), note, summary,
+    description. created_text_only: an archive issue whose list holds only its Created email, so the created text
+    is given but edits are unknown (note "edit history not available in the archive").
+    An unverifiable result has empty text: it is never filled with a guess.
+    """
+    source = issue_source(issue)
+    cutoff = _at(cutoff_iso)
+    out = {"source": source, "cutoff": cutoff_iso, "status": "reconstructed", "note": "", "summary": "", "description": ""}
+    histories = sorted(issue.get("changelog", {}).get("histories", []), key=lambda h: _at(h["created"]))
+    tracked = [(h, i) for h in histories for i in h.get("items", []) if i.get("field") in TRACKED_FIELDS]
+    later = [(h, i) for h, i in tracked if _at(h["created"]) > cutoff]
+    if source == SOURCE:
+        out["summary"], out["description"] = description_at(issue, cutoff_iso)
+        if created_text_only(issue):
+            out.update(status=CREATED_TEXT_ONLY, note="edit history not available in the archive")
+            return out
+        n_later = len({id(h) for h, _ in later})
+        n_all = len({id(h) for h, _ in tracked})
+        out["note"] = (f"created text plus {n_all - n_later} archived edit(s) up to the cutoff; "
+                       f"{n_later} later edit(s) ignored")
+        return out
+    if source in REST_LIKE:   # live REST answer or a cached REST copy: undo later edits with fromString
+        summary = issue.get("fields", {}).get("summary", "") or ""
+        description = issue.get("fields", {}).get("description", "") or ""
+        for h, item in reversed(later):  # newest first
+            if item.get("fromString") is None:
+                out.update(status="unverifiable",
+                           note=f"{item['field']} edit at {h['created']} has no old value (fromString); text not rebuilt")
+                return out
+            if item["field"] == "summary":
+                summary = item["fromString"]
+            else:
+                description = item["fromString"]
+        out.update(summary=summary, description=description,
+                   note=f"current text with {len({id(h) for h, _ in later})} later edit(s) undone using fromString")
+        return out
+    out.update(status="unverifiable", note=f"unknown source '{source}'")
+    return out
+
+
+def cutoff_file_text(issue: dict[str, Any], cutoff_iso: str) -> str:
+    """Contents of jira_<KEY>_at_cutoff.txt: a header (source, cutoff, status), a '---' line, then the text.
+
+    Readers take the issue text from after the first '---' line. An unverifiable issue has no text.
+    """
+    r = reconstruct_at(issue, cutoff_iso)
+    header = (f"key: {issue.get('key', '')}\nsource: {r['source']}\ncutoff: {r['cutoff']}\n"
+              f"reconstruction_status: {r['status']}\nreconstruction_note: {r['note']}\n---\n")
+    if r["status"] not in TEXT_STATUSES:
+        return header
+    return header + f"{r['summary']}\n\n{r['description']}".rstrip() + "\n"
 
 
 def issue_text(issue: dict[str, Any], cutoff_iso: str | None = None) -> str:
@@ -243,8 +365,8 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-__all__ = ["NotInArchive", "archive_issue", "description_at", "issue_text", "parse_created", "parse_subject",
-           "parse_updated", "project_domain"]
+__all__ = ["NotInArchive", "archive_issue", "cutoff_file_text", "description_at", "issue_source", "issue_text",
+           "parse_created", "parse_subject", "parse_updated", "project_domain", "reconstruct_at"]
 
 
 if __name__ == "__main__":

@@ -6,13 +6,26 @@ pr_number: {pr_number}
 pr_url: {pr_url}
 category_provisional: {category}   # from source metadata only, never from CodeAtlas output
 decision_cutoff_utc: {cutoff}      # PR merged_at; nothing after this time may be used
-base_sha: {base_sha}
-head_sha: {head_sha}
-merge_base_sha: {merge_base_sha}
-jira_keys: [{jira_keys}]
+merge_commit_sha: {merge_commit_sha}     # the PR's commit on the main branch
+merge_strategy: {merge_strategy}         # merge (two parents) | single_parent (squash, rebase, merge script)
+base_at_merge: {base_at_merge}           # 1st parent of the merge commit: the base branch at the merge
+head_at_merge: {head_at_merge}           # 2nd parent, or the PR head (pull/<n>/head) for single_parent
+merge_base_sha: {merge_base_sha}         # git merge-base base_at_merge head_at_merge
+historical_diff_status: {historical_diff_status}   # verified | unverifiable (diff vs the PR file list)
+historical_diff_reason: "{historical_diff_reason}"
+api_base_sha: {api_base_sha}             # GitHub API base, for comparison only
+api_head_sha: {api_head_sha}             # GitHub API head, for comparison only
+jira_keys: [{jira_keys}]                 # every historically supported key, none dropped (B4)
+jira_links:{jira_links}
+# jira_links: one entry per key, verified first, then by key. status verified | uncertain (A5);
+# requirement_quality explicit_criteria | descriptive_issue | title_only | unavailable (B3);
+# reconstruction_status of jira_<KEY>_at_cutoff.txt. Scored keys: verified AND adjudicated relevant
+# (eval/scoring_rules.md).
 policy_file: {policy_file}
+policy_sha256: {policy_sha256}           # sha256 of the policy file at the freeze (B5)
+policy_status: "{policy_status}"
 analysis_root: {analysis_root}
-codeowners_at_base: {codeowners}
+codeowners_at_base: {codeowners}               # read at base_at_merge
 sources_fetched_at: {fetched_at}
 inaccessible: []                   # e.g. ["membership of @apache/team-x at cutoff"]; never write "no approval"
 case_group: ""                     # related PRs (revert + original, follow-up fix) share one group id

@@ -5,6 +5,10 @@ labeller: ""                       # initials
 labelled_on: ""                    # YYYY-MM-DD
 labelling_guide_version: ""        # e.g. v1
 minutes_spent: 0
+jira_links:                        # one entry per key in case.yaml jira_links, filled BEFORE rules and criteria
+  - key: ""
+    relevance: ""        # relevant | not_relevant | unclear
+    reason: ""           # one line citing the source
 rules:                             # SATISFIED | VIOLATED | NOT_APPLICABLE | INSUFFICIENT_EVIDENCE
   C1: {result: "", reason: "", source_record: ""}
   C2: {result: "", reason: "", source_record: ""}
@@ -18,7 +22,7 @@ rules:                             # SATISFIED | VIOLATED | NOT_APPLICABLE | INS
 overall_verdict: {verdict: "", reason: ""}   # PASS | FAIL | REVIEW | UNKNOWN (fixed truth table, case policy)
 semantic:                          # guide Section 4. Work from criteria.csv and entities.csv only.
   criteria:                        # one entry per row of criteria.csv, in the same order
-    - criterion_id: ""             # from criteria.csv, e.g. AIRFLOW-1234:v1:ac1
+    - criterion_id: ""             # from criteria.csv, tagged with its key, e.g. AIRFLOW-1234:v1:ac1
       text: ""                     # copied from criteria.csv, never rewritten
       relevant: []                 # label_ref values from entities.csv, e.g. ["airflow/models/dag.py::DAG.clear"]
       related: []                  # optional: nearby code that does not implement it (not scored)

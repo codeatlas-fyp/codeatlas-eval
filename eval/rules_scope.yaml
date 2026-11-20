@@ -1,0 +1,93 @@
+# Which rules can be estimated on the real pilot (team decision B2, 20 Nov 2026).
+# estimable_on_real_data: false -> annotators still record NOT_APPLICABLE or INSUFFICIENT_EVIDENCE, metrics exclude
+# the rule and report "not estimable on this pilot", and the rule is tested on the challenge set
+# (eval/challenge/README.md). See eval/LABELLING_GUIDE.md, "Rules not estimable on real data".
+#
+# Evidence (checked 20 Nov 2026 on 3 issues per repo in the lists.apache.org archive, the only anonymous source:
+# Apache Jira answers 401 to anonymous REST reads):
+#   AIRFLOW-6311, AIRFLOW-5693, AIRFLOW-6122 (commits@airflow): Created, Updated, Commented, Resolved emails.
+#     Created header: Summary, Issue Type, Components, Affects Versions, Reporter, Assignee (2 of 3, only if set at
+#     creation). No Priority, no Status. Later emails change Summary, Description, Fix Version/s, Resolution; no
+#     assignment, priority or status-transition emails.
+#   ARROW-12203, ARROW-15783, ARROW-16592 (issues@arrow): one Created email each and nothing else. Created header as
+#     above (Assignee 1 of 3). No later emails at all, so no change history of any field.
+#   SPARK-39081, SPARK-38686, SPARK-38759 (issues@spark): Created, Assigned (3 each), Updated, Commented, Resolved.
+#     Created header: no Assignee, no Priority, no Status. Assigned emails give each assignee change with its time;
+#     Updated emails give Parent, Issue Type, Fix Version/s, Resolution. No priority or status-transition emails.
+#   Every email has a time (epoch). Actors appear as display names, never as Jira account ids.
+# The Arrow and Spark issues cached in eval/pool/raw/ (fetched from the REST API on another machine before the
+# login requirement) do carry status, assignee and priority histories, but they cannot be fetched again
+# anonymously and exist only on one machine, so C3, C4 and C8 stay not estimable. For the requirement text and
+# its edits (C1, C6) the cached REST copy is preferred when it exists (source jira_rest_cache).
+rules:
+  C1:
+    name: Requirement changed after work began
+    estimable_on_real_data: true
+    reason: >-
+      Needs summary/description edits with their times. A cached REST copy (jira_rest_cache, with its changelog)
+      gives them and is preferred; otherwise the archive's Updated emails do (Airflow, Spark). Where the archive
+      has only the Created email (Arrow's list), the edit history is unknown (created_text_only).
+    when_history_unknown: >-
+      Keys with reconstruction_status created_text_only give INSUFFICIENT_EVIDENCE (history unknown), never
+      SATISFIED, and are reported separately (eval/scoring_rules.md).
+    tested_instead: CH-06, CH-07 (in addition)
+  C2:
+    name: PR modifies its own governance
+    estimable_on_real_data: true
+    reason: Needs only the PR file list and the policy's governance_paths, both frozen with every case.
+    tested_instead: CH-08 (in addition)
+  C3:
+    name: Requirement not approved
+    estimable_on_real_data: false
+    reason: >-
+      Needs the issue's status transitions (to the policy's approval status) with times and the approvers. The
+      archive carries no Status field and no status-transition emails in any of the 9 issues checked, and Apache
+      Jira workflows have no approval status.
+    tested_instead: CH-07, CH-12
+  C4:
+    name: Assignee is not the implementer
+    estimable_on_real_data: false
+    reason: >-
+      Needs the assignee during the coding period. Only Spark's archive has assignment emails with times; Airflow
+      gives the assignee only if set at creation (no assignment emails) and Arrow has no emails after Created, so
+      a later reassignment cannot be seen. Actors are display names only, with no account id to join to git
+      authors.
+    tested_instead: no planned challenge scenario yet (to add)
+  C5:
+    name: Code owner did not approve the head commit
+    estimable_on_real_data: false
+    reason: >-
+      No CODEOWNERS file (.github/CODEOWNERS, CODEOWNERS, docs/CODEOWNERS) exists at any first-parent commit of
+      the Airflow, Arrow or Spark windows, so every real case is NOT_APPLICABLE by construction.
+    tested_instead: CH-01, CH-02, CH-03, CH-04, CH-05, CH-12
+  C6:
+    name: Implementation built on a superseded version
+    estimable_on_real_data: true
+    reason: >-
+      Same evidence as C1 (summary/description edits with times after the last commit), from the same sources.
+    when_history_unknown: >-
+      Keys with reconstruction_status created_text_only give INSUFFICIENT_EVIDENCE (history unknown), never
+      SATISFIED, and are reported separately (eval/scoring_rules.md).
+    tested_instead: CH-06 (in addition)
+  C7:
+    name: Test evidence
+    estimable_on_real_data: true
+    reason: >-
+      Annotators can judge test evidence from the frozen PR file list and diff. Note: the CodeAtlas C7 rule is a
+      stub that is NOT_APPLICABLE unless an issue has the policy label, which Apache issues do not use.
+    tested_instead: none (stub rule)
+  C8:
+    name: Priority changed without authority
+    estimable_on_real_data: false
+    reason: >-
+      Needs priority changes with time and actor, and the time of the first approval. The archive has no Priority
+      field in Created emails and no priority-change emails in any of the 9 issues checked, and no approval
+      (see C3).
+    tested_instead: no planned challenge scenario yet (to add)
+  C9:
+    name: Unexplained code change
+    estimable_on_real_data: true
+    reason: >-
+      Needs commit messages, the changed entities and the semantic labels, all frozen or labelled per case.
+      Cases whose scored keys are all title_only are reported separately (B3).
+    tested_instead: CH-10, CH-11 (in addition)

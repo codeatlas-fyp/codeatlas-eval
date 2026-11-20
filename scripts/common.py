@@ -259,20 +259,50 @@ def jira_issue(base_url: str, key: str) -> Any:
 
     Apache Jira is Jira Data Center (REST API v2). Since 2025 it answers 401 "Login Required" to anonymous
     reads, so after the first 401 the issue is rebuilt from the public mailing-list archive instead
-    (scripts/jira_archive.py); the result carries "source" saying so.
+    (scripts/jira_archive.py). Every result carries "source": "jira_rest" or "apache_mail_archive", because the
+    text at a cutoff is rebuilt differently for each (jira_archive.reconstruct_at).
     """
-    from jira_archive import archive_issue  # local import: jira_archive has no dependency on this module
+    from jira_archive import REST_SOURCE, archive_issue  # local import: jira_archive does not import this module
 
     if base_url not in _JIRA_LOGIN_REQUIRED:
         url = f"{base_url.rstrip('/')}/rest/api/2/issue/{urllib.parse.quote(key)}?expand=changelog"
         try:
-            return _get(url, {"Accept": "application/json"})[0]
+            issue = _get(url, {"Accept": "application/json"})[0]
+            issue["source"] = REST_SOURCE
+            return issue
         except urllib.error.HTTPError as e:
             if e.code not in (401, 403):
                 raise
             _JIRA_LOGIN_REQUIRED.add(base_url)
             print(f"  jira: {base_url} needs a login (HTTP {e.code}); reading issues from lists.apache.org instead")
     return archive_issue(key, archive_get)
+
+
+def cached_rest_issue(repo: str, key: str, pr: str | int | None = None, raw_root: Path | None = None) -> Any:
+    """A REST copy of the issue, with its changelog, saved earlier in eval/pool/raw/<repo>/<pr>/jira_<KEY>.json.
+
+    The PR's own folder is tried first, then every other PR folder of the repo. Mail-archive copies are
+    skipped. The copy is returned with source "jira_rest_cache" (and cache_path); None if there is none.
+    """
+    from jira_archive import CACHE_SOURCE, REST_LIKE, issue_source
+
+    raw = (raw_root or EVAL / "pool" / "raw") / repo
+    paths = ([raw / str(pr) / f"jira_{key}.json"] if pr is not None else []) + sorted(raw.glob(f"*/jira_{key}.json"))
+    for path in paths:
+        if not path.is_file():
+            continue
+        try:
+            issue = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        if issue_source(issue) in REST_LIKE and isinstance((issue.get("changelog") or {}).get("histories"), list):
+            return issue | {"source": CACHE_SOURCE, "cache_path": path.relative_to(raw.parent).as_posix()}
+    return None
+
+
+def jira_issue_for(cfg: dict[str, Any], key: str, pr: str | int | None = None) -> Any:
+    """The issue from a cached REST copy if one exists (source jira_rest_cache), else from Jira or the archive."""
+    return cached_rest_issue(cfg["name"], key, pr) or jira_issue(cfg["jira_base"], key)
 
 
 # ---------------------------------------------------------------- CSV

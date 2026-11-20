@@ -10,6 +10,9 @@ FYP-2 held-out set is opened. Each case records the version it was labelled unde
 - Allowed sources: the case's `sources/` folder and the GitHub and Jira web pages. Never CodeAtlas output, and never
   the other labeller's file.
 - Anything you cannot see is recorded as inaccessible. "No access" is never "no approval".
+- Policy: every case uses the baseline policy (`eval/policies/`, identical for all repos), recorded in
+  `case.yaml` as `policy_sha256` and `policy_status`. **Official labelling must not start while the policy status
+  is DRAFT**: practice labels made under a DRAFT policy are not used in the metrics.
 
 ## 2. Rules C1 to C9
 
@@ -27,6 +30,17 @@ evidence is insufficient; one positive and one negative worked example.
 | C7 Test evidence | Areej | to write |
 | C8 Priority changed without authority | Areej | to write (depends on the C3/C8 decision) |
 | C9 Unexplained code change | Yusra | draft below |
+
+### Rules not estimable on real data
+
+`eval/rules_scope.yaml` lists, for each rule, whether the real pilot can estimate it and why. On this pilot
+**C3, C4, C5 and C8 are not estimable**: no window has a CODEOWNERS file (C5), and the mail archive, the only
+anonymous Jira source, carries no status or priority history and no complete assignee history (C3, C4, C8).
+
+- Annotators still label these rules on every case: NOT_APPLICABLE or INSUFFICIENT_EVIDENCE, with the usual
+  one-line reason (for example "no CODEOWNERS file at base" or "archive has no status history").
+- Metrics exclude them and report them as "not estimable on this pilot", never as agreement or accuracy.
+- They are tested on the challenge set instead (`eval/challenge/README.md`; `tested_instead` in the scope file).
 
 ### C2 PR modifies its own governance (Yusra, draft)
 
@@ -103,6 +117,31 @@ Mechanical edits made necessary by the change (renaming a call site, adjusting a
 updating a type hint) count as explained if the entity they serve is relevant; write
 "follows from <entity>" in the reason.
 
+## PRs with several Jira keys
+
+Every key the history supports is frozen and listed in `case.yaml` under `jira_links` (verified keys first). No
+key is dropped, and you decide relevance, not the scripts (`eval/scoring_rules.md`).
+
+1. **Before labelling any rule or criterion**, fill `jira_links` in your label file with one entry for **every**
+   key in `case.yaml`: `relevance` is `relevant`, `not_relevant` or `unclear`, and `reason` is one line citing the
+   source (commit, title, issue text).
+2. **Relevant:** the PR does the work the issue asks for, or a necessary part of it.
+   Example (illustrative): commit "[AIRFLOW-5477] Rewrite PubSub hook" and AIRFLOW-5477 is "Rewrite Google PubSub Hook to Google
+   Cloud Python": relevant, reason "commit implements the issue's hook rewrite".
+3. **Not relevant:** the key is mentioned but the PR does not do its work: "see also AIRFLOW-1234", a follow-up
+   ("AIRFLOW-1300 will handle the docs"), the issue that introduced the bug being fixed, or a duplicate.
+   Example: description says "follow-up to AIRFLOW-5400": not_relevant, reason "PR body: named as the earlier
+   change, not implemented here".
+4. **Unclear:** you cannot decide from the sources. Write `unclear` with what is missing (for example "issue text
+   is title only; PR changes a different module"). Do not force a choice; the adjudicator resolves it, and a key
+   that stays unclear is recorded but never scored.
+5. **Scored keys** are those with `status: verified` **and** adjudicated relevance `relevant`. Uncertain keys
+   (for example only in the PR description) are shown to you but never scored, whatever you label.
+6. Rules that need a requirement use only scored keys. If a case has no scored key, those rules (C1, C3, C4, C6,
+   C8, C9) stay INSUFFICIENT_EVIDENCE and the case still counts for coverage.
+7. **Criteria** are taken from every scored key and each is tagged with its key (`criterion_id` starts with the
+   key, e.g. `AIRFLOW-5477:v1:ac1`).
+
 ## 3. Overall verdict
 
 The fixed truth table, and how required rules with insufficient evidence give UNKNOWN.
@@ -112,6 +151,20 @@ The fixed truth table, and how required rules with insufficient evidence give UN
 This section defines the **semantic labels**: for each acceptance criterion, which code
 implements it. They are the ground truth for the semantic evaluation, so they are written
 blind: never look at CodeAtlas candidates, scores or rankings before the labels are frozen.
+
+### 4.0 Which criteria get semantic labels (requirement quality)
+
+Each Jira key has a `requirement_quality` (pool column; `jira_links` in `case.yaml`), from the issue text at the
+cutoff: `explicit_criteria` (a numbered or bulleted list, or the words "acceptance criteria"), `descriptive_issue`
+(a description without a list), `title_only` (no description) or `unavailable` (issue not found).
+
+- **Semantic relevance labels are given only for criteria from `explicit_criteria` or `descriptive_issue`
+  issues.** These are the criteria the semantic metrics are computed on.
+- **`title_only` criteria are labelled and reported separately.** Label them the same way, but they are never
+  pooled with the others: the report shows their results in a separate row.
+- **Never invent criteria from a title.** A title is one criterion as written; do not expand it into the steps
+  you think it implies, and do not borrow text from the PR description or the code.
+- `unavailable` issues have no criteria; record the gap and move on.
 
 ### 4.1 What you work from
 

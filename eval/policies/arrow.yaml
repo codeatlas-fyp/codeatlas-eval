@@ -1,0 +1,25 @@
+# Baseline policy v0.1 (20 Nov 2026) - identical for all repos - status: DRAFT until signed off by Areej, Yusra, Saleha
+# From ../codeatlas/config/policy.example.yaml (CodeAtlas Policy schema, src/codeatlas/schema/policy.py); no field
+# added. Changes from the example, with reasons: eval/policies/README.md.
+version: 1
+workitem_key_pattern: '\b(?:AIRFLOW|ARROW|SPARK)-\d+\b'
+requirement_fields: [summary, description, acceptance_criteria]
+governance_paths:
+  - CODEOWNERS
+  - .github/CODEOWNERS
+  - docs/CODEOWNERS
+  - docs/adr/**
+  - .codeatlas/**
+  - .github/workflows/**
+  - .pre-commit-config.yaml
+  - .asf.yaml
+approval:
+  status: Approved
+  approver_account_ids: [user-01]
+priority_authority:
+  account_ids: [user-01]
+cases:
+  C3: { severity: block }
+  C5: { severity: block }
+  C7: { required_when_label: requires-test-evidence }
+semantic: { top_k: 5 }
