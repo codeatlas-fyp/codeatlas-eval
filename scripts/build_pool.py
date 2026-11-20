@@ -32,7 +32,7 @@ from links import pool_link_status
 # merge commit (base_at_merge, head_at_merge, merge_base_sha; scripts/history.py).
 FIELDS = ["repo", "pr_number", "pr_url", "merged_at", "api_base_sha", "api_head_sha", "merge_commit_sha", "merge_strategy",
           "base_at_merge", "head_at_merge", "merge_base_sha", "historical_diff_status", "historical_diff_reason", "title",
-          "keys_found", "key_locations", "link_status", "py_files_changed", "files_changed", "review_count", "approvals_on_head",
+          "keys_found", "key_locations", "link_status", "requirement_quality", "requirement_quality_note", "py_files_changed", "files_changed", "review_count", "approvals_on_head",
           "codeowners_present", "provisional_category", "included", "exclusion_reason", "merged_via"]
 MAX_FILES = 20
 BOT_TITLE = re.compile(r"^\s*(bump |build\(deps|chore\(deps|\[?release\b|prepare release|update changelog)", re.IGNORECASE)

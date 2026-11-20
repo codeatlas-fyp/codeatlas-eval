@@ -124,6 +124,20 @@ This section defines the **semantic labels**: for each acceptance criterion, whi
 implements it. They are the ground truth for the semantic evaluation, so they are written
 blind: never look at CodeAtlas candidates, scores or rankings before the labels are frozen.
 
+### 4.0 Which criteria get semantic labels (requirement quality)
+
+Each Jira key has a `requirement_quality` (pool column; `jira_links` in `case.yaml`), from the issue text at the
+cutoff: `explicit_criteria` (a numbered or bulleted list, or the words "acceptance criteria"), `descriptive_issue`
+(a description without a list), `title_only` (no description) or `unavailable` (issue not found).
+
+- **Semantic relevance labels are given only for criteria from `explicit_criteria` or `descriptive_issue`
+  issues.** These are the criteria the semantic metrics are computed on.
+- **`title_only` criteria are labelled and reported separately.** Label them the same way, but they are never
+  pooled with the others: the report shows their results in a separate row.
+- **Never invent criteria from a title.** A title is one criterion as written; do not expand it into the steps
+  you think it implies, and do not borrow text from the PR description or the code.
+- `unavailable` issues have no criteria; record the gap and move on.
+
 ### 4.1 What you work from
 
 `scripts/prepare_case.py` (in the codeatlas repo) writes two files into the case folder:
