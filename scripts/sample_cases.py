@@ -72,7 +72,8 @@ def main() -> None:
             cases.append({
                 "case_id": f"{prefix}-{i:02d}", "set": "pilot", "repo": r, "pr_number": x["pr_number"], "pr_url": x["pr_url"],
                 "category_provisional": x["provisional_category"], "decision_cutoff_utc": x["merged_at"],
-                "base_sha": x["base_sha"], "head_sha": x["head_sha"], "jira_keys": x["keys_found"],
+                "base_sha": x.get("base_at_merge") or x.get("api_base_sha", ""),
+                "head_sha": x.get("head_at_merge") or x.get("api_head_sha", ""), "jira_keys": x["keys_found"],
                 "analysis_root": cfgs[r]["analysis_root"], "source_dir": f"eval/cases/{prefix}-{i:02d}/sources",
             })
     write_csv(EVAL / "cases.csv", cases, CASE_FIELDS)

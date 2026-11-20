@@ -24,10 +24,14 @@ from typing import Any
 
 from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, first_parent_commits, gh, is_team, jira_issue,
                     merged_branch_messages, owners_for, parse_codeowners, pr_number, read_csv, repo_cfg, write_csv)
+from history import pin
 
-FIELDS = ["repo", "pr_number", "pr_url", "merged_at", "base_sha", "head_sha", "merge_commit_sha", "title", "keys_found",
-          "key_locations", "py_files_changed", "files_changed", "review_count", "approvals_on_head", "codeowners_present",
-          "provisional_category", "included", "exclusion_reason", "merged_via"]
+# api_base_sha/api_head_sha are GitHub's base/head, kept only for comparison; evidence uses the refs pinned from the
+# merge commit (base_at_merge, head_at_merge, merge_base_sha; scripts/history.py).
+FIELDS = ["repo", "pr_number", "pr_url", "merged_at", "api_base_sha", "api_head_sha", "merge_commit_sha", "merge_strategy",
+          "base_at_merge", "head_at_merge", "merge_base_sha", "historical_diff_status", "historical_diff_reason", "title",
+          "keys_found", "key_locations", "py_files_changed", "files_changed", "review_count", "approvals_on_head",
+          "codeowners_present", "provisional_category", "included", "exclusion_reason", "merged_via"]
 MAX_FILES = 20
 BOT_TITLE = re.compile(r"^\s*(bump |build\(deps|chore\(deps|\[?release\b|prepare release|update changelog)", re.IGNORECASE)
 
@@ -39,6 +43,14 @@ def ts(s: str) -> datetime:
 def utc_z(iso: str) -> str:
     """Any ISO time with an offset -> GitHub's UTC form, e.g. 2022-04-05T08:11:12Z."""
     return ts(iso).astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def migrate_row(row: dict[str, str]) -> dict[str, str]:
+    """A row written before the history columns existed: base_sha/head_sha were the API's, so rename them."""
+    for old, new in (("base_sha", "api_base_sha"), ("head_sha", "api_head_sha")):
+        if old in row and not row.get(new):
+            row[new] = row.pop(old)
+    return row
 
 
 def cached_pr(raw: Path) -> tuple[Any, Any, Any, Any] | None:
@@ -103,7 +115,7 @@ def main() -> None:
         raise SystemExit("set the window in eval/repos.json or pass --since/--until")
     repo = ensure_clone(cfg)
     out = EVAL / "pool" / f"{cfg['name']}_pool.csv"
-    rows = read_csv(out)
+    rows = [migrate_row(r) for r in read_csv(out)]
     if a.recheck_unmerged:
         before = len(rows)
         rows = [r for r in rows if not r.get("exclusion_reason", "").startswith("not merged on GitHub")]
@@ -147,7 +159,9 @@ def main() -> None:
         approvals = [r for r in reviews if r.get("state") == "APPROVED"]
         approvers_on_head = {r["user"]["login"].lower() for r in approvals if r.get("commit_id") == head and r.get("user")}
 
-        co_path, co_text = codeowners_at(repo, base)
+        hist = pin(repo, c["sha"], n, files, api_base=base, api_head=head)
+        # CODEOWNERS as it stood on the base branch at the merge, not at GitHub's (movable) API base
+        co_path, co_text = codeowners_at(repo, hist["base_at_merge"]) if hist["base_at_merge"] else (None, None)
         rules = parse_codeowners(co_text) if co_text else []
         owner_sets = [owners_for(p, rules) for p in py] if rules else []
         matched = [o for o in owner_sets if o]
@@ -182,9 +196,9 @@ def main() -> None:
         else:
             cat = "needs_manual"             # set to meaningful_link or semantic_no_match by hand
 
-        rows.append({
+        rows.append(hist | {
             "repo": cfg["name"], "pr_number": n, "pr_url": pr["html_url"], "merged_at": merged_at,
-            "base_sha": base, "head_sha": head, "merge_commit_sha": c["sha"], "title": pr.get("title", ""),
+            "title": pr.get("title", ""),
             "keys_found": ";".join(keys), "key_locations": ";".join(f"{k}:{'+'.join(sorted(v))}" for k, v in sorted(where.items())),
             "py_files_changed": len(py), "files_changed": len(paths), "review_count": len(reviews),
             "approvals_on_head": len(approvers_on_head), "codeowners_present": co_path or "no",

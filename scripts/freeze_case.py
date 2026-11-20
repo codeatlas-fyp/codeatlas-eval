@@ -5,7 +5,8 @@ Usage:
     python scripts/freeze_case.py --all
 
 For each case creates eval/cases/<id>/ with case.yaml, sources/ (PR, commits, reviews, files, Jira issues with
-changelog, jira_<KEY>_at_cutoff.txt with the issue text at the cutoff, CODEOWNERS_at_base.txt, fetched_at.txt),
+changelog, jira_<KEY>_at_cutoff.txt with the issue text at the cutoff, CODEOWNERS_at_base.txt read at base_at_merge, history.json with the
+pinned refs, fetched_at.txt),
 an empty checklist.csv and blank label files.
 Existing sources are never overwritten unless --refresh. Nothing is written to GitHub or Jira.
 """
@@ -16,10 +17,25 @@ import argparse
 import shutil
 from datetime import datetime, timezone
 
-from common import (EVAL, codeowners_at, dump_json, ensure_clone, gh, git, jira_issue, read_csv, repo_cfg, write_csv)
+from common import (EVAL, codeowners_at, dump_json, ensure_clone, gh, jira_issue, read_csv, repo_cfg, write_csv)
+from history import pin
 from jira_archive import issue_text
 
 TEMPLATES = EVAL / "templates"
+
+
+def merge_commit_for(row: dict[str, str]) -> str:
+    """The PR's commit on the main branch: from the cases row if it has one, else from the repo's pool.
+
+    GitHub's own merge_commit_sha is not used: for script-merged PRs (Arrow, Spark) it is a test merge that
+    never reached the main branch.
+    """
+    if row.get("merge_commit_sha"):
+        return row["merge_commit_sha"]
+    for r in read_csv(EVAL / "pool" / f"{row['repo']}_pool.csv"):
+        if r["pr_number"] == str(row["pr_number"]) and r.get("merge_commit_sha"):
+            return r["merge_commit_sha"]
+    raise SystemExit(f"{row['case_id']}: no merge_commit_sha for #{row['pr_number']} in the case row or the pool")
 
 
 def freeze(row: dict[str, str], refresh: bool) -> None:
@@ -51,10 +67,11 @@ def freeze(row: dict[str, str], refresh: bool) -> None:
         cutoff_at = pr.get("merged_at") or row["decision_cutoff_utc"] or None  # script-merged PRs: the pool's merge time
         (src / f"jira_{k}_at_cutoff.txt").write_text(issue_text(issue, cutoff_at), encoding="utf-8")
 
-    base, head = pr["base"]["sha"], pr["head"]["sha"]
-    git(repo, "fetch", "--quiet", "origin", f"pull/{n}/head:refs/pr/{n}", check=False)
-    merge_base = git(repo, "merge-base", base, head, check=False).strip()
-    co_path, co_text = codeowners_at(repo, base)
+    hist = pin(repo, merge_commit_for(row), n, data["files"], api_base=pr["base"]["sha"], api_head=pr["head"]["sha"])
+    dump_json(src / "history.json", hist)
+    base, head, merge_base = hist["base_at_merge"], hist["head_at_merge"], hist["merge_base_sha"]
+    # CODEOWNERS on the base branch at the merge (base_at_merge), never at GitHub's API base
+    co_path, co_text = codeowners_at(repo, base) if base else (None, None)
     (src / "CODEOWNERS_at_base.txt").write_text(co_text if co_text is not None else "NO CODEOWNERS FILE AT BASE\n", encoding="utf-8")
     fetched = datetime.now(timezone.utc).isoformat(timespec="seconds")
     (src / "fetched_at.txt").write_text(fetched + "\n", encoding="utf-8")
@@ -63,7 +80,11 @@ def freeze(row: dict[str, str], refresh: bool) -> None:
     (case_dir / "case.yaml").write_text(
         (TEMPLATES / "case.yaml").read_text(encoding="utf-8").format(
             case_id=cid, set=row["set"], repo=cfg["github"], pr_number=n, pr_url=pr["html_url"], cutoff=cutoff,
-            base_sha=base, head_sha=head, merge_base_sha=merge_base or "unknown",
+            merge_commit_sha=hist["merge_commit_sha"], merge_strategy=hist["merge_strategy"] or "unknown",
+            base_at_merge=base or "unknown", head_at_merge=head or "unknown", merge_base_sha=merge_base or "unknown",
+            historical_diff_status=hist["historical_diff_status"],
+            historical_diff_reason=hist["historical_diff_reason"].replace('"', "'"),
+            api_base_sha=hist["api_base_sha"], api_head_sha=hist["api_head_sha"],
             jira_keys=", ".join(keys) or "none", policy_file=f"eval/policies/{cfg['name']}.yaml",
             analysis_root=cfg["analysis_root"] or "/", codeowners=co_path or "none", fetched_at=fetched,
             category=row["category_provisional"]),

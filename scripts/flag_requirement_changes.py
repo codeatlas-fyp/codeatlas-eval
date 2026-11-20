@@ -17,7 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from build_pool import FIELDS, requirement_edited
+from build_pool import FIELDS, migrate_row, requirement_edited
 from common import EVAL, read_csv, repo_cfg, write_csv
 
 
@@ -29,7 +29,7 @@ def main(argv: list[str] | None = None) -> int:
 
     cfg = repo_cfg(a.repo)
     pool = EVAL / "pool" / f"{cfg['name']}_pool.csv"
-    rows = read_csv(pool)
+    rows = [migrate_row(r) for r in read_csv(pool)]
     if not rows:
         print(f"no rows in {pool}; run build_pool.py first")
         return 1
