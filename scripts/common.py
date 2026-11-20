@@ -259,14 +259,17 @@ def jira_issue(base_url: str, key: str) -> Any:
 
     Apache Jira is Jira Data Center (REST API v2). Since 2025 it answers 401 "Login Required" to anonymous
     reads, so after the first 401 the issue is rebuilt from the public mailing-list archive instead
-    (scripts/jira_archive.py); the result carries "source" saying so.
+    (scripts/jira_archive.py). Every result carries "source": "jira_rest" or "apache_mail_archive", because the
+    text at a cutoff is rebuilt differently for each (jira_archive.reconstruct_at).
     """
-    from jira_archive import archive_issue  # local import: jira_archive has no dependency on this module
+    from jira_archive import REST_SOURCE, archive_issue  # local import: jira_archive does not import this module
 
     if base_url not in _JIRA_LOGIN_REQUIRED:
         url = f"{base_url.rstrip('/')}/rest/api/2/issue/{urllib.parse.quote(key)}?expand=changelog"
         try:
-            return _get(url, {"Accept": "application/json"})[0]
+            issue = _get(url, {"Accept": "application/json"})[0]
+            issue["source"] = REST_SOURCE
+            return issue
         except urllib.error.HTTPError as e:
             if e.code not in (401, 403):
                 raise

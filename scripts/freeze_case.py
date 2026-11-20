@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 
 from common import (EVAL, codeowners_at, dump_json, ensure_clone, gh, jira_issue, read_csv, repo_cfg, write_csv)
 from history import pin
-from jira_archive import issue_text
+from jira_archive import cutoff_file_text
 
 TEMPLATES = EVAL / "templates"
 
@@ -63,9 +63,10 @@ def freeze(row: dict[str, str], refresh: bool) -> None:
             (src / f"jira_{k}.INACCESSIBLE.txt").write_text(f"{e}\n", encoding="utf-8")
             continue
         dump_json(src / f"jira_{k}.json", issue)
-        # the issue as it stood at the decision cutoff, ready for prepare_case.py --issue-text
-        cutoff_at = pr.get("merged_at") or row["decision_cutoff_utc"] or None  # script-merged PRs: the pool's merge time
-        (src / f"jira_{k}_at_cutoff.txt").write_text(issue_text(issue, cutoff_at), encoding="utf-8")
+        # the issue as it stood at the decision cutoff, rebuilt the way its source allows: a header (source,
+        # cutoff, reconstruction status), '---', then the text (none if unverifiable)
+        cutoff_at = pr.get("merged_at") or row["decision_cutoff_utc"]  # script-merged PRs: the pool's merge time
+        (src / f"jira_{k}_at_cutoff.txt").write_text(cutoff_file_text(issue, cutoff_at), encoding="utf-8")
 
     hist = pin(repo, merge_commit_for(row), n, data["files"], api_base=pr["base"]["sha"], api_head=pr["head"]["sha"])
     dump_json(src / "history.json", hist)
