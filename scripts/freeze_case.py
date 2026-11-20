@@ -44,6 +44,7 @@ from links import VERIFIED, freeze_link_statuses, title_at
 from requirement_quality import UNAVAILABLE, classify_issue
 
 TEMPLATES = EVAL / "templates"
+POLICIES = EVAL / "policies"
 FREEZE_TOOL_VERSION = "freeze_case.py 2"
 MANIFEST = "manifest.json"
 # edited by people after the freeze: never overwritten, never checksummed
@@ -183,6 +184,16 @@ def key_sources(repo: Path, cfg: dict[str, Any], pr: dict[str, Any], commits: li
     return where
 
 
+def policy_for(repo: str) -> tuple[Path, str, str]:
+    """(path, sha256, status line) of eval/policies/<repo>.yaml. Exits with a clear error if it is missing."""
+    path = POLICIES / f"{repo}.yaml"
+    if not path.is_file():
+        raise SystemExit(f"policy file {path} is missing: refusing to freeze (nothing written). "
+                         f"Copy eval/policies/baseline.yaml to it (eval/policies/README.md).")
+    first = path.read_text(encoding="utf-8").splitlines()[:1]
+    return path, sha256_file(path), (first[0].lstrip("# ").strip() if first else "")
+
+
 def merge_commit_for(row: dict[str, str]) -> str:
     """The PR's commit on the main branch: from the cases row if it has one, else from the repo's pool.
 
@@ -265,6 +276,7 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
     # CODEOWNERS on the base branch at the merge (base_at_merge), never at GitHub's API base
     co_path, co_text = codeowners_at(repo, base) if base else (None, None)
     (src / "CODEOWNERS_at_base.txt").write_text(co_text if co_text is not None else "NO CODEOWNERS FILE AT BASE\n", encoding="utf-8")
+    _, policy_sha, policy_status = policy_for(cfg["name"])
     fetched = datetime.now(timezone.utc).isoformat(timespec="seconds")
     (src / "fetched_at.txt").write_text(fetched + "\n", encoding="utf-8")
 
@@ -276,7 +288,8 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
             historical_diff_status=hist["historical_diff_status"],
             historical_diff_reason=hist["historical_diff_reason"].replace('"', "'"),
             api_base_sha=hist["api_base_sha"], api_head_sha=hist["api_head_sha"],
-            jira_keys=", ".join(keys) or "none", jira_links=jira_links_yaml(jira_links), policy_file=f"eval/policies/{cfg['name']}.yaml",
+            jira_keys=", ".join(keys) or "none", jira_links=jira_links_yaml(jira_links),
+            policy_sha256=policy_sha, policy_status=policy_status.replace('"', "'"), policy_file=f"eval/policies/{cfg['name']}.yaml",
             analysis_root=cfg["analysis_root"] or "/", codeowners=co_path or "none", fetched_at=fetched,
             category=row["category_provisional"]),
         encoding="utf-8")
@@ -284,7 +297,8 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
                 "policy_file": f"eval/policies/{cfg['name']}.yaml"})
     print(f"{cid}: collected #{n} ({len(data['files'])} files, {len(data['reviews'])} reviews by the cutoff, "
           f"{len(data['reviews_post_cutoff'])} after, keys {keys or 'none'})")
-    refs = {k: hist[k] for k in ("merge_commit_sha", "merge_strategy", "base_at_merge", "head_at_merge", "merge_base_sha",
+    refs = {"policy_sha256": policy_sha}
+    refs |= {k: hist[k] for k in ("merge_commit_sha", "merge_strategy", "base_at_merge", "head_at_merge", "merge_base_sha",
                                  "historical_diff_status", "api_base_sha", "api_head_sha")}
     return {"mandatory": mandatory, "refs": refs}
 
@@ -311,6 +325,7 @@ def latest_invalid(root: Path, cid: str) -> Path | None:
 def freeze(row: dict[str, str], out: Path | None = None, refresh: bool = False) -> str:
     """Freeze one case; returns 'skipped' (already complete) or 'frozen'."""
     cid = row["case_id"]
+    policy_for(row["repo"])   # B5: no policy, no freeze; checked before anything is moved or written
     root = out_root_for(row, out)
     final = root / cid
     carried: Path | None = latest_invalid(root, cid) if root.exists() and not final.exists() else None

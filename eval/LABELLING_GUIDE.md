@@ -10,6 +10,9 @@ FYP-2 held-out set is opened. Each case records the version it was labelled unde
 - Allowed sources: the case's `sources/` folder and the GitHub and Jira web pages. Never CodeAtlas output, and never
   the other labeller's file.
 - Anything you cannot see is recorded as inaccessible. "No access" is never "no approval".
+- Policy: every case uses the baseline policy (`eval/policies/`, identical for all repos), recorded in
+  `case.yaml` as `policy_sha256` and `policy_status`. **Official labelling must not start while the policy status
+  is DRAFT**: practice labels made under a DRAFT policy are not used in the metrics.
 
 ## 2. Rules C1 to C9
 

@@ -22,6 +22,8 @@ jira_links:{jira_links}
 # reconstruction_status of jira_<KEY>_at_cutoff.txt. Scored keys: verified AND adjudicated relevant
 # (eval/scoring_rules.md).
 policy_file: {policy_file}
+policy_sha256: {policy_sha256}           # sha256 of the policy file at the freeze (B5)
+policy_status: "{policy_status}"
 analysis_root: {analysis_root}
 codeowners_at_base: {codeowners}               # read at base_at_merge
 sources_fetched_at: {fetched_at}
