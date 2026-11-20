@@ -28,6 +28,17 @@ evidence is insufficient; one positive and one negative worked example.
 | C8 Priority changed without authority | Areej | to write (depends on the C3/C8 decision) |
 | C9 Unexplained code change | Yusra | draft below |
 
+### Rules not estimable on real data
+
+`eval/rules_scope.yaml` lists, for each rule, whether the real pilot can estimate it and why. On this pilot
+**C3, C4, C5 and C8 are not estimable**: no window has a CODEOWNERS file (C5), and the mail archive, the only
+anonymous Jira source, carries no status or priority history and no complete assignee history (C3, C4, C8).
+
+- Annotators still label these rules on every case: NOT_APPLICABLE or INSUFFICIENT_EVIDENCE, with the usual
+  one-line reason (for example "no CODEOWNERS file at base" or "archive has no status history").
+- Metrics exclude them and report them as "not estimable on this pilot", never as agreement or accuracy.
+- They are tested on the challenge set instead (`eval/challenge/README.md`; `tested_instead` in the scope file).
+
 ### C2 PR modifies its own governance (Yusra, draft)
 
 **Applies:** always. Every PR either touches governance files or it does not, so C2 is never
