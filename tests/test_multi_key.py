@@ -75,7 +75,7 @@ class FreezeAllKeysTests(unittest.TestCase):
         policies.mkdir()
         (policies / "airflow.yaml").write_text("# Baseline policy v0.1 - status: DRAFT\nversion: 1\n", encoding="utf-8")
         with mock.patch.object(fc, "repo_cfg", return_value=CFG), mock.patch.object(fc, "ensure_clone", return_value=repo), \
-                mock.patch.object(fc, "gh", side_effect=gh), mock.patch.object(fc, "jira_issue", side_effect=fake_issue), \
+                mock.patch.object(fc, "gh", side_effect=gh), mock.patch.object(fc, "jira_issue_for", side_effect=lambda cfg, key, pr=None: fake_issue(cfg, key)), \
                 mock.patch.object(fc, "pin", side_effect=fake_pin), mock.patch.object(fc, "POLICIES", policies, create=True), \
                 contextlib.redirect_stdout(io.StringIO()):
             fc.collect(row, case)

@@ -36,7 +36,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, gh, git, jira_issue, merged_branch_messages,
+from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, gh, git, jira_issue_for, merged_branch_messages,
                     read_csv, repo_cfg, write_csv)
 from history import pin
 from jira_archive import cutoff_file_text, reconstruct_at
@@ -250,7 +250,7 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
                                  "reason": "listed in the case row but not found in the PR, its commits or the merge"}
         entry = {"key": k, "found_in": link["found_in"], "status": link["status"]}
         try:
-            issue = jira_issue(cfg["jira_base"], k)
+            issue = jira_issue_for(cfg, k, n)   # cached REST copy first, else Jira or the archive
         except Exception as e:  # noqa: BLE001
             (src / f"jira_{k}.INACCESSIBLE.txt").write_text(f"{e}\n", encoding="utf-8")
             (src / f"jira_{k}_at_cutoff.txt").write_text(

@@ -187,7 +187,8 @@ class ArchiveIssueTests(unittest.TestCase):
 
         issue = ja.archive_issue("AIRFLOW-5477", self.fake, pause=0)
         cfg = {"jira_base": "https://issues.apache.org/jira"}
-        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(build_pool, "jira_issue", return_value=issue):
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(build_pool, "jira_issue_for", side_effect=lambda cfg, key, pr=None: issue):
             raw = Path(tmp)
             self.assertTrue(build_pool.requirement_edited(cfg, ["AIRFLOW-5477"], "2019-09-13T14:00:00Z",
                                                           "2019-09-20T00:00:00Z", raw))

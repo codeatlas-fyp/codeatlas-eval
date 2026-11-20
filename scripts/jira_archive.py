@@ -13,8 +13,9 @@ freeze_case.py use it unchanged. The result says where it came from (`source`, `
 Limits: an edit is recorded with the new text only (the emails do not always carry the old text);
 issues whose emails never reached the list are reported as not found, never guessed.
 
-Every issue records where it came from in `source`: "apache_mail_archive" (this module) or "jira_rest"
-(Jira's REST API). The text at a cutoff is rebuilt differently for each (`reconstruct_at`):
+Every issue records where it came from in `source`: "apache_mail_archive" (this module), "jira_rest"
+(Jira's REST API) or "jira_rest_cache" (a REST copy with its changelog saved earlier in eval/pool/raw/, which
+common.jira_issue_for prefers over the archive). The text at a cutoff is rebuilt differently (`reconstruct_at`):
 - archive: the created text plus every edit up to the cutoff (edits after it are ignored);
 - REST: the current text with every summary/description edit after the cutoff undone, newest first, using
   each edit's old value (`fromString`). An edit without an old value makes the result "unverifiable".
@@ -35,6 +36,8 @@ ARCHIVE_API = "https://lists.apache.org/api"
 DEFAULT_LISTS = ("issues", "commits", "jira", "dev")
 SOURCE = "apache_mail_archive"   # the issue was rebuilt from lists.apache.org (Jira notification emails)
 REST_SOURCE = "jira_rest"         # the issue came from Jira's REST API (current text plus changelog)
+CACHE_SOURCE = "jira_rest_cache"  # a REST copy saved earlier in eval/pool/raw/ (preferred over the archive)
+REST_LIKE = (REST_SOURCE, CACHE_SOURCE)
 TRACKED_FIELDS = ("summary", "description")
 TRAILER = re.compile(r"\n--\s*\nThis message was sent by Atlassian.*", re.DOTALL)
 SUBJECT = re.compile(r"^\[jira\]\s+\[(?P<kind>[^\]]+)\]\s+\((?P<key>[A-Z][A-Z0-9_]*-\d+)\)\s*(?P<title>.*)$", re.DOTALL)
@@ -219,6 +222,8 @@ def description_at(issue: dict[str, Any], cutoff_iso: str) -> tuple[str, str]:
 def issue_source(issue: dict[str, Any]) -> str:
     """apache_mail_archive or jira_rest. Older saved issues: an `archive` block means the mail archive."""
     src = issue.get("source") or ""
+    if src == CACHE_SOURCE:
+        return CACHE_SOURCE
     if src == SOURCE or src.startswith("lists.apache.org") or "archive" in issue:
         return SOURCE
     if src == REST_SOURCE or (not src and "fields" in issue):
@@ -249,7 +254,7 @@ def reconstruct_at(issue: dict[str, Any], cutoff_iso: str) -> dict[str, str]:
         out["note"] = (f"created text plus {n_all - n_later} archived edit(s) up to the cutoff; "
                        f"{n_later} later edit(s) ignored")
         return out
-    if source == REST_SOURCE:
+    if source in REST_LIKE:   # live REST answer or a cached REST copy: undo later edits with fromString
         summary = issue.get("fields", {}).get("summary", "") or ""
         description = issue.get("fields", {}).get("description", "") or ""
         for h, item in reversed(later):  # newest first

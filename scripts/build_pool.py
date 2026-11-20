@@ -23,9 +23,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, first_parent_commits, gh, is_team, jira_issue,
+from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, first_parent_commits, gh, is_team, jira_issue_for,
                     merged_branch_messages, owners_for, parse_codeowners, pr_number, read_csv, repo_cfg, write_csv)
 from history import pin
+from jira_archive import CACHE_SOURCE
 from links import pool_link_status
 
 # api_base_sha/api_head_sha are GitHub's base/head, kept only for comparison; evidence uses the refs pinned from the
@@ -124,11 +125,12 @@ def requirement_edited(cfg: dict[str, Any], keys: list[str], work_began: str, me
     edited = False
     for key in keys:
         try:
-            issue = jira_issue(cfg["jira_base"], key)
+            issue = jira_issue_for(cfg, key, raw_dir.name)   # a cached REST copy is preferred
         except Exception as e:  # noqa: BLE001 - record, do not guess
             print(f"  jira {key}: {e}")
             return None
-        dump_json(raw_dir / f"jira_{key}.json", issue)
+        if issue.get("source") != CACHE_SOURCE:   # never overwrite a cached REST copy with an archive copy
+            dump_json(raw_dir / f"jira_{key}.json", issue)
         for h in issue.get("changelog", {}).get("histories", []):
             at = ts(h["created"].replace("+0000", "+00:00"))
             if ts(work_began) < at <= ts(merged_at) and any(i.get("field") in ("summary", "description") for i in h.get("items", [])):
