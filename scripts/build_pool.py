@@ -26,12 +26,13 @@ from typing import Any
 from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, first_parent_commits, gh, is_team, jira_issue,
                     merged_branch_messages, owners_for, parse_codeowners, pr_number, read_csv, repo_cfg, write_csv)
 from history import pin
+from links import pool_link_status
 
 # api_base_sha/api_head_sha are GitHub's base/head, kept only for comparison; evidence uses the refs pinned from the
 # merge commit (base_at_merge, head_at_merge, merge_base_sha; scripts/history.py).
 FIELDS = ["repo", "pr_number", "pr_url", "merged_at", "api_base_sha", "api_head_sha", "merge_commit_sha", "merge_strategy",
           "base_at_merge", "head_at_merge", "merge_base_sha", "historical_diff_status", "historical_diff_reason", "title",
-          "keys_found", "key_locations", "py_files_changed", "files_changed", "review_count", "approvals_on_head",
+          "keys_found", "key_locations", "link_status", "py_files_changed", "files_changed", "review_count", "approvals_on_head",
           "codeowners_present", "provisional_category", "included", "exclusion_reason", "merged_via"]
 MAX_FILES = 20
 BOT_TITLE = re.compile(r"^\s*(bump |build\(deps|chore\(deps|\[?release\b|prepare release|update changelog)", re.IGNORECASE)
@@ -227,6 +228,7 @@ def main() -> None:
             "repo": cfg["name"], "pr_number": n, "pr_url": pr["html_url"], "merged_at": merged_at,
             "title": pr.get("title", ""),
             "keys_found": ";".join(keys), "key_locations": ";".join(f"{k}:{'+'.join(sorted(v))}" for k, v in sorted(where.items())),
+            "link_status": pool_link_status(";".join(f"{k}:{'+'.join(sorted(v))}" for k, v in sorted(where.items()))),
             "py_files_changed": len(py), "files_changed": len(paths), "review_count": len(reviews),
             "approvals_on_head": len(approvers_on_head), "codeowners_present": co_path or "no",
             "provisional_category": cat, "included": "no" if reason else "yes", "exclusion_reason": reason,

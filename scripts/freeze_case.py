@@ -9,6 +9,8 @@ Usage:
 
 For each case the evidence is written into <out>/<id>.staging/: case.yaml, sources/ (PR, commits, files, reviews.json
 with the reviews submitted at or before the cutoff and reviews_post_cutoff.json with the later ones,
+timeline.json, jira_links.json with where each key was found and its link status (A5: verified from a commit, the
+branch, the merge commit, or a title the timeline shows was in force at the merge; otherwise uncertain),
 Jira issues with changelog, jira_<KEY>_at_cutoff.txt with the issue text at the cutoff, CODEOWNERS_at_base.txt read
 at base_at_merge, history.json with the pinned refs, fetched_at.txt), checklist.csv and the label files. When
 everything is written, manifest.json is written last (sha256 of every frozen file, the mandatory-file list, the
@@ -34,9 +36,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from common import (EVAL, codeowners_at, dump_json, ensure_clone, gh, jira_issue, read_csv, repo_cfg, write_csv)
+from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, gh, git, jira_issue, merged_branch_messages,
+                    read_csv, repo_cfg, write_csv)
 from history import pin
 from jira_archive import cutoff_file_text
+from links import freeze_link_statuses, title_at
 
 TEMPLATES = EVAL / "templates"
 FREEZE_TOOL_VERSION = "freeze_case.py 2"
@@ -142,6 +146,22 @@ def split_reviews(reviews: list[dict[str, Any]], cutoff: str) -> tuple[list[dict
     return before, after
 
 
+def key_sources(repo: Path, cfg: dict[str, Any], pr: dict[str, Any], commits: list[dict[str, Any]],
+                merge_sha: str) -> dict[str, set[str]]:
+    """{key: locations}: title, branch, body, commit (PR commits) and merge_commit (the commit on main and,
+    for a true merge, the messages it brought in)."""
+    merge_text = git(repo, "log", "-1", "--format=%B", merge_sha, check=False)
+    ps = git(repo, "rev-list", "--parents", "-n", "1", merge_sha, check=False).split()[1:]
+    merge_text += merged_branch_messages(repo, {"parents": ps})
+    texts = {"title": pr.get("title", ""), "branch": (pr.get("head") or {}).get("ref", ""), "body": pr.get("body") or "",
+             "commit": "\n".join(c["commit"]["message"] for c in commits), "merge_commit": merge_text}
+    where: dict[str, set[str]] = {}
+    for loc, text in texts.items():
+        for k in find_keys(text, cfg["key_regex"]):
+            where.setdefault(k, set()).add(loc)
+    return where
+
+
 def merge_commit_for(row: dict[str, str]) -> str:
     """The PR's commit on the main branch: from the cases row if it has one, else from the repo's pool.
 
@@ -174,7 +194,22 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
     for name, d in data.items():
         dump_json(src / f"{name}.json", d)
     mandatory = []
-    keys = [k for k in row["jira_keys"].split(";") if k]
+
+    # A5: where each key was found and whether that ties it to the PR at the merge
+    merge_sha = merge_commit_for(row)
+    try:
+        timeline = gh(f"repos/{cfg['github']}/issues/{n}/timeline", paginate=True)
+        dump_json(src / "timeline.json", timeline)
+        mandatory.append("sources/timeline.json")
+        merged_title: str | None = title_at(pr.get("title", ""), timeline, cutoff)
+    except Exception as e:  # noqa: BLE001 - recorded; title keys then stay uncertain
+        (src / "timeline.INACCESSIBLE.txt").write_text(f"{e}\n", encoding="utf-8")
+        mandatory.append("sources/timeline.INACCESSIBLE.txt")
+        merged_title = None
+    links = freeze_link_statuses(key_sources(repo, cfg, pr, data["commits"], merge_sha), merged_title, cfg["key_regex"])
+    dump_json(src / "jira_links.json", {"title_at_merge": merged_title, "links": links})
+    mandatory.append("sources/jira_links.json")
+    keys = sorted({k for k in row["jira_keys"].split(";") if k} | {x["key"] for x in links})
     for k in keys:
         try:
             issue = jira_issue(cfg["jira_base"], k)
@@ -188,7 +223,7 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
         (src / f"jira_{k}_at_cutoff.txt").write_text(cutoff_file_text(issue, cutoff), encoding="utf-8")
         mandatory += [f"sources/jira_{k}.json", f"sources/jira_{k}_at_cutoff.txt"]
 
-    hist = pin(repo, merge_commit_for(row), n, data["files"], api_base=pr["base"]["sha"], api_head=pr["head"]["sha"])
+    hist = pin(repo, merge_sha, n, data["files"], api_base=pr["base"]["sha"], api_head=pr["head"]["sha"])
     dump_json(src / "history.json", hist)
     base, head, merge_base = hist["base_at_merge"], hist["head_at_merge"], hist["merge_base_sha"]
     # CODEOWNERS on the base branch at the merge (base_at_merge), never at GitHub's API base

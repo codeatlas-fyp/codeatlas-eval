@@ -3,6 +3,7 @@
 Usage:
     python scripts/update_pool.py --repo airflow --history    # A1: pin refs from the merge commit (clone + PR files)
     python scripts/update_pool.py --repo airflow --reviews    # A4: approvals at or before the merge (reviews endpoint)
+    python scripts/update_pool.py --repo airflow --links      # A5: link_status from key_locations (no network)
 
 Only included rows are touched; excluded rows keep what they have. GitHub is read with GET only and every answer
 is cached in eval/pool/raw/<repo>/<pr>/ (git-ignored), so a rerun reads the cache. The pool is written after
@@ -19,6 +20,7 @@ from typing import Any
 from build_pool import FIELDS, approval_category, approvals_by_merge, approvers_on, migrate_row, owner_info
 from common import EVAL, codeowners_at, dump_json, ensure_clone, gh, read_csv, repo_cfg, write_csv
 from history import fetch_pr_heads, pin
+from links import pool_link_status
 
 
 def cached_or_fetch(raw: Path, name: str, api_path: str, paginate: bool = True) -> Any:
@@ -94,13 +96,20 @@ def update_reviews(cfg: dict[str, Any], rows: list[dict[str, str]], save) -> lis
     return changed
 
 
+def update_links(rows: list[dict[str, str]]) -> None:
+    """A5 for every row (no network): link_status from key_locations."""
+    for r in rows:
+        r["link_status"] = pool_link_status(r.get("key_locations", ""))
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", required=True)
     ap.add_argument("--history", action="store_true", help="A1: pin base/head/merge-base from the merge commit")
     ap.add_argument("--reviews", action="store_true", help="A4: count only approvals submitted at or before the merge")
+    ap.add_argument("--links", action="store_true", help="A5: link_status from key_locations (no network)")
     a = ap.parse_args(argv)
-    if not (a.history or a.reviews):
+    if not (a.history or a.reviews or a.links):
         ap.error("choose at least one update")
 
     cfg = repo_cfg(a.repo)
@@ -117,6 +126,8 @@ def main(argv: list[str] | None = None) -> int:
         update_history(cfg, rows, save)
     if a.reviews:
         update_reviews(cfg, rows, save)
+    if a.links:
+        update_links(rows)
     save()
     return 0
 
