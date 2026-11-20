@@ -9,7 +9,8 @@ Usage:
 Writes eval/pool/<repo>_pool.csv. Every candidate PR gets a row; excluded rows keep their reason
 (rows are never deleted). Raw API responses are cached in eval/pool/raw/ (git-ignored); a PR whose four cached
 files already exist is read from the cache instead of the API.
-The provisional category comes from source metadata only, never from CodeAtlas output. Rows marked
+The provisional category comes from source metadata only, never from CodeAtlas output. Only APPROVED reviews
+submitted at or before the merge count; a review given after the merge did not support it. Rows marked
 needs_manual are set by hand to meaningful_link or semantic_no_match after reading the issue and diff.
 """
 
@@ -78,6 +79,41 @@ def merge_time(pr: dict[str, Any], commit: dict[str, str]) -> tuple[str, str]:
     if pr.get("state") == "closed":
         return utc_z(commit["time"]), f"script (commit {commit['sha'][:10]} on main)"
     return "", ""
+
+
+def approvals_by_merge(reviews: list[dict[str, Any]], merged_at: str) -> list[dict[str, Any]]:
+    """APPROVED reviews submitted at or before the merge. A review given after the merge did not support it."""
+    if not merged_at:
+        return []
+    return [r for r in reviews if r.get("state") == "APPROVED" and r.get("submitted_at")
+            and ts(r["submitted_at"]) <= ts(merged_at)]
+
+
+def approvers_on(approvals: list[dict[str, Any]], head: str) -> set[str]:
+    """Logins (lower case) whose approval was given on the head commit."""
+    return {r["user"]["login"].lower() for r in approvals if r.get("commit_id") == head and r.get("user")}
+
+
+def owner_info(co_text: str | None, py: list[str]) -> tuple[list[list[str]], set[str], bool]:
+    """(matched owner lists, user owners, all owners are teams) for the .py files under CODEOWNERS."""
+    rules = parse_codeowners(co_text) if co_text else []
+    owner_sets = [owners_for(p, rules) for p in py] if rules else []
+    matched = [o for o in owner_sets if o]
+    user_owners = {o.lstrip("@").lower() for os_ in matched for o in os_ if not is_team(o) and o.startswith("@")}
+    all_team = bool(matched) and all(all(is_team(o) for o in os_) for os_ in matched)
+    return matched, user_owners, all_team
+
+
+def approval_category(approvals: list[dict[str, Any]], approvers_on_head: set[str], matched: list[list[str]],
+                      user_owners: set[str], all_team: bool) -> str:
+    """Provisional category of a keyed PR whose requirement did not change, from approvals at or before merge."""
+    if approvals and not approvers_on_head:
+        return "ownership_gap"            # approval only on an older commit
+    if all_team:
+        return "ownership_gap"            # owners are teams; membership at cutoff not visible
+    if approvers_on_head and (not matched or approvers_on_head & user_owners):
+        return "supported_approval"
+    return "needs_manual"                 # set to meaningful_link or semantic_no_match by hand
 
 
 def requirement_edited(cfg: dict[str, Any], keys: list[str], work_began: str, merged_at: str, raw_dir: Path) -> bool | None:
@@ -156,22 +192,19 @@ def main() -> None:
         py = [p for p in paths if p.endswith(".py") and p.startswith(root)]
         head = pr["head"]["sha"]
         base = pr["base"]["sha"]
-        approvals = [r for r in reviews if r.get("state") == "APPROVED"]
-        approvers_on_head = {r["user"]["login"].lower() for r in approvals if r.get("commit_id") == head and r.get("user")}
+        merged_at, merged_via = merge_time(pr, c)
+        # only approvals submitted at or before the merge count (A4)
+        approvals = approvals_by_merge(reviews, merged_at)
+        approvers_on_head = approvers_on(approvals, head)
 
         hist = pin(repo, c["sha"], n, files, api_base=base, api_head=head)
         # CODEOWNERS as it stood on the base branch at the merge, not at GitHub's (movable) API base
         co_path, co_text = codeowners_at(repo, hist["base_at_merge"]) if hist["base_at_merge"] else (None, None)
-        rules = parse_codeowners(co_text) if co_text else []
-        owner_sets = [owners_for(p, rules) for p in py] if rules else []
-        matched = [o for o in owner_sets if o]
-        user_owners = {o.lstrip("@").lower() for os_ in matched for o in os_ if not is_team(o) and o.startswith("@")}
-        all_team = bool(matched) and all(all(is_team(o) for o in os_) for os_ in matched)
+        matched, user_owners, all_team = owner_info(co_text, py)
 
         # inclusion rules (C4)
         login = (pr.get("user") or {}).get("login", "")
         reason = ""
-        merged_at, merged_via = merge_time(pr, c)
         if not merged_at:
             reason = "not merged (PR still open)"
         elif not py:
@@ -187,14 +220,8 @@ def main() -> None:
         elif a.jira and requirement_edited(cfg, keys, commits[0]["commit"]["committer"]["date"] if commits else pr["created_at"],
                                            merged_at or pr["closed_at"], raw):
             cat = "requirement_changed"
-        elif approvals and not approvers_on_head:
-            cat = "ownership_gap"            # approval only on an older commit
-        elif all_team:
-            cat = "ownership_gap"            # owners are teams; membership at cutoff not visible
-        elif approvers_on_head and (not matched or approvers_on_head & user_owners):
-            cat = "supported_approval"
         else:
-            cat = "needs_manual"             # set to meaningful_link or semantic_no_match by hand
+            cat = approval_category(approvals, approvers_on_head, matched, user_owners, all_team)
 
         rows.append(hist | {
             "repo": cfg["name"], "pr_number": n, "pr_url": pr["html_url"], "merged_at": merged_at,

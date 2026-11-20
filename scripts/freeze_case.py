@@ -7,7 +7,8 @@ Usage:
     python scripts/freeze_case.py --verify --case AF-01
     python scripts/freeze_case.py --all --cases %TEMP%\\cases.csv --out %TEMP%\\frozen   # test outside the repo
 
-For each case the evidence is written into <out>/<id>.staging/: case.yaml, sources/ (PR, commits, reviews, files,
+For each case the evidence is written into <out>/<id>.staging/: case.yaml, sources/ (PR, commits, files, reviews.json
+with the reviews submitted at or before the cutoff and reviews_post_cutoff.json with the later ones,
 Jira issues with changelog, jira_<KEY>_at_cutoff.txt with the issue text at the cutoff, CODEOWNERS_at_base.txt read
 at base_at_merge, history.json with the pinned refs, fetched_at.txt), checklist.csv and the label files. When
 everything is written, manifest.json is written last (sha256 of every frozen file, the mandatory-file list, the
@@ -42,8 +43,8 @@ FREEZE_TOOL_VERSION = "freeze_case.py 2"
 MANIFEST = "manifest.json"
 # edited by people after the freeze: never overwritten, never checksummed
 ANNOTATOR_FILES = ("checklist.csv", "label_A.yaml", "label_B.yaml", "adjudicated.yaml")
-MANDATORY = ["case.yaml", "sources/pr.json", "sources/commits.json", "sources/reviews.json", "sources/files.json",
-             "sources/history.json", "sources/CODEOWNERS_at_base.txt", "sources/fetched_at.txt"]
+MANDATORY = ["case.yaml", "sources/pr.json", "sources/commits.json", "sources/reviews.json",
+             "sources/reviews_post_cutoff.json", "sources/files.json", "sources/history.json", "sources/CODEOWNERS_at_base.txt", "sources/fetched_at.txt"]
 
 
 # ---------------------------------------------------------------- manifest and verification
@@ -128,6 +129,19 @@ def _stamp() -> str:
 # ---------------------------------------------------------------- evidence
 
 
+def _utc(iso: str) -> datetime:
+    return datetime.fromisoformat(iso.replace("Z", "+00:00"))
+
+
+def split_reviews(reviews: list[dict[str, Any]], cutoff: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """(submitted at or before the cutoff, the rest). A review with no submitted_at (pending) was not given by then."""
+    before, after = [], []
+    for r in reviews:
+        at = r.get("submitted_at")
+        (before if at and _utc(at) <= _utc(cutoff) else after).append(r)
+    return before, after
+
+
 def merge_commit_for(row: dict[str, str]) -> str:
     """The PR's commit on the main branch: from the cases row if it has one, else from the repo's pool.
 
@@ -154,9 +168,11 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
             "commits": gh(f"repos/{cfg['github']}/pulls/{n}/commits", paginate=True),
             "reviews": gh(f"repos/{cfg['github']}/pulls/{n}/reviews", paginate=True),
             "files": gh(f"repos/{cfg['github']}/pulls/{n}/files", paginate=True)}
+    cutoff = pr.get("merged_at") or row["decision_cutoff_utc"]  # script-merged PRs: the pool's merge time
+    # reviews.json holds only what was submitted by the cutoff; later reviews are kept apart, never used
+    data["reviews"], data["reviews_post_cutoff"] = split_reviews(data["reviews"], cutoff)
     for name, d in data.items():
         dump_json(src / f"{name}.json", d)
-    cutoff = pr.get("merged_at") or row["decision_cutoff_utc"]  # script-merged PRs: the pool's merge time
     mandatory = []
     keys = [k for k in row["jira_keys"].split(";") if k]
     for k in keys:
@@ -195,7 +211,8 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
         encoding="utf-8")
     row.update({"decision_cutoff_utc": cutoff, "base_sha": base, "head_sha": head, "merge_base_sha": merge_base,
                 "policy_file": f"eval/policies/{cfg['name']}.yaml"})
-    print(f"{cid}: collected #{n} ({len(data['files'])} files, {len(data['reviews'])} reviews, keys {keys or 'none'})")
+    print(f"{cid}: collected #{n} ({len(data['files'])} files, {len(data['reviews'])} reviews by the cutoff, "
+          f"{len(data['reviews_post_cutoff'])} after, keys {keys or 'none'})")
     refs = {k: hist[k] for k in ("merge_commit_sha", "merge_strategy", "base_at_merge", "head_at_merge", "merge_base_sha",
                                  "historical_diff_status", "api_base_sha", "api_head_sha")}
     return {"mandatory": mandatory, "refs": refs}

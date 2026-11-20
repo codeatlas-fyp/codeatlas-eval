@@ -67,7 +67,8 @@ class MainRunTests(unittest.TestCase):
                   "user": {"login": "dev", "type": "User"}, "head": {"sha": "h", "ref": "b"}, "base": {"sha": "b0"},
                   "body": "", "created_at": "2022-04-01T00:00:00Z", "closed_at": "2022-04-05T08:11:20Z"}
             files = [{"filename": "python/pyarrow/a.py"}]
-            reviews = [{"state": "APPROVED", "commit_id": "h", "user": {"login": "rev"}}]
+            reviews = [{"state": "APPROVED", "commit_id": "h", "user": {"login": "rev"},
+                        "submitted_at": "2022-04-04T00:00:00Z"}]  # before the merge (A4)
             commits = [{"commit": {"message": "ARROW-1: fix", "committer": {"date": "2022-04-02T00:00:00Z"}}}]
             for name, data in (("pr", pr), ("files", files), ("reviews", reviews), ("commits", commits)):
                 (raw / f"{name}.json").write_text(json.dumps(data), encoding="utf-8")
