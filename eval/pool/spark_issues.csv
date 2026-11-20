@@ -13,7 +13,7 @@ spark,36041,SPARK-38765,Implement `inplace` parameter of `Series.clip`,46,1,no,s
 spark,36034,SPARK-38755,Add file to address missing pandas general functions,204,2,no,supported_approval,jira
 spark,36112,SPARK-38827,Improve the test coverage for pyspark/find_spark_home.py,144,1,no,supported_approval,jira
 spark,36071,SPARK-37398,Inline type hints for python/pyspark/ml/classification.py,99,1,no,supported_approval,jira
-spark,34513,SPARK-37234,Inline type hints for python/pyspark/mllib/stat/_statistics.py,0,0,yes,needs_manual,jira
+spark,34513,SPARK-37234,Inline type hints for python/pyspark/mllib/stat/_statistics.py,0,0,yes,no_approval,jira
 spark,36093,SPARK-38837,Implement `dropna` parameter of `SeriesGroupBy.value_counts`,60,1,no,supported_approval,jira
 spark,36130,SPARK-3723,"DecisionTree, RandomForest: Add more instrumentation",511,6,no,supported_approval,jira
 spark,36130,SPARK-37234,Inline type hints for python/pyspark/mllib/stat/_statistics.py,0,0,yes,supported_approval,jira
@@ -35,8 +35,8 @@ spark,34293,SPARK-37014,Inline type hints for python/pyspark/streaming/context.p
 spark,36113,SPARK-38107,Use error classes in the compilation errors of python/pandas UDFs,393,6,no,ownership_gap,jira
 spark,36184,SPARK-38890,Implement `ignore_index` of `DataFrame.sort_index`.,51,1,no,supported_approval,jira
 spark,36159,SPARK-38857,series name should be preserved in series.mode(),272,4,no,ownership_gap,jira
-spark,36190,SPARK-38893,Test SourceProgress in PySpark,182,1,no,needs_manual,jira
-spark,35530,SPARK-37405,Inline type hints for python/pyspark/ml/feature.py,84,1,no,needs_manual,jira
+spark,36190,SPARK-38893,Test SourceProgress in PySpark,182,1,no,no_approval,jira
+spark,35530,SPARK-37405,Inline type hints for python/pyspark/ml/feature.py,84,1,no,no_approval,jira
 spark,36203,SPARK-37405,Inline type hints for python/pyspark/ml/feature.py,84,1,no,supported_approval,jira
 spark,35977,SPARK-38660,PySpark DeprecationWarning: distutils Version classes are deprecated,1079,18,no,supported_approval,jira
 spark,36201,SPARK-27420,KinesisInputDStream should expose a way to configure CloudWatch metrics,702,3,no,supported_approval,jira
@@ -74,7 +74,7 @@ spark,36382,SPARK-39048,Refactor `GroupBy._reduce_for_stat_function` on accepted
 spark,36357,SPARK-38820,"Refresh dtype when astype(""category"")",1893,28,no,supported_approval,jira
 spark,36425,SPARK-33277,Python/Pandas UDF right after off-heap vectorized reader could cause executor crash.,646,11,no,supported_approval,jira
 spark,36425,SPARK-39084,df.rdd.isEmpty() results in unexpected executor failure and JVM crash,1244,28,no,supported_approval,jira
-spark,36432,SPARK-39029,Improve the test coverage for pyspark/broadcast.py,42,1,no,needs_manual,jira
+spark,36432,SPARK-39029,Improve the test coverage for pyspark/broadcast.py,42,1,no,no_approval,jira
 spark,36437,SPARK-30661,KMeans blockify input vectors,0,0,yes,supported_approval,jira
 spark,36444,SPARK-39095,Adjust `GroupBy.std` to match pandas 1.4,40,1,no,requirement_changed,jira
 spark,36465,SPARK-39113,rename self to cls in python/pyspark/mllib/clustering.py,107,2,no,supported_approval,jira
@@ -117,7 +117,7 @@ spark,36701,SPARK-39179,Improve the test coverage for pyspark/shuffle.py,39,1,no
 spark,36840,SPARK-39443,Improve docstring of pyspark.sql.functions.col/first,107,3,no,supported_approval,jira
 spark,36793,SPARK-39405,NumPy Input Support in PySpark,746,4,no,ownership_gap,jira
 spark,36793,SPARK-39406,Accept NumPy array in createDataFrame,68,1,no,ownership_gap,jira
-spark,36683,SPARK-39301,Levearge LocalRelation in createDataFrame with Arrow optimization,234,1,no,needs_manual,jira
+spark,36683,SPARK-39301,Levearge LocalRelation in createDataFrame with Arrow optimization,234,1,no,no_approval,jira
 spark,36895,SPARK-39456,Fix broken function links in the auto-generated pandas API support list documentation.,597,2,no,supported_approval,jira
 spark,36906,SPARK-39508,Support IPv6 between JVM and Python Daemon in PySpark,0,0,yes,supported_approval,jira
 spark,36927,SPARK-39534,Series.argmax only needs single pass,0,0,yes,requirement_changed,jira

@@ -10,8 +10,8 @@ Writes eval/pool/<repo>_pool.csv. Every candidate PR gets a row; excluded rows k
 (rows are never deleted). Raw API responses are cached in eval/pool/raw/ (git-ignored); a PR whose four cached
 files already exist is read from the cache instead of the API.
 The provisional category comes from source metadata only, never from CodeAtlas output. Only APPROVED reviews
-submitted at or before the merge count; a review given after the merge did not support it. Rows marked
-needs_manual are set by hand to meaningful_link or semantic_no_match after reading the issue and diff.
+submitted at or before the merge count; a review given after the merge did not support it. Keyed PRs
+with no approval on the head commit at or before the merge are no_approval, a sampling category, not a label.
 """
 
 from __future__ import annotations
@@ -114,7 +114,9 @@ def approval_category(approvals: list[dict[str, Any]], approvers_on_head: set[st
         return "ownership_gap"            # owners are teams; membership at cutoff not visible
     if approvers_on_head and (not matched or approvers_on_head & user_owners):
         return "supported_approval"
-    return "needs_manual"                 # set to meaningful_link or semantic_no_match by hand
+    # keyed PR with no approval on the head commit at or before the merge. A sampling category, not a label:
+    # whether the PR was allowed to merge is what the annotators decide (B1; formerly needs_manual)
+    return "no_approval"
 
 
 def requirement_edited(cfg: dict[str, Any], keys: list[str], work_began: str, merged_at: str, raw_dir: Path) -> bool | None:
