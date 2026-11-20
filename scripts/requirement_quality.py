@@ -18,7 +18,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from jira_archive import reconstruct_at
+from jira_archive import TEXT_STATUSES, reconstruct_at
 from links import VERIFIED, parse_locations, pool_key_status
 
 UNAVAILABLE, TITLE_ONLY, EXPLICIT, DESCRIPTIVE = "unavailable", "title_only", "explicit_criteria", "descriptive_issue"
@@ -42,7 +42,7 @@ def description_for(issue: dict[str, Any], cutoff: str | None) -> str:
     """The description at the cutoff if it can be rebuilt, else the saved one."""
     if cutoff:
         r = reconstruct_at(issue, cutoff)
-        if r["status"] == "reconstructed":
+        if r["status"] in TEXT_STATUSES:
             return r["description"]
     return (issue.get("fields") or {}).get("description") or ""
 

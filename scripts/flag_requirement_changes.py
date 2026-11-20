@@ -56,7 +56,7 @@ def main(argv: list[str] | None = None) -> int:
         checked += 1
         if edited is None:
             unknown += 1
-            print(f"#{n:<6} {';'.join(keys)}: issue not readable, category kept ({row['provisional_category']})")
+            print(f"#{n:<6} {';'.join(keys)}: issue not readable or edit history unknown, category kept ({row['provisional_category']})")
         else:
             if edited:
                 changed += 1

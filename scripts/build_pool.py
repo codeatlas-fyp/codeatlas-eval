@@ -26,7 +26,7 @@ from typing import Any
 from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, first_parent_commits, gh, is_team, jira_issue_for,
                     merged_branch_messages, owners_for, parse_codeowners, pr_number, read_csv, repo_cfg, write_csv)
 from history import pin
-from jira_archive import CACHE_SOURCE
+from jira_archive import CACHE_SOURCE, CREATED_TEXT_ONLY, reconstruct_at
 from links import pool_link_status
 
 # api_base_sha/api_head_sha are GitHub's base/head, kept only for comparison; evidence uses the refs pinned from the
@@ -121,8 +121,12 @@ def approval_category(approvals: list[dict[str, Any]], approvers_on_head: set[st
 
 
 def requirement_edited(cfg: dict[str, Any], keys: list[str], work_began: str, merged_at: str, raw_dir: Path) -> bool | None:
-    """True if a summary/description edit happened after the first commit and before the merge."""
-    edited = False
+    """True if a summary/description edit happened after the first commit and before the merge.
+
+    None if an issue could not be read, or if no edit was seen but some key's edit history is unknown
+    (created_text_only): such a row cannot be proven unchanged.
+    """
+    edited = unknown = False
     for key in keys:
         try:
             issue = jira_issue_for(cfg, key, raw_dir.name)   # a cached REST copy is preferred
@@ -131,11 +135,14 @@ def requirement_edited(cfg: dict[str, Any], keys: list[str], work_began: str, me
             return None
         if issue.get("source") != CACHE_SOURCE:   # never overwrite a cached REST copy with an archive copy
             dump_json(raw_dir / f"jira_{key}.json", issue)
+        if reconstruct_at(issue, merged_at)["status"] == CREATED_TEXT_ONLY:
+            unknown = True
+            continue
         for h in issue.get("changelog", {}).get("histories", []):
             at = ts(h["created"].replace("+0000", "+00:00"))
             if ts(work_began) < at <= ts(merged_at) and any(i.get("field") in ("summary", "description") for i in h.get("items", [])):
                 edited = True
-    return edited
+    return True if edited else (None if unknown else False)
 
 
 def main() -> None:
