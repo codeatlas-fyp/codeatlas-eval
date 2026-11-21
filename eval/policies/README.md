@@ -11,6 +11,12 @@ Team decision B5 (20 Nov 2026): **one baseline policy for every repository.**
 - **Status: DRAFT.** Official labelling must not start until the sign-off table below is complete
   (`eval/LABELLING_GUIDE.md`). Once signed off, the first line of every file changes from `status: DRAFT ...` to
   `status: SIGNED OFF <date>`, which changes `policy_sha256`; cases frozen under the draft are frozen again.
+- **DRAFT gate (audit 21 Nov):** `freeze_case.py` refuses to freeze a scored case (`set` pilot, held-out or
+  challenge) while the repo's policy says DRAFT, and writes nothing. Dev cases (`set: dev`) freeze under the
+  draft; `--allow-draft` overrides the gate for a trial freeze that will be redone.
+- **Snapshot:** every frozen case keeps the exact policy bytes in `sources/effective_policy.yaml`, checksummed in
+  the manifest; `freeze_case.py --verify` checks that its sha256 equals `policy_sha256`. A case can therefore be
+  rerun with the policy it was frozen under even after this folder changes.
 
 ## How it was made
 
