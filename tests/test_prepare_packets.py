@@ -102,7 +102,7 @@ class PacketTests(unittest.TestCase):
         self.assertEqual((self.case / "packet" / "issue_text_K-1.txt").read_text(encoding="utf-8"),
                          "Fix the thing\n\nIt must not crash.\n")
         self.assertIn("python/m.py::f", (self.case / "packet" / "entities.csv").read_text(encoding="utf-8"))
-        self.assertIn(f"/clones/airflow@{HEAD}", meta["prepare_case_output"]["K-1"])
+        self.assertIn(f"{Path('/clones/airflow')}@{HEAD}", meta["prepare_case_output"]["K-1"])
         self.assertFalse((self.case / ".packet.tmp").exists())
 
     def test_refuses_to_overwrite_without_force(self):
