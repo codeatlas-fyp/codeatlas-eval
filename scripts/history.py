@@ -104,10 +104,30 @@ def _patch_id(repo_dir: Path, a: str, b: str, path: str) -> str:
     return res.stdout.split()[0] if res.stdout.strip() else ""
 
 
+def prefetch_blobs(repo_dir: Path, commits: list[str], paths: set[str]) -> None:
+    """In a blobless (partial) clone, fetch the blobs of paths at commits in one request, not one per diff.
+
+    Best effort: a full clone needs nothing, and a failed fetch only means git fetches each blob lazily later.
+    """
+    if not paths or git(repo_dir, "config", "--get", "remote.origin.promisor", check=False).strip() != "true":
+        return
+    oids = set()
+    for c in commits:
+        for line in git(repo_dir, "ls-tree", c, "--", *sorted(paths), check=False).splitlines():
+            meta = line.split("\t", 1)[0].split()
+            if len(meta) == 3 and meta[1] == "blob":
+                oids.add(meta[2])
+    if oids:
+        subprocess.run(["git", "-C", str(repo_dir), "-c", "fetch.negotiationAlgorithm=noop", "fetch", "origin",
+                        "--no-tags", "--no-write-fetch-head", "--recurse-submodules=no", "--filter=blob:none",
+                        "--stdin"], input="\n".join(sorted(oids)) + "\n", capture_output=True, text=True)
+
+
 def content_check(repo_dir: Path, merge_base: str, head: str, base: str, merge_commit: str,
                   paths: set[str]) -> tuple[str, str]:
     """(historical_content_status, reason): does every PR path change the same way on the main branch?"""
     differ = []
+    prefetch_blobs(repo_dir, [merge_base, head, base, merge_commit], paths)
     try:
         for path in sorted(paths):
             if _patch_id(repo_dir, merge_base, head, path) != _patch_id(repo_dir, base, merge_commit, path):
