@@ -317,6 +317,93 @@ def reconstruct_at(issue: dict[str, Any], cutoff_iso: str) -> dict[str, str]:
     return out
 
 
+STATE_FIELDS = ("status", "priority", "assignee", "resolution")
+NONE_ALLOWED = ("priority", "assignee", "resolution")   # "no value" is a real state (unassigned, unresolved)
+STATE_ASFETCHED_NOTE = ("jira_<KEY>.json is the issue as it was fetched, years after the cutoff: its current fields "
+                        "(status, priority, assignee, resolution) are NOT the state at the cutoff. Read the state at "
+                        "the cutoff from this file only.")
+
+
+def _current(issue: dict[str, Any], field: str) -> tuple[str | None, str | None]:
+    """(display value, id) of a field in the issue as fetched; (None, None) when it is empty."""
+    v = (issue.get("fields") or {}).get(field)
+    if not v:
+        return None, None
+    if field == "assignee":
+        return v.get("displayName") or v.get("name"), v.get("key") or v.get("name")
+    return v.get("name"), v.get("id")
+
+
+def state_at(issue: dict[str, Any], cutoff_iso: str) -> dict[str, Any]:
+    """Status, priority, assignee and resolution as they stood at the cutoff, each with how it was obtained.
+
+    Only timestamped records are used. A REST copy (live or cached) holds the current values plus a changelog
+    whose items carry a time, an author and the old and new value; each field is rebuilt by undoing, newest first,
+    every change after the cutoff. Per field the result is:
+    - reconstructed: the value at the cutoff, and the changes up to the cutoff (time, author, from, to);
+    - unverifiable: the changelog is incomplete, or a later change has no old value, so the value is not given;
+    - unavailable: the source carries no history of the field (the mail archive), so the value is not given.
+    Nothing missing is ever filled from the issue as fetched. The status category (To Do / In Progress / Done) is
+    never reconstructed: it comes from today's workflow configuration, not from a timestamped record.
+    """
+    source = issue_source(issue)
+    cutoff = _at(cutoff_iso)
+    out: dict[str, Any] = {"key": issue.get("key", ""), "source": source, "cutoff": cutoff_iso,
+                           "note": STATE_ASFETCHED_NOTE, "changelog_complete": None, "fields": {},
+                           "status_category": {"reconstruction": "unavailable", "value": None,
+                                               "note": "categories come from the current workflow configuration, "
+                                                       "not from a timestamped record"}}
+
+    def every(reconstruction: str, note: str) -> dict[str, Any]:
+        out["fields"] = {f: {"reconstruction": reconstruction, "value": None, "value_id": None, "note": note,
+                             "changes_up_to_cutoff": []} for f in STATE_FIELDS}
+        return out
+
+    if source not in REST_LIKE:
+        return every("unavailable", f"source {source} carries no history of this field; not taken from the issue "
+                                    "as fetched")
+    created = (issue.get("fields") or {}).get("created")
+    if created and _at(created) > cutoff:
+        return every("unavailable", f"the issue was created at {created}, after the cutoff")
+    changelog = issue.get("changelog") or {}
+    histories = sorted(changelog.get("histories") or [], key=lambda h: _at(h["created"]))
+    total = changelog.get("total")
+    complete = not (isinstance(total, int) and total > len(histories))
+    # True: the copy says it holds every change; None: it does not say (no total), reported as unknown
+    out["changelog_complete"] = complete if isinstance(total, int) else None
+    if not complete:
+        return every("unverifiable", f"changelog holds {len(histories)} of {total} changes; the value at the "
+                                     "cutoff cannot be rebuilt from an incomplete history")
+    for field in STATE_FIELDS:
+        value, value_id = _current(issue, field)
+        changes = [(h, i) for h in histories for i in h.get("items", []) if i.get("field") == field]
+        later = [(h, i) for h, i in changes if _at(h["created"]) > cutoff]
+        entry: dict[str, Any] = {"reconstruction": "reconstructed", "value": None, "value_id": None, "note": "",
+                                 "changes_up_to_cutoff": []}
+        for h, item in reversed(later):   # newest first
+            old, old_id = item.get("fromString"), item.get("from")
+            if old is None and old_id is None and field not in NONE_ALLOWED:
+                entry.update(reconstruction="unverifiable",
+                             note=f"{field} change at {h['created']} has no old value; value not given")
+                break
+            value, value_id = old, old_id
+        else:
+            entry.update(value=value, value_id=value_id,
+                         note=f"value as fetched with {len(later)} later change(s) undone")
+            entry["changes_up_to_cutoff"] = [
+                {"at": h["created"], "author": (h.get("author") or {}).get("key") or (h.get("author") or {}).get("name"),
+                 "from": i.get("fromString"), "to": i.get("toString")}
+                for h, i in changes if _at(h["created"]) <= cutoff]
+        out["fields"][field] = entry
+    return out
+
+
+def state_summary(state: dict[str, Any]) -> str:
+    """One word for case.yaml: reconstructed (all fields), partial, or unavailable (none)."""
+    got = [f["reconstruction"] == "reconstructed" for f in state["fields"].values()]
+    return "reconstructed" if all(got) else "partial" if any(got) else "unavailable"
+
+
 def cutoff_file_text(issue: dict[str, Any], cutoff_iso: str) -> str:
     """Contents of jira_<KEY>_at_cutoff.txt: a header (source, cutoff, status), a '---' line, then the text.
 

@@ -51,13 +51,13 @@ from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, gh,
                     read_csv, repo_cfg, write_csv)
 from case_groups import group_of, load_groups
 from history import pin
-from jira_archive import cutoff_file_text, reconstruct_at
+from jira_archive import cutoff_file_text, reconstruct_at, state_at, state_summary
 from links import VERIFIED, freeze_link_statuses, title_at
 from requirement_quality import UNAVAILABLE, classify_issue
 
 TEMPLATES = EVAL / "templates"
 POLICIES = EVAL / "policies"
-FREEZE_TOOL_VERSION = "freeze_case.py 3"
+FREEZE_TOOL_VERSION = "freeze_case.py 4"
 MANIFEST = "manifest.json"
 # edited by people after the freeze: never overwritten, never checksummed
 ANNOTATOR_FILES = ("checklist.csv", "label_A.yaml", "label_B.yaml", "adjudicated.yaml")
@@ -176,7 +176,8 @@ def split_reviews(reviews: list[dict[str, Any]], cutoff: str) -> tuple[list[dict
     return before, after
 
 
-LINK_FIELDS = ("key", "found_in", "status", "requirement_quality", "reconstruction_status", "source")
+LINK_FIELDS = ("key", "found_in", "status", "requirement_quality", "reconstruction_status", "state_at_cutoff",
+               "source")
 
 
 def sort_links(links: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -297,18 +298,25 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
             (src / f"jira_{k}_at_cutoff.txt").write_text(
                 f"key: {k}\nsource: none\ncutoff: {cutoff}\nreconstruction_status: inaccessible\n"
                 f"reconstruction_note: {type(e).__name__}\n---\n", encoding="utf-8")
-            mandatory += [f"sources/jira_{k}.INACCESSIBLE.txt", f"sources/jira_{k}_at_cutoff.txt"]
+            dump_json(src / f"jira_{k}_state_at_cutoff.json", state_at({"key": k, "source": "none"}, cutoff))
+            mandatory += [f"sources/jira_{k}.INACCESSIBLE.txt", f"sources/jira_{k}_at_cutoff.txt",
+                          f"sources/jira_{k}_state_at_cutoff.json"]
             jira_links.append(entry | {"requirement_quality": UNAVAILABLE, "source": "none",
-                                       "reconstruction_status": "inaccessible"})
+                                       "reconstruction_status": "inaccessible", "state_at_cutoff": "unavailable"})
             continue
         dump_json(src / f"jira_{k}.json", issue)
         # the issue as it stood at the decision cutoff, rebuilt the way its source allows: a header (source,
         # cutoff, reconstruction status), '---', then the text (none if unverifiable)
         (src / f"jira_{k}_at_cutoff.txt").write_text(cutoff_file_text(issue, cutoff), encoding="utf-8")
-        mandatory += [f"sources/jira_{k}.json", f"sources/jira_{k}_at_cutoff.txt"]
+        # status, priority, assignee, resolution at the cutoff: rebuilt from the changelog, or marked missing;
+        # the fields of jira_<KEY>.json are the state when fetched and are never used as the state at the cutoff
+        state = state_at(issue, cutoff)
+        dump_json(src / f"jira_{k}_state_at_cutoff.json", state)
+        mandatory += [f"sources/jira_{k}.json", f"sources/jira_{k}_at_cutoff.txt",
+                      f"sources/jira_{k}_state_at_cutoff.json"]
         rebuilt = reconstruct_at(issue, cutoff)
         jira_links.append(entry | {"requirement_quality": classify_issue(issue, cutoff), "source": rebuilt["source"],
-                                   "reconstruction_status": rebuilt["status"]})
+                                   "reconstruction_status": rebuilt["status"], "state_at_cutoff": state_summary(state)})
     jira_links = sort_links(jira_links)
 
     hist = pin(repo, merge_sha, n, data["files"], api_base=pr["base"]["sha"], api_head=pr["head"]["sha"])
