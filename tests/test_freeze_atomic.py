@@ -56,6 +56,7 @@ class AtomicFreezeTests(unittest.TestCase):
         self._tmp.cleanup()
 
     def freeze(self, collect=fake_collect, **kwargs):
+        kwargs.setdefault("allow_draft", True)  # the repo's policy is still DRAFT: an engineering freeze
         with mock.patch.object(fc, "collect", side_effect=collect) as m:
             result, _ = quiet(fc.freeze, dict(ROW), self.out, **kwargs)
         return result, m
@@ -145,7 +146,7 @@ class AtomicFreezeTests(unittest.TestCase):
         cases.write_text(",".join(ROW) + "\n" + ",".join(ROW.values()) + "\n", encoding="utf-8")
         frozen = self.out / "frozen"
         with mock.patch.object(fc, "collect", side_effect=fake_collect):
-            code, _ = quiet(fc.main, ["--case", "AF-01", "--cases", str(cases), "--out", str(frozen)])
+            code, _ = quiet(fc.main, ["--case", "AF-01", "--cases", str(cases), "--out", str(frozen), "--allow-draft"])
         self.assertEqual(code, 0)
         self.assertTrue((frozen / "AF-01" / "manifest.json").exists())
         code, out = quiet(fc.main, ["--verify", "--out", str(frozen)])

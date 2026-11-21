@@ -22,6 +22,17 @@ non-empty sources/ folder is not enough. An invalid or partial case is moved to 
 (with REASON.txt) and frozen again. The annotators' files (label_A.yaml, label_B.yaml, adjudicated.yaml,
 checklist.csv) are never overwritten: they are carried over into the new freeze, and they are not checksummed
 because people edit them. Nothing is written to GitHub or Jira.
+
+Audit of 21 Nov 2026:
+- The policy's exact bytes are frozen as sources/effective_policy.yaml (checksummed; --verify checks that its
+  sha256 equals policy_sha256), so an old case can be rerun with the policy it was frozen under.
+- A DRAFT policy freezes only a dev case (set "dev") or with --allow-draft (an engineering freeze that is repeated
+  after sign-off). Scored cases need the signed-off policy.
+- When a refreeze carries filled-in labels over and the evidence or the policy changed, LABELS_STALE.txt lists
+  what changed: those labels must be reviewed and relabelled before they count (--verify reports it). Blank
+  templates are never stale.
+- Dev cases (eval/dev_cases.csv, set "dev") freeze into eval/dev_cases/ by default.
+- packet/ (criteria.csv, entities.csv written by scripts/prepare_packets.py) and run/ are outside the manifest.
 """
 
 from __future__ import annotations
@@ -38,6 +49,7 @@ from typing import Any
 
 from common import (EVAL, codeowners_at, dump_json, ensure_clone, find_keys, gh, git, jira_issue_for, merged_branch_messages,
                     read_csv, repo_cfg, write_csv)
+from case_groups import group_of, load_groups
 from history import pin
 from jira_archive import cutoff_file_text, reconstruct_at
 from links import VERIFIED, freeze_link_statuses, title_at
@@ -45,12 +57,16 @@ from requirement_quality import UNAVAILABLE, classify_issue
 
 TEMPLATES = EVAL / "templates"
 POLICIES = EVAL / "policies"
-FREEZE_TOOL_VERSION = "freeze_case.py 2"
+FREEZE_TOOL_VERSION = "freeze_case.py 3"
 MANIFEST = "manifest.json"
 # edited by people after the freeze: never overwritten, never checksummed
 ANNOTATOR_FILES = ("checklist.csv", "label_A.yaml", "label_B.yaml", "adjudicated.yaml")
+STALE = "LABELS_STALE.txt"   # written by a refreeze that changed labelled evidence; removed by people after relabelling
+UNCHECKED_DIRS = ("run/", "packet/")
+POLICY_SNAPSHOT = "sources/effective_policy.yaml"
 MANDATORY = ["case.yaml", "sources/pr.json", "sources/commits.json", "sources/reviews.json",
-             "sources/reviews_post_cutoff.json", "sources/files.json", "sources/history.json", "sources/CODEOWNERS_at_base.txt", "sources/fetched_at.txt"]
+             "sources/reviews_post_cutoff.json", "sources/files.json", "sources/history.json", "sources/CODEOWNERS_at_base.txt", "sources/fetched_at.txt",
+             POLICY_SNAPSHOT]
 
 
 # ---------------------------------------------------------------- manifest and verification
@@ -65,11 +81,13 @@ def sha256_file(path: Path) -> str:
 
 
 def frozen_files(case_dir: Path) -> list[str]:
-    """Every file the manifest covers (posix paths): all but the manifest, the annotator files and run/."""
+    """Every file the manifest covers (posix paths): all but the manifest, the annotator files, LABELS_STALE.txt,
+    run/ and packet/."""
     out = []
     for p in sorted(case_dir.rglob("*")):
         rel = p.relative_to(case_dir).as_posix()
-        if p.is_file() and rel != MANIFEST and rel not in ANNOTATOR_FILES and not rel.startswith("run/"):
+        if (p.is_file() and rel not in (MANIFEST, STALE) and rel not in ANNOTATOR_FILES
+                and not rel.startswith(UNCHECKED_DIRS)):
             out.append(rel)
     return out
 
@@ -116,7 +134,17 @@ def verify_case(case_dir: Path) -> list[str]:
     for name in ANNOTATOR_FILES:
         if not (case_dir / name).is_file():
             reasons.append(f"annotator file missing: {name}")
+    want = manifest.get("refs", {}).get("policy_sha256")
+    snap = case_dir / POLICY_SNAPSHOT
+    if want and snap.is_file() and sha256_file(snap) != want:
+        reasons.append(f"{POLICY_SNAPSHOT} does not match policy_sha256 in the manifest refs")
     return reasons
+
+
+def stale_note(case_dir: Path) -> str | None:
+    """The LABELS_STALE.txt text if the case's labels must be reviewed and relabelled, else None."""
+    p = case_dir / STALE
+    return p.read_text(encoding="utf-8").strip() if p.is_file() else None
 
 
 def _replace_dir(src: Path, dest: Path) -> None:
@@ -182,6 +210,19 @@ def key_sources(repo: Path, cfg: dict[str, Any], pr: dict[str, Any], commits: li
         for k in find_keys(text, cfg["key_regex"]):
             where.setdefault(k, set()).add(loc)
     return where
+
+
+def is_draft(status_line: str) -> bool:
+    return "DRAFT" in status_line.upper()
+
+
+def check_policy_gate(row: dict[str, str], allow_draft: bool) -> None:
+    """A DRAFT policy freezes a dev case, or any case with --allow-draft (an engineering freeze); nothing else."""
+    _, _, status = policy_for(row["repo"])
+    if is_draft(status) and row.get("set") != "dev" and not allow_draft:
+        raise SystemExit(f"{row['case_id']}: eval/policies/{row['repo']}.yaml is still DRAFT ({status!r}). Scored cases "
+                         f"are frozen under the signed-off policy (eval/policies/README.md). For an engineering "
+                         f"freeze that will be repeated after sign-off, add --allow-draft. Nothing written.")
 
 
 def policy_for(repo: str) -> tuple[Path, str, str]:
@@ -276,7 +317,11 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
     # CODEOWNERS on the base branch at the merge (base_at_merge), never at GitHub's API base
     co_path, co_text = codeowners_at(repo, base) if base else (None, None)
     (src / "CODEOWNERS_at_base.txt").write_text(co_text if co_text is not None else "NO CODEOWNERS FILE AT BASE\n", encoding="utf-8")
-    _, policy_sha, policy_status = policy_for(cfg["name"])
+    policy_path, policy_sha, policy_status = policy_for(cfg["name"])
+    # the exact policy bytes, so the case can be rerun with the policy it was frozen under (audit 21 Nov)
+    shutil.copyfile(policy_path, case_dir / POLICY_SNAPSHOT)
+    if sha256_file(case_dir / POLICY_SNAPSHOT) != policy_sha:
+        raise SystemExit(f"{cid}: the policy file changed while freezing; run again")
     fetched = datetime.now(timezone.utc).isoformat(timespec="seconds")
     (src / "fetched_at.txt").write_text(fetched + "\n", encoding="utf-8")
 
@@ -287,6 +332,9 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
             base_at_merge=base or "unknown", head_at_merge=head or "unknown", merge_base_sha=merge_base or "unknown",
             historical_diff_status=hist["historical_diff_status"],
             historical_diff_reason=hist["historical_diff_reason"].replace('"', "'"),
+            historical_content_status=hist.get("historical_content_status", "not_checked"),
+            historical_content_reason=hist.get("historical_content_reason", "").replace('"', "'"),
+            case_group=row.get("case_group") or group_of(load_groups(), cfg["name"], n),
             api_base_sha=hist["api_base_sha"], api_head_sha=hist["api_head_sha"],
             jira_keys=", ".join(keys) or "none", jira_links=jira_links_yaml(jira_links),
             policy_sha256=policy_sha, policy_status=policy_status.replace('"', "'"), policy_file=f"eval/policies/{cfg['name']}.yaml",
@@ -298,8 +346,9 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
     print(f"{cid}: collected #{n} ({len(data['files'])} files, {len(data['reviews'])} reviews by the cutoff, "
           f"{len(data['reviews_post_cutoff'])} after, keys {keys or 'none'})")
     refs = {"policy_sha256": policy_sha}
-    refs |= {k: hist[k] for k in ("merge_commit_sha", "merge_strategy", "base_at_merge", "head_at_merge", "merge_base_sha",
-                                 "historical_diff_status", "api_base_sha", "api_head_sha")}
+    refs |= {k: hist.get(k, "") for k in ("merge_commit_sha", "merge_strategy", "base_at_merge", "head_at_merge",
+                                         "merge_base_sha", "historical_diff_status", "historical_content_status",
+                                         "api_base_sha", "api_head_sha")}
     return {"mandatory": mandatory, "refs": refs}
 
 
@@ -309,7 +358,7 @@ def collect(row: dict[str, str], case_dir: Path) -> dict[str, Any]:
 def out_root_for(row: dict[str, str], out: Path | None) -> Path:
     if out is not None:
         return out
-    return EVAL / ("challenge" if row["set"] == "challenge" else "cases")
+    return EVAL / {"challenge": "challenge", "dev": "dev_cases"}.get(row["set"], "cases")
 
 
 def latest_invalid(root: Path, cid: str) -> Path | None:
@@ -322,10 +371,31 @@ def latest_invalid(root: Path, cid: str) -> Path | None:
     return found[-1] if found else None
 
 
-def freeze(row: dict[str, str], out: Path | None = None, refresh: bool = False) -> str:
+def labelled(path: Path, template: Path) -> bool:
+    """True if an annotator file holds more than its blank template."""
+    return path.is_file() and path.read_bytes() != template.read_bytes()
+
+
+def template_for(name: str) -> Path:
+    return TEMPLATES / ("label.yaml" if name.startswith("label_") else name)
+
+
+def evidence_changes(old_dir: Path, new_dir: Path) -> list[str]:
+    """Frozen files whose content differs between an old freeze and the new one (fetched_at.txt ignored)."""
+    try:
+        old = json.loads((old_dir / MANIFEST).read_text(encoding="utf-8")).get("files", {})
+    except (OSError, json.JSONDecodeError):
+        return ["the old freeze had no readable manifest, so its evidence cannot be compared"]
+    new = {rel: sha256_file(new_dir / rel) for rel in frozen_files(new_dir)}
+    skip = {"sources/fetched_at.txt"}
+    return sorted(r for r in (set(old) | set(new)) - skip if old.get(r) != new.get(r))
+
+
+def freeze(row: dict[str, str], out: Path | None = None, refresh: bool = False, allow_draft: bool = False) -> str:
     """Freeze one case; returns 'skipped' (already complete) or 'frozen'."""
     cid = row["case_id"]
     policy_for(row["repo"])   # B5: no policy, no freeze; checked before anything is moved or written
+    check_policy_gate(row, allow_draft)
     root = out_root_for(row, out)
     final = root / cid
     carried: Path | None = latest_invalid(root, cid) if root.exists() and not final.exists() else None
@@ -335,6 +405,10 @@ def freeze(row: dict[str, str], out: Path | None = None, refresh: bool = False) 
             print(f"{cid}: complete freeze verified, skipping (use --refresh to freeze again)")
             return "skipped"
         carried = root / f"{cid}.invalid-{_stamp()}"
+        n = 1
+        while carried.exists():  # two refreezes in the same second
+            n += 1
+            carried = root / f"{cid}.invalid-{_stamp()}-{n}"
         _replace_dir(final, carried)
         (carried / "REASON.txt").write_text("\n".join(reasons or ["--refresh requested"]) + "\n", encoding="utf-8")
         print(f"{cid}: moved to {carried.name} ({'; '.join(reasons) or '--refresh'})")
@@ -344,15 +418,30 @@ def freeze(row: dict[str, str], out: Path | None = None, refresh: bool = False) 
         shutil.rmtree(staging)  # left by an interrupted run: never trusted
     staging.mkdir(parents=True)
     info = collect(row, staging)
+    kept = []
     for name in ANNOTATOR_FILES:  # keep what annotators wrote; blank templates only for new files
         old = carried / name if carried else None
         if old is not None and old.is_file():
             shutil.copy2(old, staging / name)
+            if labelled(old, template_for(name)):
+                kept.append(name)
         else:
-            shutil.copy(TEMPLATES / ("label.yaml" if name.startswith("label_") else name), staging / name)
+            shutil.copy(template_for(name), staging / name)
     (staging / "run").mkdir(exist_ok=True)
     (staging / "run" / ".gitkeep").touch()
     write_manifest(staging, MANDATORY + info["mandatory"], info["refs"])
+    if carried is not None and kept:
+        old_stale = stale_note(carried)
+        changed = evidence_changes(carried, staging)
+        if changed or old_stale:
+            lines = [f"Labels carried over from {carried.name} on {_stamp()} were made on different evidence or policy.",
+                     "Review and relabel these files before they count; then delete this file.",
+                     f"Carried label files: {', '.join(kept)}",
+                     *(f"Changed: {c}" for c in changed[:50])]
+            if old_stale:
+                lines.append(f"Already stale before this refreeze: {old_stale.splitlines()[0]}")
+            (staging / STALE).write_text("\n".join(lines) + "\n", encoding="utf-8")
+            print(f"{cid}: labels carried over are STALE ({len(changed)} evidence files changed): see {STALE}")
     _replace_dir(staging, final)
     print(f"{cid}: frozen into {final}")
     return "frozen"
@@ -368,13 +457,16 @@ def verify(roots: list[Path], case_id: str | None) -> int:
     dirs = [r / case_id for r in roots] if case_id else [d for r in roots if r.exists() for d in case_dirs(r)]
     if case_id:
         dirs = [d for d in dirs if d.exists()] or dirs[:1]
+    stale = 0
     for d in dirs:
         reasons = verify_case(d)
-        print(f"{d.name}: {'OK' if not reasons else 'INVALID'}")
+        note = stale_note(d) if d.is_dir() else None
+        print(f"{d.name}: {'OK' if not reasons else 'INVALID'}{' (labels STALE: relabel before use)' if note else ''}")
         for r in reasons:
             print(f"  - {r}")
         bad += bool(reasons)
-    print(f"\n{len(dirs) - bad} OK, {bad} INVALID")
+        stale += bool(note)
+    print(f"\n{len(dirs) - bad} OK, {bad} INVALID, {stale} with stale labels")
     return 1 if bad else 0
 
 
@@ -385,12 +477,14 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--all", action="store_true")
     ap.add_argument("--verify", action="store_true", help="check frozen cases (all, or --case ID); fetches nothing")
     ap.add_argument("--refresh", action="store_true", help="freeze again even if the case is complete")
+    ap.add_argument("--allow-draft", action="store_true",
+                    help="freeze under a DRAFT policy (engineering freeze, repeated after sign-off)")
     ap.add_argument("--cases", type=Path, default=EVAL / "cases.csv", help="cases file (default eval/cases.csv)")
     ap.add_argument("--out", type=Path, help="folder for the frozen cases (default eval/cases, eval/challenge)")
     a = ap.parse_args(argv)
 
     if a.verify:
-        roots = [a.out] if a.out else [EVAL / "cases", EVAL / "challenge"]
+        roots = [a.out] if a.out else [EVAL / "cases", EVAL / "dev_cases", EVAL / "challenge"]
         return verify(roots, a.case)
     if not (a.case or a.all):
         ap.error("give --case ID, --all or --verify")
@@ -402,7 +496,7 @@ def main(argv: list[str] | None = None) -> int:
     if not todo:
         raise SystemExit(f"case {a.case} not in {path}")
     for r in todo:
-        freeze(r, a.out, a.refresh)
+        freeze(r, a.out, a.refresh, a.allow_draft)
         write_csv(path, rows, fields)
     return 0
 
