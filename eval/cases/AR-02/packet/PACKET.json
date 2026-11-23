@@ -1,0 +1,33 @@
+{
+  "case_id": "AR-02",
+  "head_at_merge": "82d44460abea751d738ece30925180885a497859",
+  "analysis_root": "python",
+  "requirement_version": 1,
+  "keys_used": [
+    {
+      "key": "ARROW-11259",
+      "reconstruction_status": "reconstructed",
+      "criteria": 3
+    },
+    {
+      "key": "ARROW-13798",
+      "reconstruction_status": "reconstructed",
+      "criteria": 3
+    },
+    {
+      "key": "ARROW-14596",
+      "reconstruction_status": "reconstructed",
+      "criteria": 2
+    }
+  ],
+  "keys_skipped": [],
+  "entities": 3238,
+  "prepare_case_sha256": "4b4dba9913bd930740357c07d02ee62591e67d78ff8fe872652dcf204604a109",
+  "codeatlas_commit": "b0a605bf1095e9fcdaebf58a025d51749c64fe05",
+  "deleted_code": "entities are the code at head_at_merge; code the PR deleted is not a candidate",
+  "prepare_case_output": {
+    "ARROW-11259": "repo arrow @ 82d44460abea751d738ece30925180885a497859\nentities.csv: 3238 entities (2504 in test files)\ncriteria.csv: 3 criteria for ARROW-11259 v1",
+    "ARROW-13798": "repo arrow @ 82d44460abea751d738ece30925180885a497859\nentities.csv: 3238 entities (2504 in test files)\ncriteria.csv: 3 criteria for ARROW-13798 v1",
+    "ARROW-14596": "repo arrow @ 82d44460abea751d738ece30925180885a497859\nentities.csv: 3238 entities (2504 in test files)\ncriteria.csv: 2 criteria for ARROW-14596 v1"
+  }
+}

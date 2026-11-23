@@ -1,0 +1,5 @@
+Log caught AirflowSkipException in task instance log
+
+It seems like when an operator throws AirflowSkipException, airflow captures it and marks following tasks as skipped too, but it leaves no trace in the task instances log and does not show exception message. This can confuse the users as they can't figure out in log why operators were marked as skipped.
+
+We should explicitly log the exception and its message in task instance logs, and consider other airflow-caught exceptions too.

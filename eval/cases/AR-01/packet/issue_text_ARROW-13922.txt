@@ -1,0 +1,99 @@
+[Python] ParquetDataset throws error when len(path_or_paths) = 1
+
+ 
+
+
+
+After updating pyarrow to version 5.0.0, ParquetDataset doesn't take a list of length 1 for path_or_paths. Is this by design or a bug?
+
+
+
+ 
+
+{code:java}
+
+In [1]: import pyarrow.parquet as pq
+
+In [2]: import pandas as pd
+
+In [3]: df = pd.DataFrame({'A': [1, 2, 3], 'B': ['a', 'b', 'c']})
+
+In [4]: df.to_parquet('test.parquet', index=False)
+
+In [5]: pq.ParquetDataset('test.parquet', use_legacy_dataset=False).read(use_threads=False).to_pandas()
+
+Out[5]:
+
+   A  B
+
+0  1  a
+
+1  2  b
+
+2  3  c
+
+In [6]: pq.ParquetDataset(['test.parquet'], use_legacy_dataset=False).read(use_threads=False).to_pandas()
+
+---------------------------------------------------------------------------
+
+ValueError                                Traceback (most recent call last)
+
+ValueError: cannot construct a FileSource from a path without a FileSystem
+
+Exception ignored in: 'pyarrow._dataset._make_file_source'
+
+Traceback (most recent call last):
+
+  File "/data/install/anaconda3/lib/python3.8/site-packages/pyarrow/parquet.py", line 1676, in __init__
+
+    fragment = parquet_format.make_fragment(single_file, filesystem)
+
+ValueError: cannot construct a FileSource from a path without a FileSystem
+
+---------------------------------------------------------------------------
+
+ArrowInvalid                              Traceback (most recent call last)
+
+<ipython-input-6-ed8ec622cb5b> in <module>
+
+----> 1 pq.ParquetDataset(['test.parquet'], use_legacy_dataset=False).read(use_threads=False).to_pandas()/data/install/anaconda3/lib/python3.8/site-packages/pyarrow/parquet.py in __new__(cls, path_or_paths, filesystem, schema, metadata, split_row_groups, validate_schema, filters, metadata_nthreads, read_dictionary, memory_map, buffer_size, partitioning, use_legacy_dataset, pre_buffer, coerce_int96_timestamp_unit)
+
+   1284
+
+   1285         if not use_legacy_dataset:
+
+-> 1286             return _ParquetDatasetV2(
+
+   1287                 path_or_paths, filesystem=filesystem,
+
+   1288                 filters=filters,/data/install/anaconda3/lib/python3.8/site-packages/pyarrow/parquet.py in __init__(self, path_or_paths, filesystem, filters, partitioning, read_dictionary, buffer_size, memory_map, ignore_prefixes, pre_buffer, coerce_int96_timestamp_unit, **kwargs)
+
+   1677
+
+   1678             self._dataset = ds.FileSystemDataset(
+
+-> 1679                 [fragment], schema=fragment.physical_schema,
+
+   1680                 format=parquet_format,
+
+   1681                 filesystem=fragment.filesystem/data/install/anaconda3/lib/python3.8/site-packages/pyarrow/_dataset.pyx in pyarrow._dataset.Fragment.physical_schema.__get__()/data/install/anaconda3/lib/python3.8/site-packages/pyarrow/error.pxi in pyarrow.lib.pyarrow_internal_check_status()/data/install/anaconda3/lib/python3.8/site-packages/pyarrow/error.pxi in pyarrow.lib.check_status()ArrowInvalid: Called Open() on an uninitialized FileSource
+
+In [7]: pq.ParquetDataset(['test.parquet', 'test.parquet'], use_legacy_dataset=False).read(use_threads=False).to_pandas()
+
+Out[7]:
+
+   A  B
+
+0  1  a
+
+1  2  b
+
+2  3  c
+
+3  1  a
+
+4  2  b
+
+5  3  c
+
+{code}

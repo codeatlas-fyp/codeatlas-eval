@@ -1,0 +1,33 @@
+Environment variables not correctly set in Spark submit operator
+
+AIRFLOW-2380 added support for setting environment variables at runtime for the SparkSubmitOperator. The intention was to allow for dynamic configuration paths (such as HADOOP_CONF_DIR). The pull request, however, only made it so that these env vars would only be set at runtime if a standalone cluster and a client deploy mode was chosen. For kubernetes and yarn modes, the env vars would be sent to the driver via the spark arguments _spark.yarn.appMasterEnv_ (and equivalent for k8s).
+
+If one wishes to dynamically set the yarn master address (via a _yarn-site.xml_ file), then one or more environment variables __ need to be present at runtime, and this is not currently done.
+
+The SparkSubmitHook class var `_env` is assigned the `_env_vars` variable from the SparkSubmitOperator, in the `_build_spark_submit_command` method. If running in YARN mode however, this is not set as it should be, and therefore `_env` is not passed to the Popen process.
+
+  was:
+AIRFLOW-2380 added support for setting environment variables at runtime for the SparkSubmitOperator. This allows one to dynamically set the Hadoop configuration paths (such as YARN_CONF_DIR), in cases where the previous step was creating a Spark cluster.
+
+Normal behaviour should ensure that the SparkSubmitHook class var `_env` is assigned the `_env_vars` variable from the SparkSubmitOperator, in the `_build_spark_submit_command` method. If running in YARN mode however, this is not set as it should be, and therefore `_env` is not passed to the Popen process. This currently only occurs when the deploy_mode is 'cluster' (yarn and cluster deploy modes are possible).
+
+One can replicate this by setting a bash script which subsequently prints the environment variables as the spark-submit executable instead of the real one.
+
+I have confirmed that adding the line: {{self._env = self._env_vars }}after line 244 in spark_submit_hook.py correctly propagates these environment variables.
+
+
+> Environment variables not correctly set in Spark submit operator
+> ----------------------------------------------------------------
+>
+>                 Key: AIRFLOW-5744
+>                 URL: https://issues.apache.org/jira/browse/AIRFLOW-5744
+>             Project: Apache Airflow
+>          Issue Type: Bug
+>          Components: contrib, operators
+>    Affects Versions: 1.10.5
+>            Reporter: Joseph McCartin
+>            Priority: Trivial
+>
+> AIRFLOW-2380 added support for setting environment variables at runtime for the SparkSubmitOperator. The intention was to allow for dynamic configuration paths (such as HADOOP_CONF_DIR). The pull request, however, only made it so that these env vars would only be set at runtime if a standalone cluster and a client deploy mode was chosen. For kubernetes and yarn modes, the env vars would be sent to the driver via the spark arguments _spark.yarn.appMasterEnv_ (and equivalent for k8s).
+> If one wishes to dynamically set the yarn master address (via a _yarn-site.xml_ file), then one or more environment variables __ need to be present at runtime, and this is not currently done.
+> The SparkSubmitHook class var `_env` is assigned the `_env_vars` variable from the SparkSubmitOperator, in the `_build_spark_submit_command` method. If running in YARN mode however, this is not set as it should be, and therefore `_env` is not passed to the Popen process.

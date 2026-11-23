@@ -1,0 +1,21 @@
+{
+  "case_id": "SP-02",
+  "head_at_merge": "20d35667786c03f6c8206a60a21c2f30b4a0fd96",
+  "analysis_root": "python/pyspark",
+  "requirement_version": 1,
+  "keys_used": [
+    {
+      "key": "SPARK-39443",
+      "reconstruction_status": "reconstructed",
+      "criteria": 1
+    }
+  ],
+  "keys_skipped": [],
+  "entities": 9351,
+  "prepare_case_sha256": "4b4dba9913bd930740357c07d02ee62591e67d78ff8fe872652dcf204604a109",
+  "codeatlas_commit": "b0a605bf1095e9fcdaebf58a025d51749c64fe05",
+  "deleted_code": "entities are the code at head_at_merge; code the PR deleted is not a candidate",
+  "prepare_case_output": {
+    "SPARK-39443": "repo spark @ 20d35667786c03f6c8206a60a21c2f30b4a0fd96\nentities.csv: 9351 entities (2984 in test files)\ncriteria.csv: 1 criteria for SPARK-39443 v1"
+  }
+}

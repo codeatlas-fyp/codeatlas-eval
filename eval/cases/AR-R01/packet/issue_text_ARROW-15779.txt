@@ -1,0 +1,3 @@
+[Python] Create python bindings for Substrait consumer
+
+We will want to figure out how to expose the Substrait consumer to python.  This could be a single method that accepts a buffer of bytes and returns an iterator of record batches but we might also want a helper method that returns a table.  I'm thinking this would go in the compute namespace.

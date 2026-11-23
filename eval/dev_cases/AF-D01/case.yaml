@@ -25,12 +25,12 @@ jira_links:
 # reconstruction_status of jira_<KEY>_at_cutoff.txt. Scored keys: verified AND adjudicated relevant
 # (eval/scoring_rules.md).
 policy_file: eval/policies/airflow.yaml
-policy_sha256: 1974a98b0bed74a5374c6d880fca57bbc868c3005a0bd8bd4faf496574eef49e           # sha256 of the policy file at the freeze (B5)
-policy_status: "Baseline policy v0.1 (20 Nov 2026) - identical for all repos - status: DRAFT until signed off by Areej, Yusra, Saleha"
+policy_sha256: b4bf5557a5562e42cad25f8f8bae25ef09f13b159cdfc62d6a1b0e762ffddb55           # sha256 of the policy file at the freeze (B5)
+policy_status: "Baseline policy v0.1 (20 Nov 2026) - identical for all repos - status: SIGNED OFF 23 Nov 2026 by Areej, Yusra, Saleha"
 policy_snapshot: sources/effective_policy.yaml   # the exact policy bytes (sha256 = policy_sha256)
 analysis_root: /
 codeowners_at_base: none               # read at base_at_merge
-sources_fetched_at: 2026-11-23T16:26:47+00:00
+sources_fetched_at: 2026-11-23T20:40:02+00:00
 inaccessible: []                   # e.g. ["membership of @apache/team-x at cutoff"]; never write "no approval"
 case_group: ""         # related PRs (revert + original, follow-up fix) share one group id (eval/case_groups.csv)
 notes: ""

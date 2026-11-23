@@ -1,0 +1,32 @@
+# Blind label (build plan C8). Work only from sources/ and the web pages; never from CodeAtlas output or the other label.
+# Push this file only after the other labeller has also finished this case.
+case_id: ""
+labeller: ""                       # initials
+labelled_on: ""                    # YYYY-MM-DD
+labelling_guide_version: ""        # e.g. v1
+minutes_spent: 0
+jira_links:                        # one entry per key in case.yaml jira_links, filled BEFORE rules and criteria
+  - key: ""
+    relevance: ""        # relevant | not_relevant | unclear
+    reason: ""           # one line citing the source
+rules:                             # SATISFIED | VIOLATED | NOT_APPLICABLE | INSUFFICIENT_EVIDENCE
+  C1: {result: "", reason: "", source_record: ""}
+  C2: {result: "", reason: "", source_record: ""}
+  C3: {result: "", reason: "", source_record: ""}
+  C4: {result: "", reason: "", source_record: ""}
+  C5: {result: "", reason: "", source_record: ""}
+  C6: {result: "", reason: "", source_record: ""}
+  C7: {result: "", reason: "", source_record: ""}
+  C8: {result: "", reason: "", source_record: ""}
+  C9: {result: "", reason: "", source_record: ""}
+overall_verdict: {verdict: "", reason: ""}   # PASS | FAIL | REVIEW | UNKNOWN (fixed truth table, case policy)
+semantic:                          # guide Section 4. Work from criteria.csv and entities.csv only.
+  criteria:                        # one entry per row of criteria.csv, in the same order
+    - criterion_id: ""             # from criteria.csv, tagged with its key, e.g. AIRFLOW-1234:v1:ac1
+      text: ""                     # copied from criteria.csv, never rewritten
+      relevant: []                 # label_ref values from entities.csv, e.g. ["airflow/models/dag.py::DAG.clear"]
+      related: []                  # optional: nearby code that does not implement it (not scored)
+      no_match: false              # true only after a whole-repository search (guide 4.3)
+      no_match_rationale: ""       # the searches you ran and why nothing qualifies
+      confidence: ""               # sure | unsure
+      note: ""                     # e.g. "criteria.csv split two requirements into one row"

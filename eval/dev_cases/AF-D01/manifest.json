@@ -1,24 +1,24 @@
 {
   "files": {
-    "case.yaml": "98b2dccf65d063119103fe7a3d0f88240ffc0d5e86bc9e9fe56d2012557e8ed8",
+    "case.yaml": "789c1e60205b4b718a7018f53a695214ec155ca285a0f4d36ec561f003acbaf1",
     "sources/CODEOWNERS_at_base.txt": "d6a725979c2407c7af5af45f486520d2c411cc6484305e9b5609a4a51b19aae2",
     "sources/commits.json": "93761f3f6bcb9a8317151eed81501a4e27a91a290e0cd8331e654694a7309e11",
-    "sources/effective_policy.yaml": "1974a98b0bed74a5374c6d880fca57bbc868c3005a0bd8bd4faf496574eef49e",
-    "sources/fetched_at.txt": "2f7276945a93c431ed21d1ad2b7ca701432323eebba1e45ebd57bb5657269e90",
+    "sources/effective_policy.yaml": "b4bf5557a5562e42cad25f8f8bae25ef09f13b159cdfc62d6a1b0e762ffddb55",
+    "sources/fetched_at.txt": "84b02f4ef76248d46a81a43e113938ba3eef8f5a7851d2b9cf23c08e451f81b6",
     "sources/files.json": "26443c56c3bf6a9c8f8895c0f0eba45639d4d7c5154c2ae35543c1721b54585e",
     "sources/history.json": "561a45d96bb8e0653d3cfdf0968ef1d7b1a03c0a163c402b527bf9094a40f3a9",
     "sources/jira_AIRFLOW-6020.json": "7033300cd5181c3a09d9e5aa2077c29656be60f796e10aefbc2918eafaf02e5d",
     "sources/jira_AIRFLOW-6020_at_cutoff.txt": "46169781bca797c999dd9d9e6a27945e353d89f4c10b1e7d95420a132074c071",
     "sources/jira_AIRFLOW-6020_state_at_cutoff.json": "6b52fa6c15fa14420cfbfa0f65605749c7e8eb603a744751fb2caad87085fcf4",
     "sources/jira_links.json": "7ba5c700cc01dde4a6b7ab9c0def5469863f803582675dc976a0827df5e9efbd",
-    "sources/pr.json": "fbc738b688e3e4892b0ed6f1e95d895a207907191ebc8ca5c6b4d2a6034c82dc",
+    "sources/pr.json": "ee9ce9d3192eabeabe61cb7d44f0401395c5ae9fee25b3a57113ae5b13538b18",
     "sources/reviews.json": "089a5636380eb3a1154087ea13558e73bc34835582345c19c42334bc3f774d59",
     "sources/reviews_post_cutoff.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
     "sources/timeline.json": "af008f38d4482f0531abcc029fa1ce9bb2745bea0f70aaa01fc9dd781c63845a"
   },
   "freeze_status": "complete",
   "freeze_tool_version": "freeze_case.py 4",
-  "frozen_at": "2026-11-23T16:26:47+00:00",
+  "frozen_at": "2026-11-23T20:40:02+00:00",
   "mandatory_files": [
     "case.yaml",
     "sources/CODEOWNERS_at_base.txt",
@@ -46,6 +46,6 @@
     "merge_base_sha": "39e2e70695a24e29f0000fad6c3629be81adacd2",
     "merge_commit_sha": "db4be19b80a65913edb5ab634226cf60ea8bffea",
     "merge_strategy": "single_parent",
-    "policy_sha256": "1974a98b0bed74a5374c6d880fca57bbc868c3005a0bd8bd4faf496574eef49e"
+    "policy_sha256": "b4bf5557a5562e42cad25f8f8bae25ef09f13b159cdfc62d6a1b0e762ffddb55"
   }
 }

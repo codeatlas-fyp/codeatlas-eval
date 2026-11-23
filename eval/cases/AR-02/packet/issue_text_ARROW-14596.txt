@@ -1,0 +1,49 @@
+[Python] parquet.read_table nested fields in columns does not work for use_legacy_dataset=False
+
+Reading nested field does not work with use_legacy_dataset=False.
+
+
+
+This works:
+
+
+
+ 
+
+{code:java}
+
+import pyarrow.parquet as pq
+
+t = pq.read_table(
+
+ source=*filename*,
+
+ columns=['store_key', 'properties.country'], 
+
+ use_legacy_dataset=True,
+
+).to_pandas()
+
+{code}
+
+This does not work (for the same parquet file):
+
+
+
+ 
+
+{code:java}
+
+import pyarrow.parquet as pq
+
+
+
+t = pq.read_table(
+
+ source=*filename*,
+
+ columns=['store_key', 'properties.country'], 
+
+ use_legacy_dataset=False,
+
+).to_pandas(){code}

@@ -1,0 +1,35 @@
+# Case identity and frozen evidence (build plan C5 step 3). Written by scripts/freeze_case.py.
+case_id: SP-03
+set: pilot                         # pilot | held-out | dev | challenge
+repo: apache/spark
+pr_number: 34406
+pr_url: https://github.com/apache/spark/pull/34406
+category_provisional: no_key   # from source metadata only, never from CodeAtlas output
+decision_cutoff_utc: 2022-06-16T03:14:02Z      # PR merged_at; nothing after this time may be used
+merge_commit_sha: 3b709ebf8aea0f0b21f5ee721900f88e3f5e8b4e     # the PR's commit on the main branch
+merge_strategy: single_parent         # merge (two parents) | single_parent (squash, rebase, merge script)
+base_at_merge: 9612db3fc9c38204b2bf9f724dedb9ec5f636556           # 1st parent of the merge commit: the base branch at the merge
+head_at_merge: 905aadc02f932c213a06b35d8fcdf4357e3ba011           # 2nd parent, or the PR head (pull/<n>/head) for single_parent
+merge_base_sha: 3319361ca67212d2ae373bb46c5b6f2d80d792a4         # git merge-base base_at_merge head_at_merge
+historical_diff_status: verified   # verified | unverifiable (diff vs the PR file list)
+historical_diff_reason: ""
+historical_content_status: identical   # identical | differs | not_checked (patch-id per file)
+historical_content_reason: "all 1 files changed the same way on the main branch"
+api_base_sha: 3319361ca67212d2ae373bb46c5b6f2d80d792a4             # GitHub API base, for comparison only
+api_head_sha: 905aadc02f932c213a06b35d8fcdf4357e3ba011             # GitHub API head, for comparison only
+jira_keys: [none]                 # every historically supported key, none dropped (B4)
+jira_links: []
+# jira_links: one entry per key, verified first, then by key. status verified | uncertain (A5);
+# requirement_quality explicit_criteria | descriptive_issue | title_only | unavailable (B3);
+# reconstruction_status of jira_<KEY>_at_cutoff.txt. Scored keys: verified AND adjudicated relevant
+# (eval/scoring_rules.md).
+policy_file: eval/policies/spark.yaml
+policy_sha256: b4bf5557a5562e42cad25f8f8bae25ef09f13b159cdfc62d6a1b0e762ffddb55           # sha256 of the policy file at the freeze (B5)
+policy_status: "Baseline policy v0.1 (20 Nov 2026) - identical for all repos - status: SIGNED OFF 23 Nov 2026 by Areej, Yusra, Saleha"
+policy_snapshot: sources/effective_policy.yaml   # the exact policy bytes (sha256 = policy_sha256)
+analysis_root: python/pyspark/
+codeowners_at_base: none               # read at base_at_merge
+sources_fetched_at: 2026-11-23T20:39:29+00:00
+inaccessible: []                   # e.g. ["membership of @apache/team-x at cutoff"]; never write "no approval"
+case_group: ""         # related PRs (revert + original, follow-up fix) share one group id (eval/case_groups.csv)
+notes: ""

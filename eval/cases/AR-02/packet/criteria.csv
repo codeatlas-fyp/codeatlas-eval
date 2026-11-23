@@ -1,0 +1,173 @@
+criterion_id,key,version_no,criterion_text
+ARROW-11259:v1:ac1,ARROW-11259,1,"[Python] Allow to create field reference to nested field
+
+Currently in the Python layer we have {{ds.field(name)}} for referencing a field eg when creating a filter expression."
+ARROW-11259:v1:ac2,ARROW-11259,1,"On the C++ side, the {{FieldRef}} has the ability to reference nested fields (eg a child of a struct), for example constructed with {{FieldRef::FromDotPath}}."
+ARROW-11259:v1:ac3,ARROW-11259,1,We should think about how to enable users to reference nested fields like this in the Python API.
+ARROW-13798:v1:ac1,ARROW-13798,1,"[Python] Selective projection of struct fields errors with use_legacy_dataset = False
+
+Selectively projecting fields from within a struct when reading from parquet files triggers an {{ArrowInvalid}} error when using the new dataset api ({{use_legacy_dataset=False}})."
+ARROW-13798:v1:ac2,ARROW-13798,1,"Passing {{use_legacy_dataset=True}} yields the expected behavior: loading only the columns enumerated in the {{columns}} argument, recursing into structs if there is a {{.}} delimeter in the field name."
+ARROW-13798:v1:ac3,ARROW-13798,1,"Using the following test table:
+
+{code:python}
+
+df = pd.DataFrame({
+
+    'user_id': ['abc123', 'qrs456'],
+
+    'interaction': [{'type': 'click', 'element': 'button'}, {'type':'scroll', 'element': 'window'}]
+
+})
+
+
+
+table = pa.Table.from_pandas(df)
+
+
+
+pq.write_table(table, 'example.parquet')
+
+{code}
+
+Using the current default datasets API:
+
+{code:python}
+
+table_latest = pq.read_table('example.parquet', columns = ['user_id', 'interaction.type'])
+
+{code}
+
+yields:
+
+{noformat}
+
+---------------------------------------------------------------------------
+
+ArrowInvalid                              Traceback (most recent call last)
+
+<ipython-input-25-982ca2d96075> in <module>
+
+----> 1 table_latest = pq.read_table('/'.join([out_path, 'example.parquet']), columns = ['user_id', 'interaction.type'], filesystem = fs)
+
+      2 table_latest
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/parquet.py in read_table(source, columns, use_threads, metadata, use_pandas_metadata, memory_map, read_dictionary, filesystem, filters, buffer_size, partitioning, use_legacy_dataset, ignore_prefixes, pre_buffer, coerce_int96_timestamp_unit)
+
+   1894 
+
+   1895         return dataset.read(columns=columns, use_threads=use_threads,
+
+-> 1896                             use_pandas_metadata=use_pandas_metadata)
+
+   1897 
+
+   1898     if ignore_prefixes is not None:
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/parquet.py in read(self, columns, use_threads, use_pandas_metadata)
+
+   1744         table = self._dataset.to_table(
+
+   1745             columns=columns, filter=self._filter_expression,
+
+-> 1746             use_threads=use_threads
+
+   1747         )
+
+   1748 
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/_dataset.pyx in pyarrow._dataset.Dataset.to_table()
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/_dataset.pyx in pyarrow._dataset.Dataset.scanner()
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/_dataset.pyx in pyarrow._dataset.Scanner.from_dataset()
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/_dataset.pyx in pyarrow._dataset._populate_builder()
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/error.pxi in pyarrow.lib.check_status()
+
+
+
+ArrowInvalid: No match for FieldRef.Name(interaction.type) in user_id: string
+
+interaction: struct<element: string, type: string>{noformat}
+
+Whereas: 
+
+{code:python}
+
+table_legacy = pq.read_table('example.parquet', columns = ['user_id', 'interaction.type'], use_legacy_dataset = True)
+
+{code}
+
+Yields:
+
+{noformat}
+
+pyarrow.Table
+
+user_id: string
+
+interaction: struct<type: string>
+
+  child 0, type: string{noformat}."
+ARROW-14596:v1:ac1,ARROW-14596,1,"[Python] parquet.read_table nested fields in columns does not work for use_legacy_dataset=False
+
+Reading nested field does not work with use_legacy_dataset=False."
+ARROW-14596:v1:ac2,ARROW-14596,1,"This works:
+
+
+
+ 
+
+{code:java}
+
+import pyarrow.parquet as pq
+
+t = pq.read_table(
+
+ source=*filename*,
+
+ columns=['store_key', 'properties.country'], 
+
+ use_legacy_dataset=True,
+
+).to_pandas()
+
+{code}
+
+This does not work (for the same parquet file):
+
+
+
+ 
+
+{code:java}
+
+import pyarrow.parquet as pq
+
+
+
+t = pq.read_table(
+
+ source=*filename*,
+
+ columns=['store_key', 'properties.country'], 
+
+ use_legacy_dataset=False,
+
+).to_pandas(){code}."

@@ -1,0 +1,11 @@
+[Python] Allow to create field reference to nested field
+
+Currently in the Python layer we have {{ds.field(name)}} for referencing a field eg when creating a filter expression.
+
+
+
+On the C++ side, the {{FieldRef}} has the ability to reference nested fields (eg a child of a struct), for example constructed with {{FieldRef::FromDotPath}}.
+
+
+
+We should think about how to enable users to reference nested fields like this in the Python API.
