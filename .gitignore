@@ -14,3 +14,6 @@ eval/cases/*/sources/
 eval/challenge/*/sources/
 eval/cases/*.staging/
 eval/cases/*.invalid-*/
+eval/dev_cases/*/sources/
+eval/dev_cases/*.staging/
+eval/dev_cases/*.invalid-*/
