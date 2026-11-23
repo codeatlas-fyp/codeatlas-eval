@@ -1,4 +1,4 @@
-# Baseline policy v0.1 (20 Nov 2026) - identical for all repos - status: DRAFT until signed off by Areej, Yusra, Saleha
+# Baseline policy v0.1 (20 Nov 2026) - identical for all repos - status: SIGNED OFF 23 Nov 2026 by Areej, Yusra, Saleha
 # From ../codeatlas/config/policy.example.yaml (CodeAtlas Policy schema, src/codeatlas/schema/policy.py); no field
 # added. Changes from the example, with reasons: eval/policies/README.md.
 version: 1

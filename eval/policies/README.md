@@ -8,7 +8,8 @@ Team decision B5 (20 Nov 2026): **one baseline policy for every repository.**
 - **There are no repository-specific differences yet.** If one is ever needed, it is agreed by the three of us,
   written in the repo's file, and documented in the table "Repository-specific differences" below with its
   reason. Until then any difference between a repo file and `baseline.yaml` is a mistake.
-- **Status: DRAFT.** Official labelling must not start until the sign-off table below is complete
+- **Status: SIGNED OFF 23 Nov 2026** by Areej, Yusra and Saleha (table below). This is v1 for the current round;
+  any later change is a new version and the cases are frozen again. Official labelling may start
   (`eval/LABELLING_GUIDE.md`). Once signed off, the first line of every file changes from `status: DRAFT ...` to
   `status: SIGNED OFF <date>`, which changes `policy_sha256`; cases frozen under the draft are frozen again.
 - **DRAFT gate (audit 21 Nov):** `freeze_case.py` refuses to freeze a scored case (`set` pilot, held-out or
@@ -47,6 +48,6 @@ against the rules in `src/codeatlas/evaluate/rules/`:
 
 | Name | Date |
 |---|---|
-| Areej | |
-| Yusra | |
-| Saleha | |
+| Areej | 23 Nov 2026 |
+| Yusra | 23 Nov 2026 |
+| Saleha | 23 Nov 2026 |
