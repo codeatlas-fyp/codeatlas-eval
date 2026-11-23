@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import freeze_case as fc
 
 POLICIES = Path(__file__).resolve().parent.parent / "eval" / "policies"
-HEADER = ("# Baseline policy v0.1 (20 Nov 2026) - identical for all repos - status: DRAFT until signed off by "
+HEADER = ("# Baseline policy v0.1 (20 Nov 2026) - identical for all repos - status: SIGNED OFF 23 Nov 2026 by "
           "Areej, Yusra, Saleha")
 
 
@@ -56,7 +56,7 @@ class FreezePolicyTests(unittest.TestCase):
         self.assertEqual(path.name, "airflow.yaml")
         self.assertEqual(digest, fc.sha256_file(POLICIES / "baseline.yaml"))
         self.assertTrue(status.startswith("Baseline policy v0.1"))
-        self.assertIn("status: DRAFT", status)
+        self.assertIn("status: SIGNED OFF", status)
 
 
 if __name__ == "__main__":

@@ -62,12 +62,17 @@ class AuditFreezeTests(unittest.TestCase):
         self.assertIn(f"{fc.POLICY_SNAPSHOT} does not match policy_sha256 in the manifest refs", reasons)
 
     def test_draft_policy_refuses_a_scored_case(self):
-        with mock.patch.object(fc, "collect", side_effect=AssertionError("must not collect")):
-            with self.assertRaises(SystemExit) as ctx:
-                quiet(fc.freeze, dict(ROW), self.out)            # set pilot, no --allow-draft
-        self.assertIn("still DRAFT", str(ctx.exception))
-        self.assertFalse(self.out.joinpath("AF-01").exists())
-        self.assertFalse(self.out.joinpath("AF-01.staging").exists())
+        draft = (fc.POLICIES / "airflow.yaml").read_text(encoding="utf-8").replace(
+            "status: SIGNED OFF", "status: DRAFT until signed off, was SIGNED OFF")
+        with tempfile.TemporaryDirectory() as pol:
+            (Path(pol) / "airflow.yaml").write_text(draft, encoding="utf-8")
+            with mock.patch.object(fc, "POLICIES", Path(pol)), \
+                    mock.patch.object(fc, "collect", side_effect=AssertionError("must not collect")):
+                with self.assertRaises(SystemExit) as ctx:
+                    quiet(fc.freeze, dict(ROW), self.out)            # set pilot, no --allow-draft
+            self.assertIn("still DRAFT", str(ctx.exception))
+            self.assertFalse(self.out.joinpath("AF-01").exists())
+            self.assertFalse(self.out.joinpath("AF-01.staging").exists())
 
     def test_draft_policy_freezes_a_dev_case(self):
         dev = dict(ROW, case_id="AF-D01", set="dev")
