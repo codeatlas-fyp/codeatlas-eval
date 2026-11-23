@@ -1,0 +1,21 @@
+{
+  "case_id": "AF-D01",
+  "head_at_merge": "aaee331b894f5f7221748db5caf364841e5e18d3",
+  "analysis_root": "/",
+  "requirement_version": 1,
+  "keys_used": [
+    {
+      "key": "AIRFLOW-6020",
+      "reconstruction_status": "reconstructed",
+      "criteria": 1
+    }
+  ],
+  "keys_skipped": [],
+  "entities": 9675,
+  "prepare_case_sha256": "4b4dba9913bd930740357c07d02ee62591e67d78ff8fe872652dcf204604a109",
+  "codeatlas_commit": "a4e2d66c9018d18a164f0cb7fbd511aa339fe33b",
+  "deleted_code": "entities are the code at head_at_merge; code the PR deleted is not a candidate",
+  "prepare_case_output": {
+    "AIRFLOW-6020": "repo airflow @ aaee331b894f5f7221748db5caf364841e5e18d3\nentities.csv: 9675 entities (5156 in test files)\ncriteria.csv: 1 criteria for AIRFLOW-6020 v1"
+  }
+}
