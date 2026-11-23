@@ -41,6 +41,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import time
 from datetime import datetime, timezone
@@ -399,6 +400,32 @@ def evidence_changes(old_dir: Path, new_dir: Path) -> list[str]:
     return sorted(r for r in (set(old) | set(new)) - skip if old.get(r) != new.get(r))
 
 
+PINNED = (("base_sha", "base_at_merge"), ("head_sha", "head_at_merge"), ("merge_base_sha", "merge_base_sha"),
+          ("merge_commit_sha", "merge_commit_sha"))
+
+
+def pinned_mismatch(row: dict[str, str], final: Path) -> list[str]:
+    """How the cases row (and the repo's policy) now differ from what the complete freeze in `final` pinned.
+
+    A complete case is never re-used silently for a row whose commits, cutoff, PR or policy changed: freeze()
+    refuses and asks for --refresh, which keeps the old freeze aside and marks carried labels stale.
+    """
+    manifest = json.loads((final / MANIFEST).read_text(encoding="utf-8"))
+    refs = manifest.get("refs", {})
+    out = [f"{col} is {row[col]} in the cases file, {refs[ref]} in the freeze"
+           for col, ref in PINNED if row.get(col) and refs.get(ref) and row[col] != refs[ref]]
+    case_yaml = (final / "case.yaml").read_text(encoding="utf-8") if (final / "case.yaml").exists() else ""
+    for col, field in (("decision_cutoff_utc", "decision_cutoff_utc"), ("pr_number", "pr_number")):
+        m = re.search(rf"^{field}:[ \t]*\"?([^\"#\n]*?)\"?[ \t]*(?:#.*)?$", case_yaml, re.MULTILINE)
+        if row.get(col) and m and m.group(1).strip() and row[col] != m.group(1).strip():
+            out.append(f"{col} is {row[col]} in the cases file, {m.group(1).strip()} in the freeze")
+    _, policy_sha, _ = policy_for(row["repo"])
+    if refs.get("policy_sha256") and refs["policy_sha256"] != policy_sha:
+        out.append(f"eval/policies/{row['repo']}.yaml changed since the freeze (sha256 {policy_sha[:12]}, "
+                   f"frozen {refs['policy_sha256'][:12]})")
+    return out
+
+
 def freeze(row: dict[str, str], out: Path | None = None, refresh: bool = False, allow_draft: bool = False) -> str:
     """Freeze one case; returns 'skipped' (already complete) or 'frozen'."""
     cid = row["case_id"]
@@ -410,6 +437,11 @@ def freeze(row: dict[str, str], out: Path | None = None, refresh: bool = False, 
     if final.exists():
         reasons = verify_case(final)
         if not reasons and not refresh:
+            changed = pinned_mismatch(row, final)
+            if changed:
+                raise SystemExit(f"{cid}: the complete freeze no longer matches its cases row or policy: "
+                                 + "; ".join(changed) + ". Nothing changed. Use --refresh to freeze a new version "
+                                 "deliberately (the old one is kept aside and carried labels are marked stale).")
             print(f"{cid}: complete freeze verified, skipping (use --refresh to freeze again)")
             return "skipped"
         carried = root / f"{cid}.invalid-{_stamp()}"
