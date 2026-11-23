@@ -15,8 +15,11 @@ Eligible (all must hold, from the pool columns; no CodeAtlas output is used):
 - link_status = verified and exactly one Jira key;
 - requirement_quality explicit_criteria or descriptive_issue;
 - jira_history not created_text_only (its edit history must be known);
+- not a revert (title starting with "Revert" after any Jira keys and [tags]);
 - a manageable change: at most 5 Python files and 10 files in all;
 - not a scored case, no Jira key shared with a scored case, no case group shared with a scored case.
+
+The final plan (21 Nov 2026) uses one Airflow dev case: check it with --check --repos airflow.
 
 --add writes the row (set "dev", ID AF-D01 / AR-D01 / SP-D01 ...) into eval/dev_cases.csv, which has the same
 columns as eval/cases.csv, and refuses a PR that fails the checks. Freeze them with
@@ -28,7 +31,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from case_groups import group_of, keys_of, load_groups
+from case_groups import group_of, is_revert, keys_of, load_groups
 from common import EVAL, load_repos, read_csv, write_csv
 
 DEV_FILE = EVAL / "dev_cases.csv"
@@ -50,6 +53,8 @@ def problems(row: dict[str, str], scored: list[dict[str, str]], groups: dict[tup
     out = []
     if row.get("included") != "yes":
         out.append("not included in the pool")
+    if is_revert(row):
+        out.append("a revert (reverts are excluded)")
     if row.get("historical_diff_status") != "verified":
         out.append(f"historical_diff_status {row.get('historical_diff_status') or '(none)'}")
     if row.get("historical_content_status") == "differs":
