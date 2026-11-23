@@ -1,6 +1,6 @@
 # Case identity and frozen evidence (build plan C5 step 3). Written by scripts/freeze_case.py.
 case_id: {case_id}
-set: {set}                         # pilot | held-out | challenge
+set: {set}                         # pilot | held-out | dev | challenge
 repo: {repo}
 pr_number: {pr_number}
 pr_url: {pr_url}
@@ -13,6 +13,8 @@ head_at_merge: {head_at_merge}           # 2nd parent, or the PR head (pull/<n>/
 merge_base_sha: {merge_base_sha}         # git merge-base base_at_merge head_at_merge
 historical_diff_status: {historical_diff_status}   # verified | unverifiable (diff vs the PR file list)
 historical_diff_reason: "{historical_diff_reason}"
+historical_content_status: {historical_content_status}   # identical | differs | not_checked (patch-id per file)
+historical_content_reason: "{historical_content_reason}"
 api_base_sha: {api_base_sha}             # GitHub API base, for comparison only
 api_head_sha: {api_head_sha}             # GitHub API head, for comparison only
 jira_keys: [{jira_keys}]                 # every historically supported key, none dropped (B4)
@@ -24,9 +26,10 @@ jira_links:{jira_links}
 policy_file: {policy_file}
 policy_sha256: {policy_sha256}           # sha256 of the policy file at the freeze (B5)
 policy_status: "{policy_status}"
+policy_snapshot: sources/effective_policy.yaml   # the exact policy bytes (sha256 = policy_sha256)
 analysis_root: {analysis_root}
 codeowners_at_base: {codeowners}               # read at base_at_merge
 sources_fetched_at: {fetched_at}
 inaccessible: []                   # e.g. ["membership of @apache/team-x at cutoff"]; never write "no approval"
-case_group: ""                     # related PRs (revert + original, follow-up fix) share one group id
+case_group: "{case_group}"         # related PRs (revert + original, follow-up fix) share one group id (eval/case_groups.csv)
 notes: ""

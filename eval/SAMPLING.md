@@ -63,11 +63,45 @@ evaluated on the challenge set (CH-11), not on the real pilot.
      every shortfall with its reason (never silently underfilled);
   2. inside each cell, a seeded random choice after a preference order: `link_status` verified first, then
      `requirement_quality` explicit_criteria or descriptive_issue over title_only, then `historical_diff_status`
-     verified over unverifiable;
+     verified over unverifiable, then `historical_content_status` identical over the rest. The draw is therefore
+     preference-weighted inside each cell, not uniformly random, and the report says so;
+  2a. **at most one PR per case group** (`eval/case_groups.csv`, below): a PR whose group already has a sampled PR
+     is skipped and the next one in the cell is taken; a cell that cannot be filled this way is listed in the
+     report under "Related cases";
   3. writes `eval/cases.csv` and `eval/results/sampling_report.md`, which records the seed and the sha256 of each
      pool file, the quality mix, and per repo the cases with one key, several keys and at least one verified key.
+     It also lists sampled PRs that share a Jira key, so the team can decide before the official draw whether each
+     such pair is one case group.
 - Case IDs: AF-01 to AF-08 (Airflow), AR-01 to AR-08 (Arrow), SP-01 to SP-08 (Spark), CH-01 onwards (challenge).
 - The sample is drawn only after the team approves the quotas and the baseline policy (`eval/policies/README.md`).
+
+## Case groups
+
+Related PRs (a revert and the PR it reverts, a follow-up fix, two halves of one change) are not independent cases.
+`eval/case_groups.csv` (`group_id,repo,pr_number,reason,decided_on`) records the groups **the team decides**; a
+shared Jira key alone does not make two PRs one group, it only puts them in the report for a decision. The
+sampler takes at most one PR per group, `freeze_case.py` writes the group into `case.yaml` (`case_group`), and
+`dev_cases.py` refuses a dev case in the group of a scored case. A PR in two groups is an error.
+
+Open decision: the trial draw of 21 Nov puts airflow #6241 and #6783 (both AIRFLOW-3014) in the sample as AF-06
+and AF-07. Decide whether they are one group before the official draw.
+
+## Development cases
+
+Three extra cases, one per repository, outside the 24 (audit 21 Nov), for debugging the freeze, the packets, the
+guide and the CodeAtlas runner. **They never enter a reported metric.**
+
+- Chosen **after** the scored draw with `scripts/dev_cases.py --candidates`: included, `historical_diff_status`
+  verified, `historical_content_status` not `differs`, `link_status` verified with exactly one key,
+  `requirement_quality` explicit_criteria or descriptive_issue, edit history known (not `created_text_only`), at
+  most 5 Python files and 10 files in all, and no PR, Jira key or case group shared with a scored case.
+- Added with `scripts/dev_cases.py --add <repo> <pr> --reason "..."` into `eval/dev_cases.csv` (same columns as
+  `eval/cases.csv`, `set` = dev, IDs AF-D01, AR-D01, SP-D01); `--check` confirms there is no overlap and one per
+  repository.
+- Frozen with `freeze_case.py --all --cases eval/dev_cases.csv` into `eval/dev_cases/`. A dev case freezes under
+  a DRAFT policy; a scored case does not (`eval/policies/README.md`).
+- Avoid reverts: they look small but their "requirement" is the reverted PR's, which confuses criteria labels.
+  (Airflow #6222, suggested in the audit, is `Revert "[AIRFLOW-5490] ..."`.)
 
 ## Labelling batches
 
@@ -89,3 +123,4 @@ written to `eval/cases.csv`) is in `eval/results/dataset_integrity_fixes.md`.
 | 17 Nov 2026 | Libcloud rejected; Spark promoted to main; Beam kept as backup | Libcloud has 18 keyed PRs (below 40) in every window | (to agree) |
 | 20 Nov 2026 | Hand-set category replaced by no_approval; no-match moved to the challenge set; quotas 7/6/7/2/2 | Decisions B1 and Part C | (to agree) |
 | 20 Nov 2026 | Allocation by backtracking with a shortfall table; preference order inside cells | The old greedy draw could underfill a feasible sample | (to agree) |
+| 21 Nov 2026 | Case groups (one PR per group), shared-key report, content status in the preference order; three dev cases outside the 24 | Audit of 21 Nov | (to agree) |

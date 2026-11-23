@@ -50,6 +50,20 @@ holds only the issue's Created email (Arrow's list), the created text is known b
   "unknown", not "unchanged", and the sampling report lists such sampled rows in their own table. They are
   never counted as evidence that a requirement stayed the same.
 
+## Cases that are not scored (audit 21 Nov)
+
+- **Historical diff:** a scored case needs `historical_diff_status: verified` (the files changed between
+  `merge_base_sha` and `head_at_merge` are the PR's file list). An `unverifiable` case is kept and reported but
+  not scored.
+- **Historical content:** `historical_content_status` compares, file by file, the change the PR made with the
+  change that landed on the main branch (`git patch-id --stable`). `identical` is the normal case. `differs`
+  means the merge script, a conflict resolution or an evil merge changed what landed: an adjudicator inspects the
+  case before it is scored and records the decision in `case.yaml` `notes`. `not_checked` means the file list was
+  not verified, so the case is already unscored.
+- **Stale labels:** labels in a case folder with `LABELS_STALE.txt` were made on other evidence or another policy
+  (`freeze_case.py --refresh`). They do not count until the case is relabelled and the file is removed.
+- **Dev cases** (`set: dev`, `eval/dev_cases/`) are never scored and never pooled with the 24.
+
 ## Rules not estimable on the pilot
 
 Rules marked `estimable_on_real_data: false` in `eval/rules_scope.yaml` are excluded from the pilot metrics and

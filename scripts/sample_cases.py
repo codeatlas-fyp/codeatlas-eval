@@ -11,7 +11,11 @@ Usage:
    with its reason. The pool is never silently underfilled and the rules are never bent.
 2. Choice inside each cell: seeded random (seed 20261114), after a fixed preference order: link_status verified
    first, then requirement_quality explicit_criteria / descriptive_issue over title_only, then
-   historical_diff_status verified over unverifiable.
+   historical_diff_status verified over unverifiable, then historical_content_status identical over the rest.
+   The sample is therefore preference-weighted, not uniformly random. At most one PR per case group
+   (eval/case_groups.csv): a PR whose group is already taken is skipped and the next one in the cell is used. The
+   report lists sampled PRs that share a Jira key, so the team can decide whether they are one group before the
+   official draw.
 3. Case IDs (AF-01, AR-01, SP-01 ...) in merge order. Writes the cases file and the report; refuses to overwrite a
    cases file that already has cases unless --force. The report records the seed and the sha256 of each pool file
    (not the date), so the same pools and seed give the same report.
@@ -27,6 +31,7 @@ from itertools import product
 from pathlib import Path
 from typing import Any
 
+from case_groups import GROUPS_FILE, group_of, load_groups, shared_keys
 from common import EVAL, load_repos, read_csv, write_csv
 
 # proposed, pending team approval (20 Nov 2026)
@@ -43,6 +48,7 @@ DEFAULT_REPOS = ["airflow", "arrow", "spark"]
 LINK_RANK = {"verified": 0, "title_unchecked": 1, "uncertain": 2}
 QUALITY_RANK = {"explicit_criteria": 0, "descriptive_issue": 0, "title_only": 1}
 HIST_RANK = {"verified": 0}
+CONTENT_RANK = {"identical": 0}
 
 
 def _case_fields() -> list[str]:
@@ -161,21 +167,33 @@ def _fmt(d: dict[str, int]) -> str:
 # ---------------------------------------------------------------- choice inside a cell
 
 
-def preference(row: dict[str, str]) -> tuple[int, int, int]:
+def preference(row: dict[str, str]) -> tuple[int, int, int, int]:
     return (LINK_RANK.get(row.get("link_status", ""), 3), QUALITY_RANK.get(row.get("requirement_quality", ""), 2),
-            HIST_RANK.get(row.get("historical_diff_status", ""), 1))
+            HIST_RANK.get(row.get("historical_diff_status", ""), 1),
+            CONTENT_RANK.get(row.get("historical_content_status", ""), 1))
 
 
 def choose(pools: dict[str, list[dict[str, str]]], alloc: dict[str, dict[str, int]], repos: list[str],
-           seed: int = SEED) -> dict[str, list[dict[str, str]]]:
-    """The PRs of each cell: preference order first, seeded random order among equals."""
+           seed: int = SEED, groups: dict[tuple[str, str], str] | None = None) -> dict[str, list[dict[str, str]]]:
+    """The PRs of each cell: preference order first, seeded random order among equals; one PR per case group."""
     rng = random.Random(seed)
+    groups = groups or {}
+    used: set[str] = set()
     taken: dict[str, list[dict[str, str]]] = {r: [] for r in repos}
     for r in repos:
         for c in QUOTAS:
             cell = sorted((x for x in pools[r] if x["provisional_category"] == c), key=lambda x: int(x["pr_number"]))
             keyed = [(preference(x), rng.random(), x) for x in cell]
-            taken[r] += [x for _, _, x in sorted(keyed, key=lambda t: (t[0], t[1]))[:alloc[r].get(c, 0)]]
+            want = alloc[r].get(c, 0)
+            for _, _, x in sorted(keyed, key=lambda t: (t[0], t[1])):
+                if sum(y["provisional_category"] == c for y in taken[r]) >= want:
+                    break
+                gid = group_of(groups, r, x["pr_number"])
+                if gid and gid in used:
+                    continue
+                if gid:
+                    used.add(gid)
+                taken[r].append(x)
     return taken
 
 
@@ -209,7 +227,8 @@ def verified_keys(row: dict[str, str]) -> int:
     return sum(pool_key_status(v) == VERIFIED for v in parse_locations(row.get("key_locations", "")).values())
 
 
-def report(seed: int, repos: list[str], pool_files: dict[str, Path], avail, alloc, short, taken) -> list[str]:
+def report(seed: int, repos: list[str], pool_files: dict[str, Path], avail, alloc, short, taken,
+           groups: dict[tuple[str, str], str] | None = None) -> list[str]:
     cats = list(QUOTAS)
     total = sum(sum(a.values()) for a in alloc.values())
     out = ["# Sampling report", "", f"Seed {seed}; repos {', '.join(repos)}.", "", "Pool files:", ""]
@@ -229,8 +248,22 @@ def report(seed: int, repos: list[str], pool_files: dict[str, Path], avail, allo
     else:
         out += ["None: every quota and every repo total is met."]
     picked = [x for r in repos for x in taken[r]]
+    got = {r: {c: sum(x["provisional_category"] == c for x in taken[r]) for c in QUOTAS} for r in repos}
+    group_short = [f"{r} {c}: {got[r][c]} of {alloc[r][c]}" for r in repos for c in QUOTAS if got[r][c] < alloc[r][c]]
+    out += ["", "## Related cases", "", f"Case groups applied ({GROUPS_FILE.name}): {len(set((groups or {}).values()))}."]
+    if group_short:
+        out += ["", "Cells left short because every remaining PR shares a group with a sampled one: "
+                + "; ".join(group_short) + "."]
+    shared = shared_keys([dict(x, repo=x.get("repo", "")) for x in picked])
+    out += ["", "Sampled PRs that share a Jira key (decide whether each pair is one case group before the official draw;"
+            " sharing a key alone does not make them one):", ""]
+    if shared:
+        out += ["| Jira key | PRs |", "|---|---|"] + [f"| {k} | {', '.join(v)} |" for k, v in shared]
+    else:
+        out += ["None."]
     for title, field in (("Requirement quality", "requirement_quality"), ("Link status", "link_status"),
-                         ("Historical diff status", "historical_diff_status")):
+                         ("Historical diff status", "historical_diff_status"),
+                         ("Historical content status", "historical_content_status")):
         mix = Counter(x.get(field) or "(none)" for x in picked)
         out += ["", f"## {title} of the sampled cases", "", "| Value | Cases |", "|---|---|"]
         out += [f"| {k} | {v} |" for k, v in sorted(mix.items())]
@@ -272,9 +305,10 @@ def main(argv: list[str] | None = None) -> int:
     avail = {r: {c: sum(x["provisional_category"] == c for x in pools[r]) for c in QUOTAS} for r in a.repos}
     alloc = allocate(avail, a.repos)
     short = shortfalls(avail, alloc, a.repos)
-    taken = choose(pools, alloc, a.repos, a.seed)
+    groups = load_groups()
+    taken = choose(pools, alloc, a.repos, a.seed, groups)
     write_csv(a.cases, case_rows(taken, a.repos, cfgs), _case_fields())
-    lines = report(a.seed, a.repos, pool_files, avail, alloc, short, taken)
+    lines = report(a.seed, a.repos, pool_files, avail, alloc, short, taken, groups)
     a.report.parent.mkdir(parents=True, exist_ok=True)
     a.report.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))

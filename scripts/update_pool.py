@@ -1,7 +1,8 @@
 """Bring an already-built pool up to the integrity fixes without rebuilding it.
 
 Usage:
-    python scripts/update_pool.py --repo airflow --history    # A1: pin refs from the merge commit (clone + PR files)
+    python scripts/update_pool.py --repo airflow --history    # A1: pin refs from the merge commit (clone + PR files),
+                                                              # plus the content check (historical_content_status)
     python scripts/update_pool.py --repo airflow --reviews    # A4: approvals at or before the merge (reviews endpoint)
     python scripts/update_pool.py --repo airflow --links      # A5: link_status from key_locations and the clone (no network)
     python scripts/update_pool.py --repo airflow --quality    # B3: requirement_quality from the saved issue text
@@ -60,7 +61,7 @@ def update_history(cfg: dict[str, Any], rows: list[dict[str, str]], save) -> Non
         r["codeowners_present"] = co_path or ("no" if hist["base_at_merge"] else "unknown")
         save()
         print(f"#{r['pr_number']:<6} {hist['merge_strategy']:<14} {hist['historical_diff_status']:<13} "
-              f"{hist['historical_diff_reason']}")
+              f"{hist['historical_content_status']:<12} {hist['historical_diff_reason']}")
 
 
 # categories that do not depend on approvals: no Jira key, or the requirement was edited during the PR

@@ -15,19 +15,33 @@ between merge_base and head_at_merge (and, for single_parent, between the parent
 must be exactly the PR's file list. Equal -> historical_diff_status "verified"; anything else ->
 "unverifiable" with a reason. Nothing is guessed.
 
+A matching file list shows the right files changed, not that they changed the same way. The content check
+compares, file by file, the PR's own change (merge_base..head_at_merge) with the change that reached the main
+branch (base_at_merge..merge_commit): `git diff -U0` piped to `git patch-id --stable`, so only the added and
+removed lines count (not line numbers or context, which move when the base branch moved). Binary files are
+compared by their blob at head_at_merge and at merge_commit.
+
+- historical_content_status "identical": every PR file changed in exactly the same way on the main branch;
+- "differs": at least one file landed differently (a conflict resolved in the merge, a change edited by the
+  merge script, an extra fix-up), listed in historical_content_reason. Such a case needs a manual look
+  before it is scored;
+- "not_checked": the file list was not verified, or Git could not produce the diffs.
+
 Usage (one PR, by hand):
     python scripts/history.py --repo airflow --merge-commit <sha> --pr 6216
 """
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 from typing import Any
 
 from common import git
 
 HISTORY_FIELDS = ["merge_commit_sha", "merge_strategy", "base_at_merge", "head_at_merge", "merge_base_sha",
-                  "historical_diff_status", "historical_diff_reason", "api_base_sha", "api_head_sha"]
+                  "historical_diff_status", "historical_diff_reason", "historical_content_status",
+                  "historical_content_reason", "api_base_sha", "api_head_sha"]
 
 
 def parents(repo_dir: Path, sha: str) -> list[str]:
@@ -76,12 +90,64 @@ def _diff_problem(label: str, got: set[str], want: set[str]) -> str:
     return f"{label} differs from the PR file list: " + ", ".join(parts)
 
 
+def _patch_id(repo_dir: Path, a: str, b: str, path: str) -> str:
+    """patch-id of the change to one path from a to b, counting only added and removed lines ('' if none)."""
+    diff = git(repo_dir, "diff", "-U0", "--no-renames", "--no-color", "--no-ext-diff", a, b, "--", path)
+    if not diff.strip():
+        return ""
+    if "\nBinary files " in "\n" + diff or "\nGIT binary patch" in "\n" + diff:
+        return "binary:" + git(repo_dir, "rev-parse", "--verify", "--quiet", f"{b}:{path}", check=False).strip()
+    res = subprocess.run(["git", "-C", str(repo_dir), "patch-id", "--stable"], input=diff, capture_output=True,
+                         text=True, encoding="utf-8", errors="replace")
+    if res.returncode != 0:
+        raise RuntimeError(f"git patch-id failed: {res.stderr.strip()}")
+    return res.stdout.split()[0] if res.stdout.strip() else ""
+
+
+def prefetch_blobs(repo_dir: Path, commits: list[str], paths: set[str]) -> None:
+    """In a blobless (partial) clone, fetch the blobs of paths at commits in one request, not one per diff.
+
+    Best effort: a full clone needs nothing, and a failed fetch only means git fetches each blob lazily later.
+    """
+    if not paths or git(repo_dir, "config", "--get", "remote.origin.promisor", check=False).strip() != "true":
+        return
+    oids = set()
+    for c in commits:
+        for line in git(repo_dir, "ls-tree", c, "--", *sorted(paths), check=False).splitlines():
+            meta = line.split("\t", 1)[0].split()
+            if len(meta) == 3 and meta[1] == "blob":
+                oids.add(meta[2])
+    if oids:
+        subprocess.run(["git", "-C", str(repo_dir), "-c", "fetch.negotiationAlgorithm=noop", "fetch", "origin",
+                        "--no-tags", "--no-write-fetch-head", "--recurse-submodules=no", "--filter=blob:none",
+                        "--stdin"], input="\n".join(sorted(oids)) + "\n", capture_output=True, text=True)
+
+
+def content_check(repo_dir: Path, merge_base: str, head: str, base: str, merge_commit: str,
+                  paths: set[str]) -> tuple[str, str]:
+    """(historical_content_status, reason): does every PR path change the same way on the main branch?"""
+    differ = []
+    prefetch_blobs(repo_dir, [merge_base, head, base, merge_commit], paths)
+    try:
+        for path in sorted(paths):
+            if _patch_id(repo_dir, merge_base, head, path) != _patch_id(repo_dir, base, merge_commit, path):
+                differ.append(path)
+    except RuntimeError as e:
+        return "not_checked", f"git error: {e}"
+    if differ:
+        more = f" and {len(differ) - 3} more" if len(differ) > 3 else ""
+        return "differs", (f"{len(differ)} of {len(paths)} files landed differently on the main branch: "
+                           + ", ".join(differ[:3]) + more)
+    return "identical", f"all {len(paths)} files changed the same way on the main branch"
+
+
 def pin(repo_dir: Path, merge_commit: str, pr_number: int | str, pr_files: list[dict[str, Any]],
         api_base: str = "", api_head: str = "", fetch: bool = True) -> dict[str, str]:
     """Historical refs for one merged PR. Never raises for a Git problem: it becomes 'unverifiable'."""
     out = dict.fromkeys(HISTORY_FIELDS, "")
     out.update(merge_commit_sha=merge_commit, api_base_sha=api_base, api_head_sha=api_head,
-               historical_diff_status="unverifiable")
+               historical_diff_status="unverifiable", historical_content_status="not_checked",
+               historical_content_reason="the file list was not verified")
     try:
         ps = parents(repo_dir, merge_commit)
     except RuntimeError as e:
@@ -117,8 +183,10 @@ def pin(repo_dir: Path, merge_commit: str, pr_number: int | str, pr_files: list[
         return out
     if problems:
         out["historical_diff_reason"] = "; ".join(problems)
-    else:
-        out["historical_diff_status"] = "verified"
+        return out
+    out["historical_diff_status"] = "verified"
+    out["historical_content_status"], out["historical_content_reason"] = content_check(
+        repo_dir, out["merge_base_sha"], out["head_at_merge"], out["base_at_merge"], merge_commit, want)
     return out
 
 

@@ -32,7 +32,8 @@ from links import pool_link_status
 # api_base_sha/api_head_sha are GitHub's base/head, kept only for comparison; evidence uses the refs pinned from the
 # merge commit (base_at_merge, head_at_merge, merge_base_sha; scripts/history.py).
 FIELDS = ["repo", "pr_number", "pr_url", "merged_at", "api_base_sha", "api_head_sha", "merge_commit_sha", "merge_strategy",
-          "base_at_merge", "head_at_merge", "merge_base_sha", "historical_diff_status", "historical_diff_reason", "title",
+          "base_at_merge", "head_at_merge", "merge_base_sha", "historical_diff_status", "historical_diff_reason",
+          "historical_content_status", "historical_content_reason", "title",
           "keys_found", "key_locations", "link_status", "requirement_quality", "requirement_quality_note", "jira_history",
           "py_files_changed", "files_changed", "review_count", "approvals_on_head",
           "codeowners_present", "provisional_category", "included", "exclusion_reason", "merged_via"]

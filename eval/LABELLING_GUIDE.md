@@ -168,7 +168,11 @@ cutoff: `explicit_criteria` (a numbered or bulleted list, or the words "acceptan
 
 ### 4.1 What you work from
 
-`scripts/prepare_case.py` (in the codeatlas repo) writes two files into the case folder:
+`scripts/prepare_packets.py` (dataset repo) builds `<case>/packet/` with CodeAtlas's `scripts/prepare_case.py`
+(branch `feature/semantic-retrieval`): one run per scored key on the issue text at the cutoff (the metadata header
+of `jira_<KEY>_at_cutoff.txt` is stripped), the criteria of all keys merged into one file, one entity list.
+`packet/PACKET.json` records the head SHA, analysis root, keys used and skipped, and the tool's sha256 and commit.
+The packet has:
 
 - `criteria.csv`: the issue's acceptance criteria split exactly as CodeAtlas splits them,
   each with a `criterion_id` (`KEY:vN:acM`). Label every row. Never rewrite or merge the text;
@@ -198,6 +202,9 @@ names, the call that makes it happen). Write entities as `label_ref` values from
   "add a new operator"); otherwise name the method.
 - Changed or unchanged does not matter. The relevant code may already exist before the PR;
   label it anyway.
+- **Deleted code is not a candidate.** `entities.csv` is the code at the head commit, so an entity the PR removed
+  is not in it. If a criterion was met only by deleting code, write no match with the rationale "met by deletion
+  of <path>::<name>" and the adjudicator counts it separately.
 
 ### 4.3 No match
 
@@ -232,6 +239,10 @@ that implements the criterion) and that no-match is only used after a whole-repo
 
 ## 6. Recording
 
+- Label only cases without `LABELS_STALE.txt`; if a case has one, its evidence or policy changed after you labelled
+  it: relabel from the new sources, then remove the file.
+- Dev cases (`AF-D01`, `AR-D01`, `SP-D01`) are for practice and debugging; their labels are never scored.
+
 - One-line reason per label, citing the source record.
 - Minutes spent per case.
 - How to mark a case indeterminate.
@@ -242,3 +253,4 @@ that implements the criterion) and that no-match is only used after a whole-repo
 |---|---|---|---|
 | v0 | 11 Nov 2026 | Outline from the FYP-1 Final Build Plan, Appendix C-C | |
 | v0.1 | 17 Nov 2026 | Drafts of C2, C5, C9 and Section 4 (semantic matching) | (to agree) |
+| v0.2 | 21 Nov 2026 | Packets from prepare_packets.py, deleted code, stale labels, dev cases | (to agree) |
