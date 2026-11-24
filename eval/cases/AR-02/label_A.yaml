@@ -1,5 +1,6 @@
-# Blind label (build plan C8). Work only from sources/ and the web pages; never from CodeAtlas output or the other label.
-# Push this file only after the other labeller has also finished this case.
+# Blind label (Labelling Guidelines v1, 21 Nov 2026). Work only from the frozen sources/ and packet/ and the clone
+# at head_at_merge; never the live PR or Jira pages, never CodeAtlas output, never the other label.
+# Commit and push only this file as soon as you finish; its commit time proves independence. Never edit it after.
 case_id: ""
 labeller: ""                       # initials
 labelled_on: ""                    # YYYY-MM-DD
