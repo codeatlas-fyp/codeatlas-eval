@@ -90,6 +90,16 @@ class DevCaseTests(unittest.TestCase):
         groups = {("airflow", "10"): "G", ("airflow", "3"): "G"}
         self.assertIn("case group G", " ".join(dc.problems(row(3), scored, groups)))
 
+    def test_a_revert_is_never_a_dev_case(self):
+        why = dc.problems(row(4, title='Revert "[AIRFLOW-5490] Fix incorrect None comparison"'), [], {})
+        self.assertEqual(why, ["a revert (reverts are excluded)"])
+
+    def test_one_airflow_dev_case_passes_the_check(self):
+        dev = [dict(row(1), case_id="AF-D01", set="dev")]
+        self.assertEqual(dc.check(dev, [row(10, key="K-S")], {}, ["airflow"]), [])
+        rare = [dict(row(1), case_id="AR-R01", set="rare")]   # the rare case counts as a scored case for overlap
+        self.assertIn("it is a scored case", " ".join(dc.check(dev, rare, {}, ["airflow"])))
+
     def test_check(self):
         scored = [row(10, key="K-S")]
         dev = [dict(row(1), case_id="AF-D01", set="dev"), dict(row(2, repo="arrow"), case_id="AR-D01", set="dev"),

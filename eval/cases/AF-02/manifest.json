@@ -1,0 +1,51 @@
+{
+  "files": {
+    "case.yaml": "cb8a0957de5246d0b611aa9da1ee26f368a0d605099c49d74f2b8e28a6a7fe45",
+    "sources/CODEOWNERS_at_base.txt": "d6a725979c2407c7af5af45f486520d2c411cc6484305e9b5609a4a51b19aae2",
+    "sources/commits.json": "e42a6199a0b94962c14cf3a851366dd0c8b7d4f39e6d329d128db4c4e250f432",
+    "sources/effective_policy.yaml": "b4bf5557a5562e42cad25f8f8bae25ef09f13b159cdfc62d6a1b0e762ffddb55",
+    "sources/fetched_at.txt": "614af74f317dfb81da22ae473c1de9bc3bd276236e7ef7e66c5a2d51b44a57f7",
+    "sources/files.json": "f13264f13e645219bc8ad9b560265ef2f0ceb6734420a82e8309120ac445a106",
+    "sources/history.json": "0c8360b8cae8364c621e4efa48201889e3f6e7629b95f900b530eb02a64b7986",
+    "sources/jira_AIRFLOW-5683.json": "6c255e37ea1999ae76358402485824b5e693db9b828d912e25281c14fb81b25f",
+    "sources/jira_AIRFLOW-5683_at_cutoff.txt": "e1cc73510a7348d2b87df74f860a7913e85290be9de439bcfb01513cb45397b0",
+    "sources/jira_AIRFLOW-5683_state_at_cutoff.json": "82f0fa2664077914ad9b5227f0a2f32f977c72d69a9630ef0fb2ab11a0e2aa43",
+    "sources/jira_links.json": "e8e547ddddfb224b2f765b4b40b88dfa919dbb75ca85e83d0bea658608601035",
+    "sources/pr.json": "054f8c6699d601b668ecf56b245ec2abeb4307c3f0cd526c859169dd6f600354",
+    "sources/reviews.json": "7399e4d014d77ebcdad78ce8cff2903508fdaa3bc8cc355d1c22f4cd07c7b853",
+    "sources/reviews_post_cutoff.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+    "sources/timeline.json": "a3535d59f627b0946bc8f6a4f8d7a118f3bc50fb550d0f19b1240632d6b50ebe"
+  },
+  "freeze_status": "complete",
+  "freeze_tool_version": "freeze_case.py 4",
+  "frozen_at": "2026-11-23T20:38:00+00:00",
+  "mandatory_files": [
+    "case.yaml",
+    "sources/CODEOWNERS_at_base.txt",
+    "sources/commits.json",
+    "sources/effective_policy.yaml",
+    "sources/fetched_at.txt",
+    "sources/files.json",
+    "sources/history.json",
+    "sources/jira_AIRFLOW-5683.json",
+    "sources/jira_AIRFLOW-5683_at_cutoff.txt",
+    "sources/jira_AIRFLOW-5683_state_at_cutoff.json",
+    "sources/jira_links.json",
+    "sources/pr.json",
+    "sources/reviews.json",
+    "sources/reviews_post_cutoff.json",
+    "sources/timeline.json"
+  ],
+  "refs": {
+    "api_base_sha": "eeec376b574d70980327295cd6c796d64a9aa13f",
+    "api_head_sha": "1d238c247e435e2ae166487c868ac1cd3b20df53",
+    "base_at_merge": "b4c7538b86094c39a8231fa6d4a3e0f42174c198",
+    "head_at_merge": "1d238c247e435e2ae166487c868ac1cd3b20df53",
+    "historical_content_status": "identical",
+    "historical_diff_status": "verified",
+    "merge_base_sha": "eeec376b574d70980327295cd6c796d64a9aa13f",
+    "merge_commit_sha": "5d3a5db0514bbc28e942ad496037fb432a5b0f9e",
+    "merge_strategy": "single_parent",
+    "policy_sha256": "b4bf5557a5562e42cad25f8f8bae25ef09f13b159cdfc62d6a1b0e762ffddb55"
+  }
+}

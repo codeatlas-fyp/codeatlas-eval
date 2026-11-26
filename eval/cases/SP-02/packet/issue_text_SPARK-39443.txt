@@ -1,0 +1,11 @@
+Improve docstring of pyspark.sql.functions.col/first
+
+Improve docstring of pyspark.sql.functions.col/first.
+
+
+
+`col` is malformatted.
+
+
+
+`first` misses examples.

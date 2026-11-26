@@ -1,0 +1,6 @@
+criterion_id,key,version_no,criterion_text
+ARROW-15779:v1:ac1,ARROW-15779,1,"[Python] Create python bindings for Substrait consumer
+
+We will want to figure out how to expose the Substrait consumer to python."
+ARROW-15779:v1:ac2,ARROW-15779,1,This could be a single method that accepts a buffer of bytes and returns an iterator of record batches but we might also want a helper method that returns a table.
+ARROW-15779:v1:ac3,ARROW-15779,1,I'm thinking this would go in the compute namespace.

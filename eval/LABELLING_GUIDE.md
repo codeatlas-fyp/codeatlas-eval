@@ -1,14 +1,20 @@
 # Labelling guide
 
-Version: v0.1 (outline 11 Nov 2026; Yusra's sections drafted 17 Nov 2026). Becomes v1 when every rule section is written and agreed. Lock it before the
-FYP-2 held-out set is opened. Each case records the version it was labelled under.
+Version: v0.3 (outline 11 Nov 2026; Yusra's sections drafted 17 Nov, aligned with Guidelines v1 on 24 Nov 2026).
+
+**For the FYP-1 sprint, the rule book is "CodeAtlas Labelling Guidelines v1 (Real Cases)" (Saleha, 21 Nov 2026).**
+Where this file and v1 differ, v1 wins. C2, C5, C9 and Section 4 below follow v1; the other sections are the
+older outline. Each case records the version it was labelled under (`labelling_guide_version: v1`).
 
 ## 1. Scope
 
 - A case is one real pull request (or one case group of related PRs).
 - Decision cutoff: the PR's `merged_at` time in UTC. Nothing dated after it may be used.
-- Allowed sources: the case's `sources/` folder and the GitHub and Jira web pages. Never CodeAtlas output, and never
-  the other labeller's file.
+- Allowed sources: the case's frozen `sources/` and `packet/` folders and the repository clone at `head_at_merge`
+  (for reading and `git grep`). **Never the live GitHub or Jira pages** (they show today's state, not the state at
+  the merge), never CodeAtlas output, and never the other labeller's file (Guidelines v1, section 1).
+- In `sources/jira_<KEY>.json` use only changelog entries dated at or before the cutoff; its fields are today's
+  values.
 - Anything you cannot see is recorded as inaccessible. "No access" is never "no approval".
 - Policy: every case uses the baseline policy (`eval/policies/`, identical for all repos), recorded in
   `case.yaml` as `policy_sha256` and `policy_status`. **Official labelling must not start while the policy status
@@ -37,35 +43,44 @@ evidence is insufficient; one positive and one negative worked example.
 **C3, C4, C5 and C8 are not estimable**: no window has a CODEOWNERS file (C5), and the mail archive, the only
 anonymous Jira source, carries no status or priority history and no complete assignee history (C3, C4, C8).
 
-- Annotators still label these rules on every case: NOT_APPLICABLE or INSUFFICIENT_EVIDENCE, with the usual
-  one-line reason (for example "no CODEOWNERS file at base" or "archive has no status history").
+- **Guidelines v1:** leave C3, C4 and C8 empty (`result: ""`) on real cases. C5 is labelled on every case
+  (NOT_APPLICABLE when there is no CODEOWNERS file at base) and only its NOT_APPLICABLE handling is checked.
 - Metrics exclude them and report them as "not estimable on this pilot", never as agreement or accuracy.
 - They are tested on the challenge set instead (`eval/challenge/README.md`; `tested_instead` in the scope file).
 
-### C2 PR modifies its own governance (Yusra, draft)
+### C2 PR modifies its own governance (Yusra; matches v1)
 
 **Applies:** always. Every PR either touches governance files or it does not, so C2 is never
 NOT_APPLICABLE.
 
-**Governance files** are the paths listed under `governance_paths` in the case's policy file,
-matched against the PR's changed files. The default list: `CODEOWNERS`, `.github/CODEOWNERS`,
-`docs/CODEOWNERS`, `docs/adr/**`, `.codeatlas/**`, `.github/workflows/**`,
-`.pre-commit-config.yaml`. Use the case's own policy file, not this list, if they differ.
+**Governance files** are the paths listed under `governance_paths` in the case's
+`sources/effective_policy.yaml` (the frozen policy, not the live `eval/policies/` file). The signed-off
+baseline lists `CODEOWNERS`, `.github/CODEOWNERS`, `docs/CODEOWNERS`, `docs/adr/**`, `.codeatlas/**`,
+`.github/workflows/**`, `.pre-commit-config.yaml` and `.asf.yaml`. A changed file matches when its path equals
+a listed path, or starts with a listed folder (an entry ending in `/**`). Check both `filename` and, for a rename,
+`previous_filename` in `sources/files.json`.
 
 - **VIOLATED (review):** at least one file in `sources/files.json` matches a governance path.
   Reason names the file(s). A rename *into or out of* a governance path counts.
 - **SATISFIED:** no changed file matches any governance path.
-- **INSUFFICIENT_EVIDENCE:** only if the PR's file list could not be fetched (recorded as
-  inaccessible). Never because a file "looks
-  harmless": a one-character CODEOWNERS edit still violates.
+- **INSUFFICIENT_EVIDENCE:** only if `sources/files.json` is missing or marked inaccessible. Never because a
+  file "looks harmless": a one-character CODEOWNERS edit still violates.
 
 **Worked examples.** VIOLATED: the PR edits `.github/workflows/ci.yml` alongside code, reason
 "changes .github/workflows/ci.yml (governance path)". SATISFIED: the PR changes only
 `airflow/models/dag.py` and `tests/models/test_dag.py`.
 
-### C5 Code owner did not approve the head commit (Yusra, draft)
+### C5 Code owner did not approve the head commit (Yusra; matches v1)
 
-Work from `sources/CODEOWNERS_at_base.txt`, `sources/files.json`, `sources/reviews.json` and
+**On real cases (v1):** open `sources/CODEOWNERS_at_base.txt` every time; do not assume the answer.
+
+| What the file says | Label |
+|---|---|
+| `NO CODEOWNERS FILE AT BASE` | NOT_APPLICABLE, reason "no CODEOWNERS file at the base commit", source_record `CODEOWNERS_at_base.txt` |
+| A CODEOWNERS file is present | Stop and tell Saleha (no real case is expected to have one). Label it with the full procedure below and mark it `unsure` |
+
+C5 is labelled on every real case, but only its NOT_APPLICABLE handling is checked; its accuracy is tested on the
+sandbox. **The full procedure** (sandbox, and any real case where Saleha asks for it): work from `sources/CODEOWNERS_at_base.txt`, `sources/files.json`, `sources/reviews.json` and
 `sources/commits.json`. Ownership is read at the **base** commit; approval must be on the
 **head** commit.
 
@@ -93,29 +108,31 @@ commit but owns nothing touched, `@alice` approved an older commit only. INSUFFI
 the only owner is `@apache/airflow-committers` and the team's membership at the cutoff is not
 visible; reason "owner is a team; membership at cutoff inaccessible".
 
-### C9 Unexplained code change (Yusra, draft)
+### C9 Unexplained code change (Yusra; matches v1)
 
-C9 is **advisory**: it never blocks a verdict by itself. It asks whether each changed,
-non-test function or method is explained by the work item.
+C9 has severity **review**: a VIOLATED C9 makes the verdict REVIEW, never FAIL. Label it **after** the semantic
+labels (Section 4), because it uses them.
 
-**Applies** to changed functions and methods outside test files (`tests/`, `test_*.py`,
-`*_test.py`, `conftest.py`). If the PR changes no such entity, NOT_APPLICABLE.
+**Changed entities** are the functions and methods (including methods inside classes) that the PR **adds or
+modifies** in Python files under the analysis root. Not counted: deleted functions; changes outside any function
+(imports, module-level code); anything in test files (a path containing `tests/`, a file named `test_*.py`,
+`*_test.py` or `conftest.py`).
 
-For each such entity, it is **explained** when both hold:
-1. at least one commit that touched it carries a Jira key in its message, and
-2. it implements, directly or as a necessary part, at least one acceptance criterion of a
-   linked issue, as you labelled it in Section 4 (it is in that criterion's `relevant` list).
+A changed entity is **explained** when both hold:
+1. at least one commit that touched it has a Jira key in its message, and
+2. for one of those keys, the entity is in the `relevant` list of at least one of its criteria in your semantic
+   labels, or it is a mechanical follow-on of such an entity (a renamed call site, an adjusted import or
+   signature that the relevant change required; write "follows from <entity>").
 
-- **VIOLATED (review):** at least one changed entity is unexplained. Reason names up to three
-  entities and why (for example "commit has no key" or "not relevant to any criterion of
-  AIRFLOW-1234").
-- **SATISFIED:** every changed non-test entity is explained.
-- **INSUFFICIENT_EVIDENCE:** the linked issue has no usable text (no description and no
-  acceptance criteria), so relevance cannot be judged.
+| Situation | Label |
+|---|---|
+| The PR has no changed entities | NOT_APPLICABLE |
+| Some changed entity fails (1), or passes (1) but fails (2) for a key whose issue text you could label | VIOLATED. Reason names up to 3 entities and why |
+| No entity is VIOLATED, but for some entity (2) cannot be judged (its key is not scored, or the issue text is unavailable) | INSUFFICIENT_EVIDENCE |
+| Every changed entity is explained | SATISFIED |
 
-Mechanical edits made necessary by the change (renaming a call site, adjusting an import,
-updating a type hint) count as explained if the entity they serve is relevant; write
-"follows from <entity>" in the reason.
+A PR with no Jira key anywhere (the `no_key` case, for example SP-03) fails (1) for every entity, so its C9 is
+VIOLATED; it has no packet and no semantic labels.
 
 ## PRs with several Jira keys
 
@@ -146,7 +163,7 @@ key is dropped, and you decide relevance, not the scripts (`eval/scoring_rules.m
 
 The fixed truth table, and how required rules with insufficient evidence give UNKNOWN.
 
-## 4. Semantic matching (Yusra, draft)
+## 4. Semantic matching (Yusra; matches v1 section 6)
 
 This section defines the **semantic labels**: for each acceptance criterion, which code
 implements it. They are the ground truth for the semantic evaluation, so they are written
@@ -158,13 +175,17 @@ Each Jira key has a `requirement_quality` (pool column; `jira_links` in `case.ya
 cutoff: `explicit_criteria` (a numbered or bulleted list, or the words "acceptance criteria"), `descriptive_issue`
 (a description without a list), `title_only` (no description) or `unavailable` (issue not found).
 
-- **Semantic relevance labels are given only for criteria from `explicit_criteria` or `descriptive_issue`
-  issues.** These are the criteria the semantic metrics are computed on.
-- **`title_only` criteria are labelled and reported separately.** Label them the same way, but they are never
-  pooled with the others: the report shows their results in a separate row.
+- **Label every row of `packet/criteria.csv`, in order**, copying `criterion_id` and `text` exactly. Never
+  rewrite, merge or split a criterion. The semantic metrics are computed on the criteria of `explicit_criteria`
+  and `descriptive_issue` issues of scored keys.
+- **`title_only` issues:** the single criterion is the title. Label it the same way; it is reported in its own
+  row, never pooled with the others.
 - **Never invent criteria from a title.** A title is one criterion as written; do not expand it into the steps
   you think it implies, and do not borrow text from the PR description or the code.
 - `unavailable` issues have no criteria; record the gap and move on.
+- **Criteria of a key that is not scored** (open question for Saleha, 24 Nov): the packet holds the criteria of
+  every **verified** key, because relevance is only known after labelling (AR-02 has three keys). Proposal: label
+  them like the others; the scoring keeps only the criteria of keys adjudicated `relevant`.
 
 ### 4.1 What you work from
 
@@ -182,8 +203,19 @@ The packet has:
   root, with its `label_ref` (`path.py::Class.method`). It is an alphabetical list, not a
   ranking, and contains no scores.
 
-Search the code yourself: the GitHub file view at the head SHA, `git grep -n "<word>" <head_sha>`
-in the clone, and the PR diff. Never use a tool's "top results".
+Search the code yourself, in the clone at the head commit and in the PR diff (`sources/files.json`), never in
+the live GitHub view and never with a tool's "top results":
+
+1. Read the PR diff and note the changed functions.
+2. Search the code at the head commit for the criterion's key words and synonyms:
+   `git grep -n -i "<word>" <head_sha> -- <analysis_root>` (leave out `-- <analysis_root>` when the root is the
+   whole repository, as for Airflow).
+3. For each candidate, read its body, then follow what it calls and what calls it, until you find the code that
+   actually does the work.
+4. Decide each candidate by its body, not its name.
+
+Arrow head commits are not on the main branch: fetch the PR head into your clone first
+(`git fetch origin "+refs/pull/<n>/head:refs/pull/<n>/head"`), or `git grep` cannot find the commit.
 
 ### 4.2 What counts as relevant
 
@@ -220,15 +252,22 @@ A criterion with relevant entities never also gets no match.
 
 ### 4.4 Ambiguity and confidence
 
-If you are unsure, still give your best label and set `confidence: unsure` with a one-line
-reason. The adjudicator resolves disagreements against this section; if this section cannot
-settle it, the criterion is marked indeterminate and excluded from the metrics (and counted).
+| Case | What to write |
+|---|---|
+| Relevant code found and you are sure | the `label_ref` values, `confidence: sure` |
+| Relevant code found but you are not sure | list it, `confidence: unsure`, say why in `note` |
+| No match after a full search (4.3) | `relevant: []`, `no_match: true`, the search record in `no_match_rationale` |
+| Indeterminate: the text or the code cannot support a reliable decision | `relevant: []`, `no_match: false`, `confidence: unsure`, and `note` starting with `INDETERMINATE:` and the reason |
+
+The adjudicator resolves disagreements against this section; an item that stays indeterminate is excluded from
+the metrics and counted.
 
 ### 4.5 How the labels are scored (so labellers know what matters)
 
-Scoring uses each ranker's **full ranking** of all entities, not a fixed top 5: the rank of the
-first relevant entity (median rank, MRR, recall at 1, 5, 10, 20 and 50). No-match criteria are
-scored by whether the gate abstained. So it matters that `relevant` is complete (every entity
+Scoring uses each ranker's **full ranking** of all entities, not a fixed top 5. Primary: MRR and recall at 1, 5
+and 10, with a 95% bootstrap interval that resamples whole cases. Exploratory: recall at 20 and 50 and the median
+first-relevant rank. Also precision, recall and F1 of the top results against your `relevant` set. No-match
+criteria are reported separately, by whether the gate abstained. So it matters that `relevant` is complete (every entity
 that implements the criterion) and that no-match is only used after a whole-repository search.
 
 ## 5. Ownership
@@ -241,7 +280,9 @@ that implements the criterion) and that no-match is only used after a whole-repo
 
 - Label only cases without `LABELS_STALE.txt`; if a case has one, its evidence or policy changed after you labelled
   it: relabel from the new sources, then remove the file.
-- Dev cases (`AF-D01`, `AR-D01`, `SP-D01`) are for practice and debugging; their labels are never scored.
+- The dev case (`AF-D01`, Airflow #6614) is for practice and timing; its labels are never scored.
+- Commit and push only your own file (`git add eval/cases/<ID>/label_B.yaml`, message `label(<ID>): label_B`) as
+  soon as you finish; the commit time proves independence. Never edit it afterwards: report a mistake to Saleha.
 
 - One-line reason per label, citing the source record.
 - Minutes spent per case.
@@ -254,3 +295,4 @@ that implements the criterion) and that no-match is only used after a whole-repo
 | v0 | 11 Nov 2026 | Outline from the FYP-1 Final Build Plan, Appendix C-C | |
 | v0.1 | 17 Nov 2026 | Drafts of C2, C5, C9 and Section 4 (semantic matching) | (to agree) |
 | v0.2 | 21 Nov 2026 | Packets from prepare_packets.py, deleted code, stale labels, dev cases | (to agree) |
+| v0.3 | 24 Nov 2026 | Sources limited to frozen files (no live pages); C2, C5, C9 and Section 4 aligned with Guidelines v1; one dev case; label template header fixed | (to agree) |

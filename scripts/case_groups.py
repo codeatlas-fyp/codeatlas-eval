@@ -15,6 +15,7 @@ decide whether they are a group; sharing a key alone does not make them one.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from common import EVAL, read_csv
@@ -39,6 +40,20 @@ def load_groups(path: Path = GROUPS_FILE) -> dict[tuple[str, str], str]:
 
 def group_of(groups: dict[tuple[str, str], str], repo: str, pr_number: str) -> str:
     return groups.get((repo, str(pr_number)), "")
+
+
+# leading Jira keys ("[AIRFLOW-1]", "ARROW-2:") and component tags ("[R][CI]") before the first word of the title
+_TITLE_PREFIX = re.compile(r"^(?:\s*(?:\[[^\]]*\]|[A-Z][A-Z0-9]+-\d+:?)\s*)*")
+
+
+def is_revert(row: dict[str, str]) -> bool:
+    """True when the PR is a revert: its title, after any leading Jira keys and [tags], starts with "Revert".
+
+    Reverts are excluded as a population rule (Dataset Plan (Final), 21 Nov 2026): their "requirement" is the
+    reverted PR's, which confuses criteria labels. A title that only mentions a revert later on is kept.
+    """
+    title = _TITLE_PREFIX.sub("", row.get("title") or "")
+    return re.match(r"revert\b", title, re.IGNORECASE) is not None
 
 
 def keys_of(row: dict[str, str]) -> set[str]:

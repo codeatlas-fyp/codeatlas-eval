@@ -1,0 +1,21 @@
+Add propagate_skipped_state to SubDagOperator
+
+Currently there is no way of telling the parent dag of a sub dag that an essential task has been skipped. This PR addresses this issue by adding a new propagate_skipped_state option to the SubDagOperator.
+
+Background story: https://lists.apache.org/thread.html/0eefd459a502c5100d792416f8ba720302aa49a8906fe6ea4ec8fca4@%3Cdev.airflow.apache.org%3E
+
+> Add propagate_skipped_state to SubDagOperator
+> ---------------------------------------------
+>
+>                 Key: AIRFLOW-5683
+>                 URL: https://issues.apache.org/jira/browse/AIRFLOW-5683
+>             Project: Apache Airflow
+>          Issue Type: New Feature
+>          Components: operators
+>    Affects Versions: 1.10.6
+>            Reporter: Felix Uellendall
+>            Assignee: Felix Uellendall
+>            Priority: Major
+>
+> Currently there is no way of telling the parent dag of a sub dag that an essential task has been skipped. This PR addresses this issue by adding a new propagate_skipped_state option to the SubDagOperator.
+> Background story: https://lists.apache.org/thread.html/0eefd459a502c5100d792416f8ba720302aa49a8906fe6ea4ec8fca4@%3Cdev.airflow.apache.org%3E

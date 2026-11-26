@@ -1,0 +1,18 @@
+criterion_id,key,version_no,criterion_text
+ARROW-16018:v1:ac1,ARROW-16018,1,"[Doc][Python] Run doctests on Python docstring examples
+
+We start to add more and more examples to the docstrings of Python methods (ARROW-15367), and so we could use the doctest functionality to ensure that those examples are actually correct (and keep being correct)."
+ARROW-16018:v1:ac2,ARROW-16018,1,"Pytest has integration for doctests (https://docs.pytest.org/en/6.2.x/doctest.html), and so you can do:
+
+
+
+{code}
+
+pytest python/pyarrow --doctest-modules
+
+{code}
+
+
+
+This currently fails for me because not having pyarrow.cuda, so we will need to find some ways to automatically skips those parts if not available."
+ARROW-16018:v1:ac3,ARROW-16018,1,"Normally, that should be possible with adding a {{conftest.py}} file in the main {{pyarrow}} directory, and then we can influence which files are found by defining {{pytest_runtest_setup}} or {{pytest_collection_modifyitems}}."

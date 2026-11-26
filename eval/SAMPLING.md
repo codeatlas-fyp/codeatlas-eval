@@ -1,6 +1,6 @@
 # Sampling record (FYP-1 pilot)
 
-Status: v2 draft, 20 Nov 2026 (v1: 11 Nov 2026). Basis: FYP-1 Final Build Plan (10 Nov 2026), Part C; supervisor's
+Status: v3, 23 Nov 2026, for the 9-case sprint of the Dataset Plan (Final), 21 Nov 2026 (v2: 20 Nov, v1: 11 Nov 2026). Basis: FYP-1 Final Build Plan (10 Nov 2026), Part C; supervisor's
 dataset guide (5 Nov 2026); repository acceptance runs (`eval/results/acceptance_summary.md`, 17 Nov 2026); team
 decisions B1 to B5 and Part C of the integrity fixes (`eval/results/dataset_integrity_fixes.md`, 20 Nov 2026).
 Any change after the sample is drawn is logged under "Changes" with date and reason.
@@ -30,6 +30,10 @@ the challenge set (`eval/challenge/README.md`).
 4. Not a bot PR (dependency bumps, release automation).
 5. Jira key in the title, branch, body or a commit message, except for the `no_key` category.
 6. Related PRs (a revert and its original, a follow-up fix) form one case group; a PR counts once.
+7. Not a revert (population rule, Dataset Plan (Final)): a PR whose title, after any leading Jira keys and
+   `[tags]`, starts with "Revert" is never drawn (`case_groups.is_revert`). The sampling report lists the reverts
+   left out per repository. Partial reverts titled that way (for example `[SPARK-...][FOLLOW-UP] Revert some
+   changes`) are left out too: their requirement is the earlier PR's.
 
 ## Categories and quotas
 
@@ -37,16 +41,17 @@ Assigned from source metadata only, never from CodeAtlas output (`scripts/build_
 categories, not labels: actual results after labelling are reported separately. Only approvals submitted at or
 before the merge count (fix A4).
 
-**Quotas: proposed, pending team approval.**
+**Quotas: Dataset Plan (Final), 21 Nov 2026: 9 real cases, 3 per repository** (to be signed off at task 1). The
+24-case quotas of 20 Nov (7/6/7/2/2, 8 per repo) are kept for the extension to 24 by the same procedure.
 
 | Category | Quota | Source signal |
 |---|---|---|
-| supported_approval | 7 | Keyed; approval on the head commit at or before the merge by a listed CODEOWNER, or no CODEOWNERS rule applies; issue unchanged during the PR |
-| ownership_gap | 6 | Approval only on an older commit, or owners are teams whose membership at the cutoff is not visible |
-| no_approval | 7 | Keyed PR with no approval on the head commit at or before the merge |
-| requirement_changed | 2 | Summary or description edited after the first commit and before the merge. A row whose key has only a Created email in the archive (`created_text_only`) cannot be proven unchanged; the sampling report lists such rows separately |
-| no_key | 2 | Merged Python PR with no Jira key anywhere |
-| **Total** | **24** | exactly 8 per repository |
+| supported_approval | 3 | Keyed; approval on the head commit at or before the merge by a listed CODEOWNER, or no CODEOWNERS rule applies; issue unchanged during the PR |
+| ownership_gap | 2 | Approval only on an older commit, or owners are teams whose membership at the cutoff is not visible |
+| no_approval | 2 | Keyed PR with no approval on the head commit at or before the merge |
+| requirement_changed | 1 | Summary or description edited after the first commit and before the merge. A row whose key has only a Created email in the archive (`created_text_only`) cannot be proven unchanged; the sampling report lists such rows separately |
+| no_key | 1 | Merged Python PR with no Jira key anywhere |
+| **Total** | **9** | exactly 3 per repository |
 
 `no_approval` replaces the former hand-set category (decision B1). Whether an issue's criteria match the code,
 including the no-match case, is no longer a sampling category: it is an annotator's judgement, and no-match is
@@ -58,7 +63,7 @@ evaluated on the challenge set (CH-11), not on the real pilot.
 - `scripts/build_pool.py` writes `eval/pool/<repo>_pool.csv`; excluded rows keep their reason. Existing pools are
   brought up to date with `scripts/update_pool.py --history --reviews --links --quality`.
 - `scripts/sample_cases.py` (defaults: airflow, arrow, spark):
-  1. a deterministic backtracking search over the repo x category count matrix meets every quota and the 8 per
+  1. a deterministic backtracking search over the repo x category count matrix meets every quota and the 3 per
      repo when the pool allows it; otherwise it takes the allocation with the most cases and the report lists
      every shortfall with its reason (never silently underfilled);
   2. inside each cell, a seeded random choice after a preference order: `link_status` verified first, then
@@ -72,7 +77,13 @@ evaluated on the challenge set (CH-11), not on the real pilot.
      pool file, the quality mix, and per repo the cases with one key, several keys and at least one verified key.
      It also lists sampled PRs that share a Jira key, so the team can decide before the official draw whether each
      such pair is one case group.
-- Case IDs: AF-01 to AF-08 (Airflow), AR-01 to AR-08 (Arrow), SP-01 to SP-08 (Spark), CH-01 onwards (challenge).
+  4. adds the **rare case** to `eval/cases.csv` as set `rare` (ID AR-R01 or AF-R01): the first PR of the seeded
+     order fixed in the Sandbox and Rare-Case Plan, section 5 (arrow #12672, airflow #6949, #6702, #6681, #6563)
+     that is in the included pool, not drawn and in no case group with a drawn PR. It is frozen, labelled and
+     adjudicated like the 9 and reported in its own row, never pooled with them. A candidate that does not freeze
+     cleanly is passed over with `--rare-skip arrow#12672` and the reason logged under "Changes".
+- Case IDs: AF-01 to AF-03 (Airflow), AR-01 to AR-03 (Arrow), SP-01 to SP-03 (Spark), one rare case (-R01),
+  AF-D01 (the dev case). For the extension to 24: AF-01 to AF-08 (Airflow), AR-01 to AR-08 (Arrow), SP-01 to SP-08 (Spark), CH-01 onwards (challenge).
 - The sample is drawn only after the team approves the quotas and the baseline policy (`eval/policies/README.md`).
 
 ## Case groups
@@ -111,6 +122,10 @@ guide and the CodeAtlas runner. **They never enter a reported metric.**
 | 2: Arrow (AR-01 to AR-08) | Areej | Saleha | Yusra |
 | 3: Spark (SP-01 to SP-08; was Libcloud) | Saleha | Yusra | Areej |
 
+Superseded for the sprint by the Dataset Plan (Final), 21 Nov 2026: Areej is labeller A and Yusra labeller B on
+every case (the dev case, the 9 and the rare case), and Saleha adjudicates every case and never labels. One dev
+case (Airflow, `dev_cases.py --check --repos airflow`) replaces the three.
+
 ## Shortfalls
 
 Copied from `eval/results/sampling_report.md` after the draw. A trial run on the pools of 20 Nov 2026 (not
@@ -124,3 +139,4 @@ written to `eval/cases.csv`) is in `eval/results/dataset_integrity_fixes.md`.
 | 20 Nov 2026 | Hand-set category replaced by no_approval; no-match moved to the challenge set; quotas 7/6/7/2/2 | Decisions B1 and Part C | (to agree) |
 | 20 Nov 2026 | Allocation by backtracking with a shortfall table; preference order inside cells | The old greedy draw could underfill a feasible sample | (to agree) |
 | 21 Nov 2026 | Case groups (one PR per group), shared-key report, content status in the preference order; three dev cases outside the 24 | Audit of 21 Nov | (to agree) |
+| 23 Nov 2026 | 9 cases (3/2/2/1/1, 3 per repo); reverts excluded from the draw and the dev case; seeded rare case added as set `rare`; one Airflow dev case | Dataset Plan (Final) and Sandbox and Rare-Case Plan, 21 Nov 2026, tasks 3 and 4 | (to sign off at task 1) |

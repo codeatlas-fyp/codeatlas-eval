@@ -1,0 +1,123 @@
+[Python] Selective projection of struct fields errors with use_legacy_dataset = False
+
+Selectively projecting fields from within a struct when reading from parquet files triggers an {{ArrowInvalid}} error when using the new dataset api ({{use_legacy_dataset=False}}).  Passing {{use_legacy_dataset=True}} yields the expected behavior: loading only the columns enumerated in the {{columns}} argument, recursing into structs if there is a {{.}} delimeter in the field name.
+
+
+
+Using the following test table:
+
+{code:python}
+
+df = pd.DataFrame({
+
+    'user_id': ['abc123', 'qrs456'],
+
+    'interaction': [{'type': 'click', 'element': 'button'}, {'type':'scroll', 'element': 'window'}]
+
+})
+
+
+
+table = pa.Table.from_pandas(df)
+
+
+
+pq.write_table(table, 'example.parquet')
+
+{code}
+
+Using the current default datasets API:
+
+{code:python}
+
+table_latest = pq.read_table('example.parquet', columns = ['user_id', 'interaction.type'])
+
+{code}
+
+yields:
+
+{noformat}
+
+---------------------------------------------------------------------------
+
+ArrowInvalid                              Traceback (most recent call last)
+
+<ipython-input-25-982ca2d96075> in <module>
+
+----> 1 table_latest = pq.read_table('/'.join([out_path, 'example.parquet']), columns = ['user_id', 'interaction.type'], filesystem = fs)
+
+      2 table_latest
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/parquet.py in read_table(source, columns, use_threads, metadata, use_pandas_metadata, memory_map, read_dictionary, filesystem, filters, buffer_size, partitioning, use_legacy_dataset, ignore_prefixes, pre_buffer, coerce_int96_timestamp_unit)
+
+   1894 
+
+   1895         return dataset.read(columns=columns, use_threads=use_threads,
+
+-> 1896                             use_pandas_metadata=use_pandas_metadata)
+
+   1897 
+
+   1898     if ignore_prefixes is not None:
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/parquet.py in read(self, columns, use_threads, use_pandas_metadata)
+
+   1744         table = self._dataset.to_table(
+
+   1745             columns=columns, filter=self._filter_expression,
+
+-> 1746             use_threads=use_threads
+
+   1747         )
+
+   1748 
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/_dataset.pyx in pyarrow._dataset.Dataset.to_table()
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/_dataset.pyx in pyarrow._dataset.Dataset.scanner()
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/_dataset.pyx in pyarrow._dataset.Scanner.from_dataset()
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/_dataset.pyx in pyarrow._dataset._populate_builder()
+
+
+
+/usr/local/share/sciencebox/venv/lib/python3.6/site-packages/pyarrow/error.pxi in pyarrow.lib.check_status()
+
+
+
+ArrowInvalid: No match for FieldRef.Name(interaction.type) in user_id: string
+
+interaction: struct<element: string, type: string>{noformat}
+
+Whereas: 
+
+{code:python}
+
+table_legacy = pq.read_table('example.parquet', columns = ['user_id', 'interaction.type'], use_legacy_dataset = True)
+
+{code}
+
+Yields:
+
+{noformat}
+
+pyarrow.Table
+
+user_id: string
+
+interaction: struct<type: string>
+
+  child 0, type: string{noformat}

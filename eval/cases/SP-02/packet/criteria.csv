@@ -1,0 +1,12 @@
+criterion_id,key,version_no,criterion_text
+SPARK-39443:v1:ac1,SPARK-39443,1,"Improve docstring of pyspark.sql.functions.col/first
+
+Improve docstring of pyspark.sql.functions.col/first.
+
+
+
+`col` is malformatted.
+
+
+
+`first` misses examples."

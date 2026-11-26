@@ -1,0 +1,45 @@
+{
+  "files": {
+    "case.yaml": "ab67d283af097d7954048f5e0ef699b7fc05409d66a85ed219e600cb71f7c3e1",
+    "sources/CODEOWNERS_at_base.txt": "d6a725979c2407c7af5af45f486520d2c411cc6484305e9b5609a4a51b19aae2",
+    "sources/commits.json": "a66d2274602d46e36435018b2aedcfcd3b2a9d82edf5f21e19b597d00f5d3ee2",
+    "sources/effective_policy.yaml": "b4bf5557a5562e42cad25f8f8bae25ef09f13b159cdfc62d6a1b0e762ffddb55",
+    "sources/fetched_at.txt": "fe8c51b6ec54809d85eeaad7873d16d82fda39a988262a46ad8aaf0a654855fe",
+    "sources/files.json": "2d600b688c794633db9b78a0f7c7c61ed092c32e6a2eecb8e9dc556843c8f9e5",
+    "sources/history.json": "b7c45d4707a86b415ffac7c05d000edb0b9b93d77d3b7c1528d2ed6354672cbf",
+    "sources/jira_links.json": "db2ab779a8d0f2557cc5c1d920b3ab2c5eaadec05de407406810539b19cdc0d0",
+    "sources/pr.json": "88159f54f1598420f509ecd1dabf073048b9e23165b92755afa5b6d8c950518a",
+    "sources/reviews.json": "fba6ead3b7904101ddfd23c20bd85d3ef6380488b3fc0d25ecbb82857e32e380",
+    "sources/reviews_post_cutoff.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+    "sources/timeline.json": "1acb909bf00bd0e8938259e4ff8fe3d9bb23899625f7ed96fe08efd3186e3b72"
+  },
+  "freeze_status": "complete",
+  "freeze_tool_version": "freeze_case.py 4",
+  "frozen_at": "2026-11-23T20:39:29+00:00",
+  "mandatory_files": [
+    "case.yaml",
+    "sources/CODEOWNERS_at_base.txt",
+    "sources/commits.json",
+    "sources/effective_policy.yaml",
+    "sources/fetched_at.txt",
+    "sources/files.json",
+    "sources/history.json",
+    "sources/jira_links.json",
+    "sources/pr.json",
+    "sources/reviews.json",
+    "sources/reviews_post_cutoff.json",
+    "sources/timeline.json"
+  ],
+  "refs": {
+    "api_base_sha": "3319361ca67212d2ae373bb46c5b6f2d80d792a4",
+    "api_head_sha": "905aadc02f932c213a06b35d8fcdf4357e3ba011",
+    "base_at_merge": "9612db3fc9c38204b2bf9f724dedb9ec5f636556",
+    "head_at_merge": "905aadc02f932c213a06b35d8fcdf4357e3ba011",
+    "historical_content_status": "identical",
+    "historical_diff_status": "verified",
+    "merge_base_sha": "3319361ca67212d2ae373bb46c5b6f2d80d792a4",
+    "merge_commit_sha": "3b709ebf8aea0f0b21f5ee721900f88e3f5e8b4e",
+    "merge_strategy": "single_parent",
+    "policy_sha256": "b4bf5557a5562e42cad25f8f8bae25ef09f13b159cdfc62d6a1b0e762ffddb55"
+  }
+}

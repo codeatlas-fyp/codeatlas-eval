@@ -1,0 +1,21 @@
+{
+  "case_id": "AR-01",
+  "head_at_merge": "b0bca6261e52b37eba05d3e411312688f2005552",
+  "analysis_root": "python",
+  "requirement_version": 1,
+  "keys_used": [
+    {
+      "key": "ARROW-13922",
+      "reconstruction_status": "reconstructed",
+      "criteria": 2
+    }
+  ],
+  "keys_skipped": [],
+  "entities": 3229,
+  "prepare_case_sha256": "4b4dba9913bd930740357c07d02ee62591e67d78ff8fe872652dcf204604a109",
+  "codeatlas_commit": "b0a605bf1095e9fcdaebf58a025d51749c64fe05",
+  "deleted_code": "entities are the code at head_at_merge; code the PR deleted is not a candidate",
+  "prepare_case_output": {
+    "ARROW-13922": "repo arrow @ b0bca6261e52b37eba05d3e411312688f2005552\nentities.csv: 3229 entities (2500 in test files)\ncriteria.csv: 2 criteria for ARROW-13922 v1"
+  }
+}

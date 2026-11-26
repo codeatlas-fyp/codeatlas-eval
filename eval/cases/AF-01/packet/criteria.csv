@@ -1,0 +1,6 @@
+criterion_id,key,version_no,criterion_text
+AIRFLOW-5653:v1:ac1,AIRFLOW-5653,1,"Log caught AirflowSkipException in task instance log
+
+It seems like when an operator throws AirflowSkipException, airflow captures it and marks following tasks as skipped too, but it leaves no trace in the task instances log and does not show exception message."
+AIRFLOW-5653:v1:ac2,AIRFLOW-5653,1,This can confuse the users as they can't figure out in log why operators were marked as skipped.
+AIRFLOW-5653:v1:ac3,AIRFLOW-5653,1,"We should explicitly log the exception and its message in task instance logs, and consider other airflow-caught exceptions too."

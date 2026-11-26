@@ -1,0 +1,14 @@
+criterion_id,key,version_no,criterion_text
+AIRFLOW-6020:v1:ac1,AIRFLOW-6020,1,"KubernetesExecutor iteritems() exception when using Python 3.*
+
+When running scheduler using {{KubernetesExecutor}} with Python 3.7 the exception occurs due to the use of {{iteritems()}} within dictionaries.
+
+{{iteritems()}} found:
+
+- {{airflow/executors/kubernetes_executor.py}} line 277
+
+- {{airflow/executors/kubernetes_executor.py}} line 655
+
+ 
+
+TODO: use {{six.iteritems}} function."
